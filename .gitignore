@@ -1,0 +1,24 @@
+# Rohdaten liegen ausschliesslich auf dem Persistent Volume, nie im Repo (CLAUDE.md Regel 2)
+/data/raw/*
+/data/static/*
+/data/ch/*
+!/data/raw/.gitkeep
+!/data/static/.gitkeep
+!/data/ch/.gitkeep
+
+# Go
+/bin/
+*.exe
+*.test
+
+# Secrets — Repo muss jederzeit öffentlich auf GitHub einsehbar sein (CLAUDE.md Regel 14)
+.env
+.env.*
+*.pem
+*.key
+
+# OS / Editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
