@@ -70,6 +70,16 @@ type StopEvent struct {
 	DepartureTime  *int64
 
 	ScheduleRelationship ScheduleRelationship
+
+	// IsTripLevelOnly is true for a synthetic event with no per-stop data,
+	// emitted when a TripUpdate carries zero stop_time_update entries — the
+	// documented GTFS-RT shape for a fully CANCELED trip. Without it, a
+	// cancellation with no stop_time_update would produce no row at all and
+	// vanish from the raw data entirely, which the "Ausfall muss immer
+	// danebenstehen" rule (Bahnpuls_Datenmodell) forbids. Callers cannot
+	// scope-filter this event by stop (there is no stop to check) — see
+	// cmd/collector for how that's handled.
+	IsTripLevelOnly bool
 }
 
 // Decode parses a raw GTFS-RT FeedMessage protobuf payload.
@@ -95,6 +105,16 @@ func stopEventsFromTripUpdate(tu *gtfs.TripUpdate) []StopEvent {
 	tripSchedRel := ScheduleRelationship(trip.GetScheduleRelationship().String())
 
 	updates := tu.GetStopTimeUpdate()
+	if len(updates) == 0 {
+		return []StopEvent{{
+			TripID:                   trip.GetTripId(),
+			StartDate:                trip.GetStartDate(),
+			RouteID:                  trip.GetRouteId(),
+			TripScheduleRelationship: tripSchedRel,
+			IsTripLevelOnly:          true,
+		}}
+	}
+
 	events := make([]StopEvent, 0, len(updates))
 	for _, stu := range updates {
 		ev := StopEvent{

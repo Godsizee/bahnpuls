@@ -93,6 +93,9 @@ func TestDecode_FlattensStopTimeUpdates(t *testing.T) {
 	if ev.ScheduleRelationship != ScheduleRelationshipScheduled {
 		t.Errorf("ScheduleRelationship = %q, want SCHEDULED", ev.ScheduleRelationship)
 	}
+	if ev.IsTripLevelOnly {
+		t.Error("IsTripLevelOnly = true, want false for a normal stop_time_update row")
+	}
 }
 
 func TestDecode_MissingDelayAndStopSequence(t *testing.T) {
@@ -135,6 +138,9 @@ func TestDecode_MissingDelayAndStopSequence(t *testing.T) {
 }
 
 func TestDecode_CanceledTrip(t *testing.T) {
+	// A CANCELED trip typically carries zero stop_time_update entries. Decode
+	// must still emit one trip-level marker row — dropping it silently would
+	// make the cancellation invisible in the raw data (see IsTripLevelOnly).
 	msg := &gtfs.FeedMessage{
 		Header: baseHeader(),
 		Entity: []*gtfs.FeedEntity{
@@ -154,8 +160,22 @@ func TestDecode_CanceledTrip(t *testing.T) {
 	if err != nil {
 		t.Fatalf("Decode: %v", err)
 	}
-	if len(feed.StopEvents) != 0 {
-		t.Fatalf("len(StopEvents) = %d, want 0 (CANCELED trip has no stop_time_update)", len(feed.StopEvents))
+	if len(feed.StopEvents) != 1 {
+		t.Fatalf("len(StopEvents) = %d, want 1 (trip-level marker for the cancellation)", len(feed.StopEvents))
+	}
+
+	ev := feed.StopEvents[0]
+	if !ev.IsTripLevelOnly {
+		t.Error("IsTripLevelOnly = false, want true")
+	}
+	if ev.TripID != "999" {
+		t.Errorf("TripID = %q, want 999", ev.TripID)
+	}
+	if ev.TripScheduleRelationship != ScheduleRelationshipCanceled {
+		t.Errorf("TripScheduleRelationship = %q, want CANCELED", ev.TripScheduleRelationship)
+	}
+	if ev.StopID != "" || ev.HasStopSequence {
+		t.Errorf("expected no stop info, got StopID=%q HasStopSequence=%v", ev.StopID, ev.HasStopSequence)
 	}
 }
 

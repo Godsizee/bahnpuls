@@ -10,7 +10,9 @@ Kontext liegt im Vault, nicht hier:
 C:\Users\bades\OneDrive\Desktop\Ideen\02 Projekte\Bahnpuls\
 ```
 
-Stand: M0 (Fundament) — Repo-Skeleton steht, Collector folgt (BPULS-002 ff.).
+Stand: M0 — Collector läuft (gegen den echten Feed getestet), Dockerfile steht aber noch
+ungebaut. Offen: 24h-Messlauf (BPULS-006), Haltestellenliste fachlich prüfen, Docker-Build
+verifizieren.
 
 ## Stack
 
