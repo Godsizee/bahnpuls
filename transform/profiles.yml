@@ -1,0 +1,7 @@
+bahnpuls:
+  target: dev
+  outputs:
+    dev:
+      type: duckdb
+      path: '../data/bahnpuls.duckdb'
+      threads: 4

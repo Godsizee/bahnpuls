@@ -1,0 +1,14 @@
+version: 2
+
+sources:
+  - name: ch_raw
+    description: >
+      Rohe CSV-Dateien des Schweizer Ist-Daten-Archivs (opentransportdata.swiss),
+      siehe Bahnpuls_Datenquellen.md. Eine Datei pro Betriebstag, Semikolon-getrennt.
+    meta:
+      # all_varchar=true: bewusst ungetypt einlesen, alles Casting passiert explizit
+      # in stg_ch_istdaten (CLAUDE.md Regel 5 -- keine impliziten Defaults vertrauen).
+      external_location: "read_csv('{{ var('ch_istdaten_glob') }}', delim=';', header=true, all_varchar=true, union_by_name=true)"
+    tables:
+      - name: istdaten
+        description: Eine Zeile je Halt-Ereignis (Ankunft+Abfahrt zusammen), alle Verkehrsmittel ungefiltert.

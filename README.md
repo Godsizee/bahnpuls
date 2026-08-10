@@ -12,7 +12,9 @@ C:\Users\bades\OneDrive\Desktop\Ideen\02 Projekte\Bahnpuls\
 
 Stand: M0 — Collector läuft (gegen den echten Feed getestet), Dockerfile steht aber noch
 ungebaut. Offen: 24h-Messlauf (BPULS-006), Haltestellenliste fachlich prüfen, Docker-Build
-verifizieren.
+verifizieren. M1 begonnen: dbt-duckdb-Projekt steht, `stg_ch_istdaten` normalisiert
+CH-Ist-Daten auf das gemeinsame Schema (BPULS-010/011, gegen synthetische Fixture
+getestet, echte Datei noch offen — siehe `transform/README.md`).
 
 ## Stack
 
@@ -30,7 +32,8 @@ internal/dedup/     Änderungserkennung, State
 internal/writer/    Parquet-Writer, Partitionierung, Flush
 internal/health/    Heartbeat, Feed-Alter, Metriken
 data/                Rohdaten (nicht in Git)
+transform/           dbt-duckdb-Projekt, siehe transform/README.md
 deploy/              Coolify-Hinweise
 ```
 
-`transform/` (dbt) und `dashboard/` (Evidence.dev) kommen erst in M1 (BPULS-010, BPULS-014).
+`dashboard/` (Evidence.dev) kommt erst mit BPULS-014.

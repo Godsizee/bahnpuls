@@ -1,0 +1,27 @@
+name: 'bahnpuls'
+version: '1.0.0'
+config-version: 2
+
+profile: 'bahnpuls'
+
+model-paths: ["models"]
+test-paths: ["tests"]
+seed-paths: ["seeds"]
+macro-paths: ["macros"]
+
+target-path: "target"
+clean-targets:
+  - "target"
+  - "dbt_packages"
+
+vars:
+  # Pfad/Glob zu den rohen CH-Ist-Daten-CSVs, siehe Bahnpuls_Datenquellen.md.
+  # Relativ zu transform/, wo dbt ausgefuehrt wird.
+  ch_istdaten_glob: "../data/ch/*_istdaten.csv"
+
+models:
+  bahnpuls:
+    staging:
+      +materialized: view
+    # intermediate/marts-Konfiguration folgt, sobald die ersten Modelle dort landen
+    # (BPULS-012 ff.) -- dbt warnt sonst vor unbenutzten Config-Pfaden.

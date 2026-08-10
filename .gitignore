@@ -11,6 +11,18 @@
 *.exe
 *.test
 
+# dbt (transform/) — DuckDB-Datei ist ein Build-Artefakt, kein Rohdatum, aber
+# trotzdem nicht im Repo (waechst, ist aus data/ jederzeit neu baubar)
+/data/*.duckdb
+/transform/target/
+/transform/dbt_packages/
+/transform/logs/
+/transform/.user.yml
+
+# Python (dbt-Tooling)
+.venv/
+__pycache__/
+
 # Secrets — Repo muss jederzeit öffentlich auf GitHub einsehbar sein (CLAUDE.md Regel 14)
 .env
 .env.*
