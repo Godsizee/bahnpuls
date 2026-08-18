@@ -35,6 +35,8 @@ func main() {
 	heartbeatPath := flag.String("heartbeat-path", envOr("BAHNPULS_HEARTBEAT_PATH", "data/heartbeat.json"), "path to the heartbeat status file")
 	pollInterval := flag.Duration("poll-interval", 30*time.Second, "how often to poll the feed")
 	fetchTimeout := flag.Duration("fetch-timeout", 15*time.Second, "per-attempt HTTP timeout")
+	measureScopeConfig := flag.String("measure-scope-config", envOr("BAHNPULS_MEASURE_SCOPE_CONFIG", ""), "optional second stop-list CSV, written alongside the regular output from the same poll for the Q12 volume measurement (BPULS-029); empty disables it")
+	measureDataDir := flag.String("measure-data-dir", envOr("BAHNPULS_MEASURE_DATA_DIR", ""), "output directory for -measure-scope-config; required together with it")
 	flag.Parse()
 
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
@@ -50,11 +52,13 @@ func main() {
 	tracker := dedup.NewTracker()
 	httpClient := &http.Client{Timeout: *fetchTimeout}
 
+	measure := newMeasurePipeline(*measureScopeConfig, *measureDataDir)
+
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
 	log.Printf("collector: starting, polling %s every %s", *feedURL, *pollInterval)
-	pollSafely(ctx, httpClient, *feedURL, scopeFilter, tracker, rawWriter, hbWriter)
+	pollSafely(ctx, httpClient, *feedURL, scopeFilter, tracker, rawWriter, hbWriter, measure)
 
 	pollTicker := time.NewTicker(*pollInterval)
 	defer pollTicker.Stop()
@@ -68,17 +72,57 @@ func main() {
 		case <-ctx.Done():
 			log.Println("collector: shutdown signal received, flushing buffer before exit")
 			flushBuffer(rawWriter)
+			measure.flush()
 			log.Println("collector: shutdown complete")
 			return
 
 		case <-pollTicker.C:
-			pollSafely(ctx, httpClient, *feedURL, scopeFilter, tracker, rawWriter, hbWriter)
+			pollSafely(ctx, httpClient, *feedURL, scopeFilter, tracker, rawWriter, hbWriter, measure)
 
 		case <-flushTimer.C:
 			flushBuffer(rawWriter)
+			measure.flush()
 			flushTimer.Reset(time.Hour)
 		}
 	}
+}
+
+// measurePipeline is a temporary, optional second scope+dedup+write path,
+// applied to the same fetched-and-decoded feed as the regular collection
+// path so it costs no extra bandwidth. It exists solely to answer Q12
+// (Sammel-Scope regional oder bundesweit, BPULS-029) with one 24h run
+// instead of two full-feed pollers — remove this type and its call sites
+// once Q12 is decided; it is not part of the permanent architecture.
+// A nil *measurePipeline (the default) disables it entirely, so production
+// behavior is unchanged unless both flags below are set.
+type measurePipeline struct {
+	filter  *scope.Filter
+	tracker *dedup.Tracker
+	writer  *writer.Writer
+}
+
+func newMeasurePipeline(scopeConfig, dataDir string) *measurePipeline {
+	if scopeConfig == "" {
+		return nil
+	}
+	if dataDir == "" {
+		log.Fatalf("collector: -measure-data-dir required when -measure-scope-config is set")
+	}
+	filter, err := scope.LoadCSV(scopeConfig)
+	if err != nil {
+		log.Fatalf("collector: load measure scope config: %v", err)
+	}
+	log.Printf("collector: measurement scope loaded from %s, %d stops -> %s", scopeConfig, filter.Len(), dataDir)
+	return &measurePipeline{filter: filter, tracker: dedup.NewTracker(), writer: writer.New(dataDir)}
+}
+
+// flush is a no-op on a nil *measurePipeline, so call sites don't need a
+// separate "if measure != nil" guard.
+func (m *measurePipeline) flush() {
+	if m == nil {
+		return
+	}
+	flushBuffer(m.writer)
 }
 
 // pollSafely wraps poll with panic recovery. This is the only place recover
@@ -86,16 +130,16 @@ func main() {
 // äußeren Poll-Loop") — a crash inside decode or filter logic must cost at
 // most the current buffered hour, never bring down the process that months
 // of unattended collection depend on.
-func pollSafely(ctx context.Context, client *http.Client, feedURL string, scopeFilter *scope.Filter, tracker *dedup.Tracker, w *writer.Writer, hbWriter *health.Writer) {
+func pollSafely(ctx context.Context, client *http.Client, feedURL string, scopeFilter *scope.Filter, tracker *dedup.Tracker, w *writer.Writer, hbWriter *health.Writer, measure *measurePipeline) {
 	defer func() {
 		if r := recover(); r != nil {
 			log.Printf("collector: recovered from panic during poll: %v", r)
 		}
 	}()
-	poll(ctx, client, feedURL, scopeFilter, tracker, w, hbWriter)
+	poll(ctx, client, feedURL, scopeFilter, tracker, w, hbWriter, measure)
 }
 
-func poll(ctx context.Context, client *http.Client, feedURL string, scopeFilter *scope.Filter, tracker *dedup.Tracker, w *writer.Writer, hbWriter *health.Writer) {
+func poll(ctx context.Context, client *http.Client, feedURL string, scopeFilter *scope.Filter, tracker *dedup.Tracker, w *writer.Writer, hbWriter *health.Writer, measure *measurePipeline) {
 	now := time.Now().UTC()
 	hb := health.Heartbeat{PolledAt: now}
 
@@ -127,15 +171,27 @@ func poll(ctx context.Context, client *http.Client, feedURL string, scopeFilter 
 	trips := groupByTrip(feed.StopEvents)
 	hb.EntityCount = len(trips)
 
+	var measureInScope, measureChanged int
 	for _, events := range trips {
-		if !tripInScope(scopeFilter, events) {
+		inScope := tripInScope(scopeFilter, events)
+		if inScope {
+			hb.InScopeCount++
+		}
+		inMeasure := measure != nil && tripInScope(measure.filter, events)
+		if inMeasure {
+			measureInScope++
+		}
+		if !inScope && !inMeasure {
 			continue
 		}
-		hb.InScopeCount++
 		for _, ev := range events {
-			if tracker.Changed(ev) {
+			if inScope && tracker.Changed(ev) {
 				hb.ChangedCount++
 				w.Add(writer.RowFromStopEvent(ev, feed.Timestamp, now))
+			}
+			if inMeasure && measure.tracker.Changed(ev) {
+				measureChanged++
+				measure.writer.Add(writer.RowFromStopEvent(ev, feed.Timestamp, now))
 			}
 		}
 	}
@@ -145,6 +201,10 @@ func poll(ctx context.Context, client *http.Client, feedURL string, scopeFilter 
 	}
 	log.Printf("collector: poll ok — %d trips, %d in scope, %d changed, feed age %ds, buffer %d rows",
 		hb.EntityCount, hb.InScopeCount, hb.ChangedCount, hb.FeedAgeSec, w.Len())
+	if measure != nil {
+		log.Printf("collector: measure poll ok — %d in scope, %d changed, buffer %d rows",
+			measureInScope, measureChanged, measure.writer.Len())
+	}
 }
 
 // tripKey groups a flat StopEvent list back into per-trip-instance batches.
