@@ -1,0 +1,56 @@
+version: 2
+
+unit_tests:
+  - name: int_segment_ausgelassener_halt_bricht_abschnitt_nicht
+    description: >
+      Ein ausgelassener Halt bleibt in der Reihenfolge stehen und trägt keine
+      Verspätung. Der Folgeabschnitt darf ihn nicht überspringen — sonst würden
+      zwei nicht benachbarte Betriebsstellen als direkte Fahrt ausgewiesen.
+    model: int_segment_delta
+    given:
+      - input: ref('fct_stop_events')
+        rows:
+          - {trip_key: 't1', stop_sequence: 1, betriebstag: '2026-08-11', stop_id: 'A', stop_name: 'A', delay_an_sek: null, delay_ab_sek: 60,  halt_ausgelassen: false, zug_ausgefallen: false}
+          - {trip_key: 't1', stop_sequence: 2, betriebstag: '2026-08-11', stop_id: 'B', stop_name: 'B', delay_an_sek: 300, delay_ab_sek: 320, halt_ausgelassen: true,  zug_ausgefallen: false}
+          - {trip_key: 't1', stop_sequence: 3, betriebstag: '2026-08-11', stop_id: 'C', stop_name: 'C', delay_an_sek: 400, delay_ab_sek: 420, halt_ausgelassen: false, zug_ausgefallen: false}
+    expect:
+      rows:
+        - {trip_key: 't1', nach_stop_sequence: 1, von_stop_id: null, abschnitt_direkt: null, delay_an_sek: null, delay_ab_sek: 60,   laufzeit_delta_sek: null, haltezeit_delta_sek: null}
+        - {trip_key: 't1', nach_stop_sequence: 2, von_stop_id: 'A',  abschnitt_direkt: true, delay_an_sek: null, delay_ab_sek: null, laufzeit_delta_sek: null, haltezeit_delta_sek: null}
+        - {trip_key: 't1', nach_stop_sequence: 3, von_stop_id: 'B',  abschnitt_direkt: true, delay_an_sek: 400,  delay_ab_sek: 420,  laufzeit_delta_sek: null, haltezeit_delta_sek: 20}
+
+  - name: int_segment_ausfall_ist_nicht_verspaetung_null
+    description: >
+      Ein ausgefallener Zug hat keine Verspätung, nicht die Verspätung 0
+      (CLAUDE.md Regel 8). Alle Deltas NULL, die Zeilen bleiben vollständig erhalten.
+    model: int_segment_delta
+    given:
+      - input: ref('fct_stop_events')
+        rows:
+          - {trip_key: 't2', stop_sequence: 1, betriebstag: '2026-08-11', stop_id: 'A', stop_name: 'A', delay_an_sek: null, delay_ab_sek: 0, halt_ausgelassen: false, zug_ausgefallen: true}
+          - {trip_key: 't2', stop_sequence: 2, betriebstag: '2026-08-11', stop_id: 'B', stop_name: 'B', delay_an_sek: 0, delay_ab_sek: 0, halt_ausgelassen: false, zug_ausgefallen: true}
+    expect:
+      rows:
+        - {trip_key: 't2', nach_stop_sequence: 1, delay_an_sek: null, delay_ab_sek: null, laufzeit_delta_sek: null, haltezeit_delta_sek: null, zug_ausgefallen: true}
+        - {trip_key: 't2', nach_stop_sequence: 2, delay_an_sek: null, delay_ab_sek: null, laufzeit_delta_sek: null, haltezeit_delta_sek: null, zug_ausgefallen: true}
+
+  - name: int_segment_kein_uebergriff_zwischen_fahrten
+    description: >
+      lag() darf nie über eine Fahrtgrenze greifen. Sonst erscheint am Anfang einer
+      Fahrt ein Laufzeitverlust, der aus einer fremden Fahrt stammt — plausibel
+      aussehend und dadurch besonders teuer.
+    model: int_segment_delta
+    given:
+      - input: ref('fct_stop_events')
+        rows:
+          - {trip_key: 't3', stop_sequence: 1, betriebstag: '2026-08-11', stop_id: 'A', stop_name: 'A', delay_an_sek: null, delay_ab_sek: 600, halt_ausgelassen: false, zug_ausgefallen: false}
+          - {trip_key: 't3', stop_sequence: 2, betriebstag: '2026-08-11', stop_id: 'B', stop_name: 'B', delay_an_sek: 660, delay_ab_sek: 660, halt_ausgelassen: false, zug_ausgefallen: false}
+          - {trip_key: 't4', stop_sequence: 1, betriebstag: '2026-08-11', stop_id: 'C', stop_name: 'C', delay_an_sek: null, delay_ab_sek: 0,   halt_ausgelassen: false, zug_ausgefallen: false}
+          - {trip_key: 't4', stop_sequence: 2, betriebstag: '2026-08-11', stop_id: 'D', stop_name: 'D', delay_an_sek: -120, delay_ab_sek: -60, halt_ausgelassen: false, zug_ausgefallen: false}
+    expect:
+      rows:
+        - {trip_key: 't3', nach_stop_sequence: 1, von_stop_sequence: null, laufzeit_delta_sek: null, haltezeit_delta_sek: null}
+        - {trip_key: 't3', nach_stop_sequence: 2, von_stop_sequence: 1, laufzeit_delta_sek: 60, haltezeit_delta_sek: 0}
+        - {trip_key: 't4', nach_stop_sequence: 1, von_stop_sequence: null, laufzeit_delta_sek: null, haltezeit_delta_sek: null}
+        # Negativer Laufzeitanteil ist Pufferabbau (A2), kein Fehler und keine Null.
+        - {trip_key: 't4', nach_stop_sequence: 2, von_stop_sequence: 1, laufzeit_delta_sek: -120, haltezeit_delta_sek: 60}

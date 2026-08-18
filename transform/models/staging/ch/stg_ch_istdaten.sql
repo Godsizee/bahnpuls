@@ -7,7 +7,26 @@
 
 with source as (
 
-    select * from {{ source('ch_raw', 'istdaten') }}
+    -- Spalten explizit statt select *: das Quellschema ist mit 22 Spalten dokumentiert
+    -- (Bahnpuls_Datenquellen.md), eine stille Aenderung daran soll hier auffallen --
+    -- und nur so lassen sich die Unit-Tests unten gegen eine gemockte Quelle fahren.
+    select
+        betriebstag,
+        fahrt_bezeichner,
+        produkt_id,
+        linien_text,
+        umlauf_id,
+        faellt_aus_tf,
+        bpuic,
+        haltestellen_name,
+        ankunftszeit,
+        an_prognose,
+        an_prognose_status,
+        abfahrtszeit,
+        ab_prognose,
+        ab_prognose_status
+
+    from {{ source('ch_raw', 'istdaten') }}
 
 ),
 
