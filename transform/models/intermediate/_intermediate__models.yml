@@ -1,0 +1,106 @@
+version: 2
+
+models:
+  - name: fct_stop_events
+    description: >
+      Zentrale Faktentabelle, ein Halt-Ereignis je Zeile (Schema in
+      Bahnpuls_Datenmodell.md). Vereinigt alle Quellen-Staging-Modelle; aktuell nur
+      stg_ch_istdaten (Spur A), stg_de_gtfsrt folgt mit BPULS-030. Enthaelt Ausfaelle
+      und ausgelassene Halte bewusst mit -- gefiltert wird erst dort, wo es fachlich
+      noetig ist (CLAUDE.md Regel 8).
+    columns:
+      - name: betriebstag
+        description: Betriebstag, nicht Kalendertag (siehe Fallstricke im Datenmodell).
+        tests:
+          - not_null
+      - name: trip_key
+        description: betriebstag + trip_id, eindeutig über Tage.
+        tests:
+          - not_null
+      - name: stop_sequence
+        description: Position im Laufweg, ab 1, je trip_key lückenlos aufsteigend.
+        tests:
+          - not_null
+      - name: delay_an_sek
+        description: Ankunftsverspätung in Sekunden, positiv = zu spät.
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: -3600
+                max_value: 86400
+                inclusive: true
+      - name: delay_ab_sek
+        description: Abfahrtsverspätung in Sekunden, positiv = zu spät.
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: -3600
+                max_value: 86400
+                inclusive: true
+      - name: halt_ausgelassen
+        tests:
+          - not_null
+      - name: zug_ausgefallen
+        tests:
+          - not_null
+      - name: quelle
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['ch_istdaten']
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - trip_key
+              - stop_sequence
+
+  - name: int_segment_delta
+    description: >
+      A1 — Zerlegung der Verspätungsänderung in Laufzeit- und Haltezeitanteil, eine
+      Zeile je Halt-Ereignis, Reihenfolge und Anzahl identisch zu fct_stop_events.
+      NULL in den Delta-Spalten heißt "nicht bestimmbar", nie "keine Veränderung" —
+      auch Ausfälle und ausgelassene Halte landen dort als NULL, nicht als 0.
+    columns:
+      - name: betriebstag
+        tests:
+          - not_null
+      - name: trip_key
+        tests:
+          - not_null
+      - name: nach_stop_sequence
+        description: Halt, an dem der Abschnitt endet; identisch mit stop_sequence der Faktentabelle.
+        tests:
+          - not_null
+      - name: laufzeit_delta_sek
+        description: >
+          delay_an(n) − delay_ab(n−1). Negativ = Pufferabbau (A2), kein Fehler.
+          NULL am ersten Halt einer Fahrt und überall dort, wo eine der beiden
+          Verspätungen fehlt.
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: -86400
+                max_value: 86400
+                inclusive: true
+      - name: haltezeit_delta_sek
+        description: >
+          delay_ab(n) − delay_an(n). NULL, wo nur eine der beiden Zeiten gemeldet
+          wurde — der Anteil ist dann nicht bestimmbar.
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: -86400
+                max_value: 86400
+                inclusive: true
+      - name: abschnitt_direkt
+        description: >
+          Wahr, wenn der Vorhalt unmittelbar vorausgeht (von_stop_sequence + 1).
+          NULL am ersten Halt einer Fahrt.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - trip_key
+              - nach_stop_sequence

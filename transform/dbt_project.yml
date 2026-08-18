@@ -23,5 +23,7 @@ models:
   bahnpuls:
     staging:
       +materialized: view
-    # intermediate/marts-Konfiguration folgt, sobald die ersten Modelle dort landen
-    # (BPULS-012 ff.) -- dbt warnt sonst vor unbenutzten Config-Pfaden.
+    intermediate:
+      +materialized: table
+    # marts-Konfiguration folgt mit dem ersten Mart-Modell (BPULS-016, dann
+    # incremental) -- dbt warnt sonst vor unbenutzten Config-Pfaden.
