@@ -147,6 +147,22 @@ gesehenen Fahrt, das ist der Hintergrund von BPULS-028:
 docker stats --no-stream
 ```
 
+**Der Lauf ist unbewacht.** Healthcheck (BPULS-022) und fachliche Prüfung (BPULS-026) sind
+zu diesem Zeitpunkt noch nicht eingerichtet — stürzt der Container nachts ab, merkt es
+niemand. Einmal zwischendurch ins Log sehen: frische `poll ok`-Zeilen mit einer plausiblen
+`in scope`-Zahl genügen als Lebenszeichen.
+
+> [!warning] Freien Plattenplatz selbst prüfen
+> Coolifys eigene Warnschwelle ist kein Sicherheitsnetz — auf `strato` stand sie auf 80 %,
+> während die Platte bei 99 % lag, ohne dass etwas passiert wäre. Vor dem Start und nach
+> dem Lauf `df -h` fahren. Läuft die Platte voll, schlägt der Parquet-Flush fehl, und die
+> Lücke ist nicht nachlieferbar.
+>
+> Beim Aufräumen: `docker image prune -a` **immer** mit `--filter "until=168h"`, sonst
+> verschwinden Coolifys Rollback-Images aller Apps auf dem Server. `docker volume prune`
+> nur nach Sichtprüfung — Volumes gestoppter Apps gelten als ungenutzt und sind danach
+> endgültig weg.
+
 ### 7. Auswertung
 
 Volume-Pfad auf dem Host ermitteln:
