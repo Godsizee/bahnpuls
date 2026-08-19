@@ -1,6 +1,6 @@
 # Bahnpuls — Projektregeln
 
-Verspätungs-Analytics für den Schienenverkehr (VRN + Rhein-Main). Datenpipeline- und
+Verspätungs-Analytics für den Schienenverkehr (VRN + RMV). Datenpipeline- und
 Analyseprojekt — **kein CRUD, kein PWA, kein n8n** (ADR-001, ADR-006). Vollständiger
 fachlicher und architektonischer Kontext liegt im Vault, nicht in diesem Repo:
 
@@ -66,9 +66,11 @@ aufhebbar.
     Datei-Art (Env-Dateien, lokale Configs, Dumps, Credentials, IDE-/Editor-Settings)
     sofort ergänzen, nicht nachträglich. Vor jedem Commit/Push prüfen, ob etwas
     Sensibles versehentlich mitgeht (`git status`, Inhalt neuer Dateien ansehen).
-15. **Scope bleibt VRN + Rhein-Main** (ADR-008). Die Sammel-Scope-Frage (regional vs.
-    bundesweit sammeln) ist offen bis Q12/BPULS-029 entschieden ist — nicht eigenmächtig
-    vorwegnehmen.
+15. **Scope ist VRN + RMV** (ADR-008, ADR-010). Gesammelt wird ausschließlich dieses
+    Gebiet — die bundesweite Sammelvariante ist gestrichen, Q12 ist seit 2026-08-19
+    entschieden. „VRN" ist der **Verkehrsverbund Rhein-Neckar**, nicht die
+    Rhein-Neckar-Verkehr GmbH (RNV); RNV ist ein Unternehmen im Gebiet, kein Gebiet.
+    Keine eigenmächtige Ausweitung, auch nicht „nur zum Messen".
 
 ## Architektur-Leitplanken
 
@@ -145,8 +147,7 @@ zeigt. Keine Analyse-Logik im Collector, keine Datenbeschaffung in dbt.
 - Keine Kubernetes-/Kafka-/Airflow-Einführung „auf Vorrat".
 - Kein Zurückgreifen auf bestehende Bausteine aus FairShare/Life OS — bewusste
   Entscheidung, siehe ADR-001.
-- Keine eigenmächtige Scope-Erweiterung über VRN + Rhein-Main hinaus, solange Q12 nicht
-  entschieden ist.
+- Keine eigenmächtige Scope-Erweiterung über VRN + RMV hinaus (ADR-010).
 
 ## Referenzen im Vault
 

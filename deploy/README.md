@@ -23,45 +23,30 @@ gemountet ist:
 `-poll-interval` und `-fetch-timeout` sind reine Flags (kein Env-Fallback bisher), Default
 30 s bzw. 15 s.
 
-### Q12-Volumenmessung (temporär, BPULS-029)
-
-Zwei zusätzliche, optionale Env-Vars aktivieren einen zweiten Scope-Filter + Writer im
-selben Prozess — verarbeitet denselben Feed-Abruf, kostet also keine zusätzliche
-Bandbreite. Leer/unset (Default) heißt: deaktiviert, kein Verhaltensunterschied zur
-Produktion.
-
-| Variable | Beispiel (24h-Testlauf) |
-|---|---|
-| `BAHNPULS_MEASURE_SCOPE_CONFIG` | `config/scope_stops_bundesweit.csv` |
-| `BAHNPULS_MEASURE_DATA_DIR` | `/data/measure_raw` |
-
-Beide Pfade müssen auf dem Persistent Volume liegen, sonst geht die Messung beim nächsten
-Redeploy verloren wie jede andere Rohdatei auch (CLAUDE.md Regel 2). Nach der Auswertung
-beide Env-Vars wieder entfernen und `measurePipeline` in `cmd/collector/main.go`
-zurückbauen — das ist Wegwerf-Code für genau diese eine Messung, nicht Teil der
-Dauerarchitektur.
-
-**`/data/measure_raw` dabei nicht löschen, solange Q12 offen ist.** Fällt die Entscheidung
-auf „bundesweit sammeln", ist dieses Verzeichnis der erste Tag der neuen Historie — und
-ein gelöschter Tag ist endgültig weg (ADR-008).
+Gesammelt wird **ausschließlich der Scope VRN + RMV** (ADR-008, ADR-010). Der zweite
+Scope-Filter für eine bundesweite Vergleichsmessung wurde am 2026-08-19 wieder ausgebaut —
+Q12 ist ohne Messung gegen „bundesweit" entschieden, siehe ADR-010 in `Decisions.md`.
 
 ---
 
-## Runbook: 24 h-Messlauf auf Coolify (BPULS-006 → BPULS-029)
+## Runbook: Erststart und 24 h-Testlauf auf Coolify
 
-Der Lauf beantwortet Q12 (regional oder bundesweit sammeln) und ist gleichzeitig der
-**erste produktive Start des Collectors**: der reguläre Pfad schreibt ab Schritt 6 echte
-Historie nach `/data/raw`. Deshalb wird er nicht als Wegwerf-Deployment aufgesetzt,
-sondern gleich richtig — und nach der Messung nicht abgeschaltet, sondern nur um die
-beiden Mess-Env-Vars erleichtert (CLAUDE.md Regel 3).
+Der Lauf ist der **erste produktive Start des Collectors**: er schreibt ab Schritt 6 echte
+Historie nach `/data/raw`. Deshalb wird er nicht als Wegwerf-Deployment aufgesetzt, sondern
+gleich richtig — und danach nicht abgeschaltet (CLAUDE.md Regel 3).
+
+Er beantwortet drei Dinge auf einmal:
+
+- **BPULS-020** — überlebt das Persistent Volume einen Redeploy?
+- **BPULS-021** — flusht `SIGTERM` den Stundenpuffer wirklich? (auf Windows nicht prüfbar)
+- **BPULS-006** — wie viel Volumen erzeugt der Scope pro Tag tatsächlich?
 
 ### 0. Voraussetzung: der Stand muss auf GitHub sein
 
-Coolify baut aus dem Git-Repository, nicht aus dem Arbeitsverzeichnis. Ohne diesen Schritt
-baut Coolify einen Stand ohne Collector-Verdrahtung, und der Messpfad bricht beim Start
-mit `log.Fatalf` ab, weil `config/scope_stops_bundesweit.csv` im Image fehlt.
+Coolify baut aus dem Git-Repository, nicht aus dem Arbeitsverzeichnis. Ohne Push baut
+Coolify einen Stand ohne Collector-Verdrahtung.
 
-Vor dem Push prüfen, dass nichts Sensibles mitgeht (CLAUDE.md Regel 14) — die Scope-Listen
+Vor dem Push prüfen, dass nichts Sensibles mitgeht (CLAUDE.md Regel 14) — die Scope-Liste
 sind abgeleitete GTFS-Haltestellendaten, unkritisch.
 
 ### 1. Application in Coolify anlegen
@@ -78,8 +63,11 @@ sind abgeleitete GTFS-Haltestellendaten, unkritisch.
 
 **Storages → Add → Volume Mount**, Name z. B. `bahnpuls-data`, Mount Path **`/data`**.
 
-Vor dem Start auf dem Host prüfen, ob überhaupt Platz da ist. Der bundesweite Pfad schreibt
-grob die 19-fache Menge des regionalen (40-Sekunden-Rauchtest, BPULS-006):
+Vor dem Start auf dem Host prüfen, ob Platz da ist. Erwartung für den regionalen Scope:
+niedriger dreistelliger MB-Bereich pro Tag (`Bahnpuls_Datenquellen.md`) — genau das
+bestätigt oder widerlegt dieser Lauf. Achtung: die Haltestellenliste ist am 2026-08-19 von
+836 auf 1.916 Halte gewachsen und trifft jetzt rund 2,3-mal so viele Fahrten wie in den
+älteren Schätzungen (BPULS-005) — die alte Zahl unterschätzt das Volumen entsprechend.
 
 ```bash
 df -h
@@ -90,8 +78,6 @@ df -h
 ```ini
 BAHNPULS_DATA_DIR=/data/raw
 BAHNPULS_HEARTBEAT_PATH=/data/heartbeat.json
-BAHNPULS_MEASURE_SCOPE_CONFIG=config/scope_stops_bundesweit.csv
-BAHNPULS_MEASURE_DATA_DIR=/data/measure_raw
 ```
 
 `BAHNPULS_SCOPE_CONFIG` und `BAHNPULS_FEED_URL` bleiben auf Default — die Scope-Liste liegt
@@ -112,8 +98,11 @@ Ob es wirkt, wird in Schritt 5 gemessen, nicht angenommen.
 Dieser Test ist gleichzeitig der **erste echte SIGTERM-Beweis**: lokal auf Windows war er
 nicht führbar, weil `TerminateProcess` sich nicht abfangen lässt.
 
-1. Deployen, im Log auf zwei bis drei `collector: poll ok …`-Zeilen warten. Direkt daneben
-   muss `collector: measure poll ok …` stehen — sonst greift der Messpfad nicht.
+1. Deployen, im Log auf zwei bis drei `collector: poll ok …`-Zeilen warten. Die Zahl hinter
+   `in scope` muss bei **rund 2.000 von ~78.000 Trips** liegen (Stand 2026-08-19, gemessen
+   gegen den echten Feed). Deutlich weniger heißt: die Haltestellenliste greift nicht mehr,
+   die `stop_id`s sind weitergerotiert — siehe Q6 im Vault. Das ist der billigste
+   Frühwarnkanal, den es hier gibt.
 2. Terminal in den Container (Coolify → Terminal, oder `docker exec -it <container> sh`):
 
    ```sh
@@ -129,7 +118,7 @@ nicht führbar, weil `TerminateProcess` sich nicht abfangen lässt.
 4. Prüfen, dass der Flush Dateien erzeugt hat:
 
    ```sh
-   find /data/raw /data/measure_raw -name '*.parquet' | head
+   find /data/raw -name '*.parquet' | head
    ```
 
 5. **Redeploy** auslösen (nicht nur Start — ein Redeploy ersetzt das Container-Dateisystem,
@@ -139,7 +128,7 @@ nicht führbar, weil `TerminateProcess` sich nicht abfangen lässt.
    stimmt.
 7. `rm /data/redeploy-test.txt`, danach ist der Marker erledigt.
 
-### 6. Messlauf
+### 6. Testlauf
 
 Startzeitpunkt notieren. An einem **normalen Werktag** starten, nicht am Wochenende — die
 Änderungsrate im Feed hängt am Verkehrsaufkommen, und ein Sonntag unterschätzt das Volumen
@@ -151,9 +140,8 @@ Dedup-Tracker ist leer, der erste Poll schreibt jede Zeile jeder Fahrt im Scope 
 Rauchtest 10.012 Zeilen gegenüber 230 im eingeschwungenen Zustand). Diese Stunde verfälscht
 jede Hochrechnung und wird verworfen, ebenso die angebrochene letzte.
 
-Währenddessen einmal den Speicherbedarf mitnehmen — der Dedup-Tracker hält bundesweit rund
-19-mal so viele Einträge, und das ist neben der Platte der zweite Kostenfaktor der
-Q12-Entscheidung (BPULS-028):
+Währenddessen einmal den Speicherbedarf mitnehmen — der Dedup-Tracker wächst mit jeder
+gesehenen Fahrt, das ist der Hintergrund von BPULS-028:
 
 ```bash
 docker stats --no-stream
@@ -171,47 +159,40 @@ docker inspect <container> --format '{{ json .Mounts }}'
 
 ```bash
 MOUNT=<mountpoint aus dem inspect>
-du -b --max-depth=2 "$MOUNT/raw" "$MOUNT/measure_raw" | sort -k2
+du -b --max-depth=2 "$MOUNT/raw" | sort -k2
 ```
 
-**Zeilen je Stunde**, beide Pfade nebeneinander — die DuckDB-CLI ist ein einzelnes Binary,
-es muss nichts installiert werden:
+**Zeilen je Stunde** — die DuckDB-CLI ist ein einzelnes Binary, es muss nichts installiert
+werden:
 
 ```sql
-select 'regional' as pfad,
-       regexp_extract(filename, 'date=([0-9-]+)', 1) as tag,
+select regexp_extract(filename, 'date=([0-9-]+)', 1) as tag,
        regexp_extract(filename, 'hour=([0-9]+)', 1)  as stunde,
-       count(*) as zeilen
+       count(*)                                      as zeilen,
+       count(distinct trip_id)                       as fahrten
 from read_parquet('MOUNT/raw/**/*.parquet', filename = true)
 group by all
-union all
-select 'bundesweit',
-       regexp_extract(filename, 'date=([0-9-]+)', 1),
-       regexp_extract(filename, 'hour=([0-9]+)', 1),
-       count(*)
-from read_parquet('MOUNT/measure_raw/**/*.parquet', filename = true)
-group by all
-order by tag, stunde, pfad;
+order by tag, stunde;
 ```
 
-Daraus die Zahlen, die Q12 tatsächlich entscheiden:
+Daraus die Zahlen, die den Betrieb planbar machen:
 
-| Kennzahl | regional | bundesweit |
-|---|---|---|
-| Bytes/Tag (ohne Kaltstartstunde) |   |   |
-| Zeilen/Tag |   |   |
-| Hochrechnung 1 Monat / 1 Jahr |   |   |
-| Freier Plattenplatz danach (`df -h`) |   |   |
-| RSS des Collectors (`docker stats`) |   |   |
+| Kennzahl                              | Wert |
+|---------------------------------------|------|
+| Bytes/Tag (ohne Kaltstartstunde)      | —    |
+| Zeilen/Tag                            | —    |
+| Hochrechnung 1 Monat / 1 Jahr         | —    |
+| Freier Plattenplatz danach (`df -h`)  | —    |
+| RSS des Collectors (`docker stats`)   | —    |
+| Feed-Ausfälle im Log (`fetch failed`) | —    |
 
-Faktor bundesweit/regional aus beiden Zeilen bilden und gegen die Erwartung aus dem
-Rauchtest halten (~19×). Weicht er stark ab, erst die Ursache klären, bevor entschieden
-wird — ein Ausreißer in einer einzelnen Stunde (Störungslage) ist kein Tagesmittel.
+Tagesgang prüfen: die Änderungsrate muss nachts einbrechen und in den Spitzenstunden
+steigen. Eine flache Kurve wäre ein Hinweis darauf, dass etwas anderes gemessen wird als
+Verkehr.
 
 ### 8. Danach
 
-1. Ergebnis als ADR zu Q12 in `Decisions.md` festhalten, BPULS-029 schließen.
-2. Beide `BAHNPULS_MEASURE_*`-Env-Vars entfernen, Redeploy.
-3. `measurePipeline` aus `cmd/collector/main.go` zurückbauen (Wegwerf-Code).
-4. **Collector weiterlaufen lassen.** Ab hier zählt jeder Tag Historie.
-5. `/data/measure_raw` erst löschen, wenn Q12 gegen „bundesweit" entschieden ist.
+1. Ergebnis in `Backlog.md` (BPULS-006) festhalten, bei Auffälligkeiten in `Decisions.md`.
+2. **Collector weiterlaufen lassen.** Ab hier zählt jeder Tag Historie.
+3. Nächste Betriebsaufgaben: Healthcheck auf den Heartbeat (BPULS-022), fachliche Prüfung
+   als Scheduled Task (BPULS-026), Backup (BPULS-025).
