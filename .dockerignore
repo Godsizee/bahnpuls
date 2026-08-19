@@ -1,6 +1,19 @@
+# Nur der Go-Build braucht Kontext. Alles andere blaeht ihn auf oder gehoert
+# ohnehin nie ins Image. Coolify baut aus dem Git-Clone (dort fehlen die
+# ignorierten Pfade schon), das hier greift beim lokalen `docker build`.
 .git
 .rtk
 bin
+
+# Rohdaten und DuckDB-Artefakte (CLAUDE.md Regel 2)
 data/raw
 data/static
 data/ch
+data/*.duckdb
+
+# dbt/Python-Tooling: 395 MB venv plus Build-Artefakte, fuer das Binary irrelevant
+.venv
+__pycache__
+transform/target
+transform/dbt_packages
+transform/logs
