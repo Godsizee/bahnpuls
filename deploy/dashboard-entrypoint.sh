@@ -8,6 +8,16 @@
 # damit ein Fehler hier niemals Historie kosten kann (CLAUDE.md Regel 1).
 set -eu
 
+# Phasendauer mitschreiben. Ohne das ist "der Deploy dauert lang" nicht entscheidbar --
+# Image-Bau, dbt-Lauf und Evidence-Bau sind drei verschiedene Probleme mit drei
+# verschiedenen Hebeln, und geraten hatte ich hier schon oft genug daneben.
+phase_start=$(date +%s)
+phase() {
+	jetzt=$(date +%s)
+	echo "dashboard: [$1] $((jetzt - phase_start))s"
+	phase_start=$jetzt
+}
+
 # Feste Partitionstiefe date=/hour= statt ** -- der rekursive Glob ist in DuckDB
 # versionsabhaengig, die Tiefe ist dagegen vom Writer festgelegt.
 DE_GLOB="${BAHNPULS_DE_GLOB:-/data/raw/date=*/hour=*/*.parquet}"
@@ -29,6 +39,8 @@ if ! /opt/venv/bin/dbt build --full-refresh --vars "$VARS"; then
 	echo "dashboard: dbt meldete Fehler -- Seite wird mit dem vorhandenen Stand gebaut"
 fi
 
+phase "dbt"
+
 echo "dashboard: evidence sources"
 cd /app/dashboard
 # Muss ausdruecklich laufen: `evidence build` erzeugt die Quelldateien **nicht** neu.
@@ -36,8 +48,12 @@ cd /app/dashboard
 # "No sources found" und DuckDB-WASM-Timeout sichtbar, von aussen als HTTP 200.
 npm run sources
 
+phase "sources"
+
 echo "dashboard: evidence build"
 npm run build
+
+phase "evidence-build"
 
 echo "dashboard: serving on :3000"
 exec npm run serve

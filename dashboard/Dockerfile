@@ -17,18 +17,22 @@ RUN apt-get update  && apt-get install -y --no-install-recommends python3 python
 WORKDIR /app
 RUN python3 -m venv /opt/venv  && /opt/venv/bin/pip install --no-cache-dir dbt-core==1.12.0 dbt-duckdb==1.11.0
 
-COPY transform ./transform
-COPY dashboard ./dashboard
-COPY deploy/dashboard-entrypoint.sh deploy/dashboard-rebuild.sh deploy/diagnose.py ./deploy/
-COPY --from=webdeps /app/dashboard/node_modules ./dashboard/node_modules
-
-# dbt-Pakete beim Bauen holen, nicht beim Start -- sonst braucht der Container Netz zu
-# einem Zeitpunkt, an dem er nur ausliefern soll.
+# Reihenfolge nach Aenderungshaeufigkeit, damit der Layer-Cache etwas taugt: erst die
+# Paketdefinition, dann der Paketzug, erst danach der Projektinhalt. Stuenden die COPYs
+# davor, wuerfe jede geaenderte Modelldatei auch `dbt deps` weg.
+COPY transform/packages.yml transform/dbt_project.yml transform/profiles.yml ./transform/
 RUN cd /app/transform && /opt/venv/bin/dbt deps
+
+# --chown statt eines spaeteren `chown -R /app`: das lief ueber node_modules mit rund
+# 900 Paketen und kostete bei jedem Bau ueber hunderttausend Dateioperationen.
+COPY --chown=node:node --from=webdeps /app/dashboard/node_modules ./dashboard/node_modules
+COPY --chown=node:node transform ./transform
+COPY --chown=node:node dashboard ./dashboard
+COPY --chown=node:node deploy/dashboard-entrypoint.sh deploy/dashboard-rebuild.sh deploy/diagnose.py ./deploy/
 
 # Verzeichnis fuer die DuckDB-Datei; sie ist ein Build-Artefakt im Container-Dateisystem
 # und hat auf dem Volume nichts zu suchen.
-RUN mkdir -p /app/data
+RUN mkdir -p /app/data && chown -R node:node /app/data /app/transform
 
 # Als node laufen, nicht als root. Das ist hier kein Ritual, sondern der einzige
 # wirksame Schreibschutz auf die Rohdaten: Coolify kann ein fremdes Named Volume weder
@@ -37,7 +41,6 @@ RUN mkdir -p /app/data
 # gehoeren root, weil der Collector als root schreibt -- ein Prozess als node kann sie
 # lesen und nicht anfassen. Damit gilt CLAUDE.md Regel 1 durch Dateirechte statt durch
 # Absicht.
-RUN chown -R node:node /app
 USER node
 
 # Ohne Healthcheck schaltet Coolify den Verkehr sofort auf den neuen Container um --
