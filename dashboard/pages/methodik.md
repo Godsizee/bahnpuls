@@ -7,6 +7,16 @@ Eine Zahl ohne offengelegte Definition ist eine Behauptung. Diese Seite beschrei
 Kennzahl, die im Dashboard vorkommt, und benennt die Annahmen dahinter. Sie wird
 zusammen mit den Kennzahlen gepflegt, nicht nachträglich.
 
+**Diese Seite muss man nicht lesen, um das Dashboard zu verstehen.** Sie ist für alle da,
+die eine Zahl nachprüfen oder ihr widersprechen wollen — und dafür wissen müssen, wie
+genau sie zustande kam. Wer nur wissen will, worum es geht, ist auf der
+[Startseite](/) besser aufgehoben.
+
+Ein Hinweis vorweg, weil er alles Weitere prägt: Wo etwas nicht bestimmbar ist, bleibt es
+hier leer. Es wird **nie** durch eine Null ersetzt. Null wäre eine Aussage — „es hat sich
+nichts verändert" — und das ist etwas völlig anderes als „wir wissen es nicht". Diese
+Unterscheidung zieht sich durch jede Kennzahl auf diesen Seiten.
+
 ## Datenstand
 
 Diese Seiten sind eine **Vorschau im Aufbau**. Sie zeigen zwei Quellen nebeneinander, und
@@ -15,17 +25,16 @@ welche davon er vor sich hat:
 
 - **Deutsche Echtzeitdaten: echt**, aus der eigenen Mitschrift seit dem 19.08.2026. Die
   Sammlung läuft erst wenige Tage; für Aussagen über Linien oder Bahnhöfe ist das zu kurz.
-  Stationsnamen und Liniennummern fehlen noch, weil der Fahrplan-Datensatz nicht
-  angeschlossen ist.
-- **Schweizer Daten: synthetisch.** Sie prüfen die Rechenwege — Fensterlogik,
-  Betriebstag-Behandlung, Ausfallbehandlung — und beschreiben **keinen realen Betrieb**.
-  Keine Zahl auf diesen Seiten, die aus der Schweizer Quelle stammt, sagt etwas über
+  Wo statt eines Bahnhofsnamens eine Nummer steht, kannte der Fahrplandatensatz diesen Halt
+  noch nicht — der Echtzeit-Feed selbst enthält keine Namen.
+- **Schweizer Daten: erfunden.** Sie prüfen die Rechenwege an konstruierten Fällen — ein
+  Zug über Mitternacht, ein ausgefallener Zug, eine Nacht mit Zeitumstellung — und
+  beschreiben **keinen realen Betrieb**. Keine Zahl aus dieser Quelle sagt etwas über
   tatsächliche Züge aus.
 
-Die Herkunft steht in jeder Tabelle in der Spalte `quelle`: `de_gtfsrt` ist echt,
-`ch_istdaten` ist synthetisch.
+Welche Zeile woher stammt, steht in jeder Tabelle ausgeschrieben.
 
-Die beiden Quellen:
+Woher die beiden Quellen kommen:
 
 - **Schweizer Ist-Daten-Archiv** (opentransportdata.swiss): fertig gejointe Soll- und
   Ist-Zeiten je Halt, rückwirkend verfügbar. Dient dazu, die Auswertungen zu entwickeln,
@@ -36,9 +45,13 @@ Die beiden Quellen:
 
 ## Was eine Zeile ist
 
-Grundeinheit ist das **Halt-Ereignis**: ein Zug an einer Betriebsstelle, mit Soll- und
-Ist-Zeit für Ankunft und Abfahrt. Alle Verspätungen sind Sekunden bzw. Minuten gegenüber
-dem Sollfahrplan, positiv bedeutet zu spät.
+Alles hier rechnet mit einer einzigen Grundeinheit: **ein Zug an einem Bahnhof.** Nicht
+die ganze Fahrt, nicht die Linie, nicht der Tag — ein einzelner Halt eines einzelnen
+Zuges. Dazu gehören vier Zeiten: wann er ankommen sollte, wann er tatsächlich ankam, wann
+er abfahren sollte, wann er tatsächlich abfuhr.
+
+Verspätungen sind immer die Abweichung vom Fahrplan in Minuten, positiv bedeutet zu spät,
+negativ zu früh.
 
 Fahrten werden dem **Betriebstag** zugeordnet, nicht dem Kalendertag. Ein Zug, der um
 23:50 abfährt und um 00:40 ankommt, gehört zu einem einzigen Betriebstag — sonst fielen

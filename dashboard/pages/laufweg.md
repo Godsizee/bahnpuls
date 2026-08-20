@@ -3,16 +3,23 @@ title: Laufweg einer Fahrt
 description: Der Verspätungsverlauf einer einzelnen Fahrt, zerlegt in Laufzeit- und Haltezeitanteil
 ---
 
-Eine einzelne Fahrt, Halt für Halt: Wo kam Verspätung dazu, wo wurde welche abgebaut —
-und ob das auf der Strecke oder im Bahnhof passierte. Die Rechenwege stehen auf der
-[Methodik](/methodik).
+Eine einzelne Fahrt, von Halt zu Halt nachgezeichnet. Statt einer Zahl am Ende — „zwölf
+Minuten zu spät" — steht hier, an welcher Stelle diese Minuten dazugekommen sind, und ob
+das unterwegs passierte oder während eines Aufenthalts.
+
+**So liest man die Diagramme:** Das obere zeigt, was jeder einzelne Abschnitt und jeder
+Halt beigetragen hat. Ein Balken nach oben heißt, dort ist Verspätung entstanden; ein
+Balken nach unten heißt, dort wurde welche aufgeholt. Die Farbe sagt, ob es unterwegs
+passierte oder im Bahnhof. Das untere Diagramm zeigt denselben Zug noch einmal anders: wie
+viel Verspätung er zu jedem Zeitpunkt insgesamt mit sich trug.
 
 <Alert status=info>
 
-**Auswahl begrenzt.** Diese Seite zeigt eine Stichprobe von bis zu 300 Fahrten des zuletzt
-geladenen Betriebstags, nicht alle. Grund ist die Technik, nicht die Datenlage: die
-Diagramme rechnen im Browser, und ein vollständiger Betriebstag wären mehrere hundert
-Megabyte pro Aufruf. Die Zahlen auf der Startseite umfassen dagegen den gesamten Bestand.
+**Zur Auswahl steht nur ein Ausschnitt.** Diese Seite bietet eine Stichprobe von bis zu
+150 Fahrten des zuletzt aufgezeichneten Tages an, nicht alle. Das liegt an der Technik,
+nicht an fehlenden Daten: Die Diagramme rechnen direkt im Browser, und ein vollständiger
+Tag wären mehrere hundert Megabyte, die jeder Besucher erst herunterladen müsste. Die
+Zahlen auf der Startseite beruhen dagegen auf allem, was aufgezeichnet wurde.
 
 </Alert>
 
@@ -81,7 +88,7 @@ zerlegt as (
     select
         halt_nr * 10 + 1,
         '→ ' || coalesce(stop_name, stop_id),
-        'Laufzeit (Strecke)',
+        'Unterwegs',
         laufzeit_delta_sek,
         delay_an_sek,
         zeitumstellung_mehrdeutig,
@@ -98,7 +105,7 @@ zerlegt as (
     select
         halt_nr * 10 + 2,
         'Halt ' || coalesce(stop_name, stop_id),
-        'Haltezeit (Bahnhof)',
+        'Im Bahnhof',
         haltezeit_delta_sek,
         delay_ab_sek,
         zeitumstellung_mehrdeutig,
@@ -119,14 +126,14 @@ select
     case
         when zug_ausgefallen             then 'Zug ausgefallen'
         when halt_ausgelassen            then 'Halt ausgelassen'
-        when zeitumstellung_mehrdeutig   then 'Zeitumstellung — nicht bestimmbar'
-        when beitrag_sek is null         then 'nicht bestimmbar'
+        when zeitumstellung_mehrdeutig   then 'Nacht der Zeitumstellung — nicht eindeutig'
+        when beitrag_sek is null         then 'keine Meldung'
     end as hinweis
 from zerlegt
 order by reihenfolge
 ```
 
-## Beiträge je Abschnitt und Halt
+## Wo die Minuten dazugekommen sind
 
 ```sql beitraege_chart
 select schritt, reihenfolge, art, beitrag_min
@@ -142,14 +149,18 @@ order by reihenfolge
     series=art
     sort=false
     yAxisTitle="Minuten"
-    title="Positiv = neu entstanden, negativ = aufgeholt"
+    title="Nach oben: dort entstanden. Nach unten: dort aufgeholt."
 />
 
-Ein negativer Balken ist kein Fehler, sondern **Pufferabbau**: Fahrpläne enthalten
-Fahrzeit- und Haltezeitreserve, und der Zug hat sie hier genutzt. Wo ein Beitrag fehlt,
-war er nicht bestimmbar — er wird nicht als 0 dargestellt, sondern gar nicht.
+Ein Balken nach unten ist kein Fehler, sondern der Normalfall: In jedem Fahrplan steckt
+Reserve — etwas mehr Fahrzeit zwischen zwei Bahnhöfen, etwas längerer Aufenthalt als
+nötig. Ein verspäteter Zug holt damit auf. Genau dafür ist sie da.
 
-## Verspätungsstand entlang des Laufwegs
+Wo für einen Abschnitt kein Balken erscheint, fehlt die Angabe. Sie wird dann **nicht als
+Null gezeichnet**, denn Null hieße „hier hat sich nichts verändert" — und das ist etwas
+anderes als „wir wissen es nicht".
+
+## Wie viel Verspätung der Zug jeweils hatte
 
 ```sql verlauf
 select schritt, reihenfolge, stand_min
@@ -167,16 +178,17 @@ order by reihenfolge
     markers=true
 />
 
-Der Stand stammt jeweils aus der gemessenen Ankunfts- bzw. Abfahrtsverspätung, nicht aus
-der Fortschreibung der Beiträge. Wo eine Meldung fehlt, bricht die Linie ab, statt eine
-Zwischenzahl zu erfinden.
+Diese Linie stammt aus den tatsächlich gemeldeten Werten, nicht aus dem Aufaddieren der
+Balken darüber. Das ist Absicht: Beide Wege müssten dasselbe ergeben, und wo sie es nicht
+tun, fehlt eine Meldung. Deshalb bricht die Linie dort ab, statt eine Zwischenzahl zu
+erfinden, die plausibel aussieht.
 
-## Protokoll
+## Halt für Halt zum Nachlesen
 
 <DataTable data={schritte} rows=20>
-    <Column id=schritt title="Schritt" />
-    <Column id=art title="Art" />
-    <Column id=beitrag_min title="Beitrag (Min.)" fmt='#,##0.0' />
-    <Column id=stand_min title="Stand danach (Min.)" fmt='#,##0.0' />
-    <Column id=hinweis title="Hinweis" />
+    <Column id=schritt title="Wo" />
+    <Column id=art title="Unterwegs oder im Bahnhof" />
+    <Column id=beitrag_min title="Dort dazugekommen (Min.)" fmt='#,##0.0' />
+    <Column id=stand_min title="Verspätung danach (Min.)" fmt='#,##0.0' />
+    <Column id=hinweis title="Warum keine Zahl" />
 </DataTable>
