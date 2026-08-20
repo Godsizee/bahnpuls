@@ -134,3 +134,41 @@ func TestWriter_ErrorFieldOmittedWhenEmpty(t *testing.T) {
 		t.Error(`"error" key present in JSON despite empty Err field, want omitted`)
 	}
 }
+
+func TestParseVmRSS(t *testing.T) {
+	tests := []struct {
+		name string
+		in   string
+		want int64
+	}{
+		{
+			name: "echte Ausgabe aus dem Container",
+			in:   "VmPeak:\t 2118392 kB\nVmSize:\t 2118392 kB\nVmRSS:\t 1264616 kB\nVmData:\t 2000000 kB\n",
+			want: 1264616,
+		},
+		{name: "erste Zeile", in: "VmRSS:\t 42 kB\n", want: 42},
+		{name: "ohne abschliessenden Zeilenumbruch", in: "VmRSS:\t 42 kB", want: 42},
+		// 0 heisst durchgehend "nicht bestimmbar", nie "nichts belegt".
+		{name: "Feld fehlt", in: "VmSize:\t 2118392 kB\n", want: 0},
+		{name: "unlesbarer Wert", in: "VmRSS:\t viel kB\n", want: 0},
+		{name: "leer", in: "", want: 0},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := parseVmRSS([]byte(tt.in)); got != tt.want {
+				t.Errorf("parseVmRSS() = %d, want %d", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestResidentKB_OhneProcfsNull(t *testing.T) {
+	alt := procStatusPath
+	t.Cleanup(func() { procStatusPath = alt })
+
+	procStatusPath = filepath.Join(t.TempDir(), "gibtsnicht")
+	if got := ResidentKB(); got != 0 {
+		t.Errorf("ResidentKB() = %d ohne procfs, want 0", got)
+	}
+}

@@ -7,10 +7,12 @@
 package health
 
 import (
+	"bytes"
 	"encoding/json"
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 )
 
@@ -22,10 +24,13 @@ type Heartbeat struct {
 	EntityCount   int       `json:"entity_count"`
 	InScopeCount  int       `json:"in_scope_count"`
 	ChangedCount  int       `json:"changed_count"`
-	// TrackedKeys is the size of the dedup tracker — the cheapest proxy for
-	// the collector's memory trend there is, and the only one visible from
-	// outside the container (BPULS-028).
+	// TrackedKeys is the size of the dedup tracker (BPULS-028).
 	TrackedKeys int `json:"tracked_keys"`
+	// ResidentKB is the process's resident set size. Without it, memory can
+	// only be read by opening a shell in the container — and a collector that
+	// has to run unattended for months must be measurable from the outside
+	// (BPULS-059). 0 means "not determinable here", never "nothing used".
+	ResidentKB int64 `json:"resident_kb"`
 	// Err carries the last poll error, if any, so a failing-but-alive
 	// process is visible instead of silently going stale.
 	Err string `json:"error,omitempty"`
@@ -39,6 +44,41 @@ func FeedAge(feedTimestamp uint64, now time.Time) time.Duration {
 		return 0
 	}
 	return now.Sub(time.Unix(int64(feedTimestamp), 0))
+}
+
+// procStatusPath is a variable so the parser can be tested against a fixture
+// instead of only against whatever the test machine happens to expose.
+var procStatusPath = "/proc/self/status"
+
+// ResidentKB reports the process's resident set size in kilobytes, or 0 where
+// that cannot be read — on Windows there is no /proc, and the development
+// machine must not fail over a number that only matters in the container.
+func ResidentKB() int64 {
+	data, err := os.ReadFile(procStatusPath)
+	if err != nil {
+		return 0
+	}
+	return parseVmRSS(data)
+}
+
+// parseVmRSS picks the VmRSS line out of /proc/<pid>/status, which reads
+// "VmRSS:\t 1264616 kB".
+func parseVmRSS(data []byte) int64 {
+	for _, line := range bytes.Split(data, []byte("\n")) {
+		if !bytes.HasPrefix(line, []byte("VmRSS:")) {
+			continue
+		}
+		fields := bytes.Fields(line[len("VmRSS:"):])
+		if len(fields) == 0 {
+			return 0
+		}
+		kb, err := strconv.ParseInt(string(fields[0]), 10, 64)
+		if err != nil {
+			return 0
+		}
+		return kb
+	}
+	return 0
 }
 
 // Writer persists heartbeats to a fixed path, one file that always holds the

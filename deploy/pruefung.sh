@@ -83,6 +83,11 @@ fi
 schluessel=$(json_zahl tracked_keys)
 [ -n "$schluessel" ] && echo "dedup: ${schluessel} Schluessel verfolgt"
 
+rss_kb=$(json_zahl resident_kb)
+if [ -n "$rss_kb" ] && [ "$rss_kb" -gt 0 ]; then
+	echo "speicher: $(( rss_kb / 1024 )) MB RSS"
+fi
+
 # --- Landet ueberhaupt etwas auf dem Volume? -------------------------------
 # Sortiert nach Pfad: date=/hour= sind nullgepolstert, der Dateiname ist die
 # Nanosekundenzeit des Flushes -- die letzte Zeile ist damit die neueste Datei.

@@ -187,6 +187,7 @@ func poll(ctx context.Context, client *http.Client, feedURL string, scopeFilter 
 	}
 
 	hb.TrackedKeys = tracker.Len()
+	hb.ResidentKB = health.ResidentKB()
 
 	if err := hbWriter.Write(hb); err != nil {
 		log.Printf("collector: write heartbeat failed: %v", err)
