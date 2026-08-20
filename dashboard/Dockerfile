@@ -40,5 +40,12 @@ RUN mkdir -p /app/data
 RUN chown -R node:node /app
 USER node
 
+# Ohne Healthcheck schaltet Coolify den Verkehr sofort auf den neuen Container um --
+# der baut beim Start aber erst dbt und Evidence, und bis dahin lauscht nichts auf 3000.
+# Ergebnis war ein mehrminuetiges 502-Fenster bei jedem Deploy. start-period ist deshalb
+# grosszuegig: waehrenddessen zaehlt ein Fehlschlag nicht, der alte Container bleibt.
+# Kein curl im Image, also prueft node selbst.
+HEALTHCHECK --interval=30s --timeout=10s --start-period=900s --retries=3 CMD ["node", "-e", "require('http').get('http://127.0.0.1:3000/', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+
 EXPOSE 3000
 ENTRYPOINT ["/bin/sh", "/app/deploy/dashboard-entrypoint.sh"]

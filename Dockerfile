@@ -6,6 +6,9 @@ COPY go.mod go.sum ./
 RUN go mod download
 COPY . .
 RUN CGO_ENABLED=0 go build -o /out/collector ./cmd/collector
+# statictool liegt im selben Image, laeuft aber als eigener Scheduled Task -- der
+# Collector darf fuer einen Download nicht blockieren (Regel 3).
+RUN CGO_ENABLED=0 go build -o /out/statictool ./cmd/statictool
 
 FROM alpine:3.20
 # ca-certificates: the collector calls the GTFS-RT feed over HTTPS.
@@ -18,6 +21,7 @@ RUN apk add --no-cache ca-certificates
 
 WORKDIR /app
 COPY --from=build /out/collector ./collector
+COPY --from=build /out/statictool ./statictool
 COPY config ./config
 # Healthcheck (BPULS-022) und fachliche Pruefung (BPULS-026) liegen als
 # Shell-Skripte bei, damit beide dieselbe Definition von "gesund" benutzen wie
