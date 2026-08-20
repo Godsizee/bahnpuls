@@ -8,7 +8,9 @@
 # damit ein Fehler hier niemals Historie kosten kann (CLAUDE.md Regel 1).
 set -eu
 
-DE_GLOB="${BAHNPULS_DE_GLOB:-/data/raw/**/*.parquet}"
+# Feste Partitionstiefe date=/hour= statt ** -- der rekursive Glob ist in DuckDB
+# versionsabhaengig, die Tiefe ist dagegen vom Writer festgelegt.
+DE_GLOB="${BAHNPULS_DE_GLOB:-/data/raw/date=*/hour=*/*.parquet}"
 CH_GLOB="${BAHNPULS_CH_GLOB:-tests/fixtures/ch/*_istdaten.csv}"
 VARS="{\"ch_istdaten_glob\": \"$CH_GLOB\", \"de_gtfsrt_glob\": \"$DE_GLOB\"}"
 

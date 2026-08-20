@@ -30,5 +30,15 @@ RUN cd /app/transform && /opt/venv/bin/dbt deps
 # und hat auf dem Volume nichts zu suchen.
 RUN mkdir -p /app/data
 
+# Als node laufen, nicht als root. Das ist hier kein Ritual, sondern der einzige
+# wirksame Schreibschutz auf die Rohdaten: Coolify kann ein fremdes Named Volume weder
+# read-only einhaengen noch ueberhaupt teilen (es praefixt jeden Storage-Namen mit der
+# App-UUID), also haengt /data als Bind-Mount auf das Volume-Verzeichnis. Dessen Dateien
+# gehoeren root, weil der Collector als root schreibt -- ein Prozess als node kann sie
+# lesen und nicht anfassen. Damit gilt CLAUDE.md Regel 1 durch Dateirechte statt durch
+# Absicht.
+RUN chown -R node:node /app
+USER node
+
 EXPOSE 3000
 ENTRYPOINT ["/bin/sh", "/app/deploy/dashboard-entrypoint.sh"]
