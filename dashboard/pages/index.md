@@ -16,12 +16,12 @@ select
     case quelle when 'de_gtfsrt' then 'Deutschland, echt'
                 when 'ch_istdaten' then 'Schweiz, synthetisch'
                 else quelle end                  as herkunft,
-    count(distinct betriebstag)                  as betriebstage,
-    count(distinct trip_key)                     as fahrten,
-    count(*)                                     as halt_ereignisse,
+    count(*)                                     as betriebstage,
+    sum(fahrten)                                 as fahrten,
+    sum(halte)                                   as halt_ereignisse,
     min(betriebstag)                             as von,
     max(betriebstag)                             as bis
-from bahnpuls.mart_zuglauf
+from bahnpuls.mart_datenqualitaet
 group by quelle
 order by quelle desc
 ```

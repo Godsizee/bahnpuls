@@ -7,6 +7,15 @@ Eine einzelne Fahrt, Halt für Halt: Wo kam Verspätung dazu, wo wurde welche ab
 und ob das auf der Strecke oder im Bahnhof passierte. Die Rechenwege stehen auf der
 [Methodik](/methodik).
 
+<Alert status=info>
+
+**Auswahl begrenzt.** Diese Seite zeigt eine Stichprobe von bis zu 300 Fahrten des zuletzt
+geladenen Betriebstags, nicht alle. Grund ist die Technik, nicht die Datenlage: die
+Diagramme rechnen im Browser, und ein vollständiger Betriebstag wären mehrere hundert
+Megabyte pro Aufruf. Die Zahlen auf der Startseite umfassen dagegen den gesamten Bestand.
+
+</Alert>
+
 ```sql fahrten
 -- Der erste Halt einer Fahrt ist der mit der kleinsten Nummer, nicht die 1: bei den
 -- deutschen Echtzeitdaten ist halt_nr die Fahrplannummer und beginnt bei 0 oder höher.
