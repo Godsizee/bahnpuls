@@ -43,12 +43,21 @@ RUN mkdir -p /app/data && chown -R node:node /app/data /app/transform
 # Absicht.
 USER node
 
-# Ohne Healthcheck schaltet Coolify den Verkehr sofort auf den neuen Container um --
-# der baut beim Start aber erst dbt und Evidence, und bis dahin lauscht nichts auf 3000.
-# Ergebnis war ein mehrminuetiges 502-Fenster bei jedem Deploy. start-period ist deshalb
-# grosszuegig: waehrenddessen zaehlt ein Fehlschlag nicht, der alte Container bleibt.
+# Ohne Healthcheck schaltet Coolify den Verkehr sofort auf den neuen Container um -- der
+# baut beim Start aber erst dbt und Evidence, und bis dahin lauscht nichts auf 3000.
+# Ergebnis war ein mehrminuetiges 502-Fenster bei jedem Deploy.
+#
+# **start-period knapp halten.** Coolify wartet die Startphase **vollstaendig ab**, bevor
+# es ueberhaupt zu pruefen beginnt ("Waiting for the start period before starting
+# healthcheck") -- anders als Docker, wo ein erfolgreicher Check darin sofort zaehlt. Der
+# Wert ist damit keine Reserve, sondern aufgeschlagene Deploy-Zeit: mit 900 s stand ein
+# laengst gesunder Container 15 Minuten lang als "in progress".
+#
+# Gemessen dauert der Start 83 s (dbt 18 s, Quellen 6 s, Seitenbau 59 s). 150 s plus
+# 5 Versuche im 15-s-Takt geben knapp das Dreifache als Toleranz.
+#
 # Kein curl im Image, also prueft node selbst.
-HEALTHCHECK --interval=30s --timeout=10s --start-period=900s --retries=3 CMD ["node", "-e", "require('http').get('http://127.0.0.1:3000/', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
+HEALTHCHECK --interval=15s --timeout=5s --start-period=150s --retries=5 CMD ["node", "-e", "require('http').get('http://127.0.0.1:3000/', r => process.exit(r.statusCode === 200 ? 0 : 1)).on('error', () => process.exit(1))"]
 
 EXPOSE 3000
 ENTRYPOINT ["/bin/sh", "/app/deploy/dashboard-entrypoint.sh"]
