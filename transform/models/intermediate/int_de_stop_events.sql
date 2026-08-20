@@ -46,7 +46,7 @@ with snapshots as (
 -- NULL, statt aus dem Laufweg zu verschwinden (CLAUDE.md Regel 8, Fallstrick A1).
 halte as (
 
-    select distinct betriebstag, trip_key, stop_sequence, stop_id, quelle
+    select distinct betriebstag, trip_key, trip_id, stop_sequence, stop_id, quelle
     from snapshots
 
 ),
@@ -134,9 +134,10 @@ select
     halte.stop_sequence::bigint as stop_sequence,
     halte.stop_id,
 
-    -- Kein Stationsname im Echtzeit-Feed. Der Rohwert waere eine ID, kein Name -- ihn
-    -- als Namen auszugeben, waere eine Luege im Dashboard. Kommt mit BPULS-023.
-    cast(null as varchar) as stop_name,
+    -- Name aus den statischen Fahrplaenen, vereinigt ueber alle Versionen (BPULS-023).
+    -- Bleibt NULL, wo keine Version den Halt kennt -- eine ID als Namen auszugeben waere
+    -- eine Luege im Dashboard, dort steht dann bewusst die ID als solche.
+    halte_name.bezeichnung as stop_name,
 
     soll.soll_an,
     soll.soll_ab,
@@ -157,14 +158,21 @@ select
     coalesce(zustand.halt_ausgelassen, false) as halt_ausgelassen,
     coalesce(zustand.zug_ausgefallen, false)  as zug_ausgefallen,
 
-    -- route_id ist im freien gtfs.de-Echtzeitfeed zu 100 % leer (gemessen 2026-08-20
-    -- an 2.346 Fahrten im Scope), block_id liefert die Quelle gar nicht (BPULS-003).
-    cast(null as varchar) as route_kurzname,
+    -- route_id ist im Echtzeitfeed zu 100 % leer (gemessen 2026-08-20 an 2.346 Fahrten
+    -- im Scope), der Weg fuehrt deshalb ueber die trip_id in trips.txt. block_id liefert
+    -- die Quelle gar nicht (BPULS-003).
+    linien_name.bezeichnung as route_kurzname,
     cast(null as varchar) as block_id,
 
     halte.quelle
 
 from halte
+left join {{ ref('stg_de_static') }} as halte_name
+  on  halte_name.art        = 'stop'
+  and halte_name.schluessel = halte.stop_id
+left join {{ ref('stg_de_static') }} as linien_name
+  on  linien_name.art        = 'linie'
+  and linien_name.schluessel = halte.trip_id
 left join soll
   on  halte.trip_key      = soll.trip_key
   and halte.stop_sequence = soll.stop_sequence

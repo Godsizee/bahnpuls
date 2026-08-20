@@ -24,6 +24,9 @@ vars:
   # Karenz fuer die Ist-Bestimmung aus GTFS-RT: als Ist gilt der letzte Wert, der bis
   # Soll + diese Spanne gemeldet wurde. Annahme, siehe Methodik-Seite (BPULS-030).
   de_ist_karenz_minuten: 5
+  # Verzeichnis der versionierten statischen Fahrplaene (BPULS-023). Produktiv das
+  # Persistent Volume, lokal das Entwicklungsverzeichnis.
+  de_static_dir: "../data/static"
 
 models:
   bahnpuls:

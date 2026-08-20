@@ -1,0 +1,5 @@
+stop_name,parent_station,stop_id,stop_lat,stop_lon,location_type,platform_code
+Mannheim Hbf,,A,49.4794,8.4690,,
+Heidelberg Hbf,,B,49.4036,8.6753,,
+Darmstadt Hbf,,NEU1,49.8728,8.6294,,
+Ludwigshafen(Rh)Hbf,,D,49.4775,8.4344,,

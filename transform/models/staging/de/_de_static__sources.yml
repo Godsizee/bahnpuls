@@ -1,0 +1,20 @@
+version: 2
+
+sources:
+  - name: de_static
+    description: >
+      Statische GTFS-Fahrpläne von gtfs.de, versioniert abgelegt durch `statictool`
+      (BPULS-023). Der Glob liest **alle** Versionen — nicht die neueste: die stop_ids
+      rotieren zwischen Veröffentlichungen fast vollständig, und der Echtzeit-Feed
+      referenziert mehrere Namensräume gleichzeitig (Q6). Eine einzelne Version ließe den
+      Großteil der Halte namenlos.
+    tables:
+      - name: stops
+        meta:
+          external_location: "read_csv('{{ var('de_static_dir') }}/v=*/*/stops.txt', filename = true, union_by_name = true, all_varchar = true)"
+      - name: routes
+        meta:
+          external_location: "read_csv('{{ var('de_static_dir') }}/v=*/*/routes.txt', filename = true, union_by_name = true, all_varchar = true)"
+      - name: trips
+        meta:
+          external_location: "read_csv('{{ var('de_static_dir') }}/v=*/*/trips.txt', filename = true, union_by_name = true, all_varchar = true)"

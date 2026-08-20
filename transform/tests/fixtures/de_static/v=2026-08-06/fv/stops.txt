@@ -1,0 +1,2 @@
+stop_name,parent_station,stop_id,stop_lat,stop_lon,location_type,platform_code
+Frankfurt(Main)Hbf,,C,50.1070,8.6636,,
