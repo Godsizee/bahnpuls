@@ -8,14 +8,26 @@ und ob das auf der Strecke oder im Bahnhof passierte. Die Rechenwege stehen auf 
 [Methodik](/methodik).
 
 ```sql fahrten
--- halt_nr = 1 ist der Startbahnhof der Fahrt
+-- Der erste Halt einer Fahrt ist der mit der kleinsten Nummer, nicht die 1: bei den
+-- deutschen Echtzeitdaten ist halt_nr die Fahrplannummer und beginnt bei 0 oder höher.
+-- Und er ist nicht zwangsläufig der Startbahnhof — ein Zug, der beim Beginn der
+-- Beobachtung schon unterwegs war, taucht erst ab seinem nächsten Halt auf.
+with erster_halt as (
+    select trip_key, min(halt_nr) as halt_nr
+    from bahnpuls.mart_zuglauf
+    group by trip_key
+)
 select
-    trip_key,
-    route_kurzname || ' · ' || strftime(betriebstag, '%d.%m.%Y')
-        || ' · ab ' || stop_name as bezeichnung
-from bahnpuls.mart_zuglauf
-where halt_nr = 1
-order by betriebstag, route_kurzname, trip_key
+    z.trip_key,
+    -- Linienname und Stationsname fehlen bei der deutschen Quelle, solange der
+    -- Fahrplan-Datensatz nicht angeschlossen ist. Dann steht hier die ID statt eines
+    -- Namens — sichtbar, aber nicht kaputt.
+    coalesce(z.route_kurzname, z.quelle) || ' · '
+        || strftime(z.betriebstag, '%d.%m.%Y') || ' · ab '
+        || coalesce(z.stop_name, z.stop_id) as bezeichnung
+from bahnpuls.mart_zuglauf z
+join erster_halt e on z.trip_key = e.trip_key and z.halt_nr = e.halt_nr
+order by z.betriebstag, bezeichnung
 ```
 
 <Dropdown data={fahrten} name=fahrt value=trip_key label=bezeichnung title="Fahrt" />
@@ -29,20 +41,28 @@ with halte as (
 
 ),
 
+grenzen as (
+
+    -- Erster und letzter gelieferter Halt dieser Fahrt. Nicht 1 und n: die Nummer ist
+    -- bei den deutschen Daten die Fahrplannummer, nicht die Position.
+    select min(halt_nr) as erster, max(halt_nr) as letzter from halte
+
+),
+
 zerlegt as (
 
     -- Startverspätung: der Stand, mit dem die Fahrt beginnt
     select
         halt_nr * 10                             as reihenfolge,
-        'Start ' || stop_name                    as schritt,
+        'Start ' || coalesce(stop_name, stop_id) as schritt,
         'Startverspätung'                        as art,
         coalesce(delay_an_sek, delay_ab_sek)     as beitrag_sek,
         coalesce(delay_an_sek, delay_ab_sek)     as stand_sek,
         zeitumstellung_mehrdeutig,
         zug_ausgefallen,
         halt_ausgelassen
-    from halte
-    where halt_nr = 1
+    from halte, grenzen
+    where halt_nr = grenzen.erster
 
     union all
 
@@ -51,15 +71,15 @@ zerlegt as (
     -- delay_an − laufzeit_delta ist genau die Abfahrtsverspätung des Vorhalts.
     select
         halt_nr * 10 + 1,
-        '→ ' || stop_name,
+        '→ ' || coalesce(stop_name, stop_id),
         'Laufzeit (Strecke)',
         laufzeit_delta_sek,
         delay_an_sek,
         zeitumstellung_mehrdeutig,
         zug_ausgefallen,
         halt_ausgelassen
-    from halte
-    where halt_nr > 1
+    from halte, grenzen
+    where halt_nr > grenzen.erster
 
     union all
 
@@ -68,7 +88,7 @@ zerlegt as (
     -- der beiden planmäßig, und das ist kein fehlender Messwert.
     select
         halt_nr * 10 + 2,
-        'Halt ' || stop_name,
+        'Halt ' || coalesce(stop_name, stop_id),
         'Haltezeit (Bahnhof)',
         haltezeit_delta_sek,
         delay_ab_sek,

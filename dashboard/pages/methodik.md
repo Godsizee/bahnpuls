@@ -9,12 +9,23 @@ zusammen mit den Kennzahlen gepflegt, nicht nachträglich.
 
 ## Datenstand
 
-Die aktuell gezeigten Zahlen stammen aus **synthetischen Testdaten**. Sie prüfen die
-Rechenwege — ob Fensterlogik, Betriebstag-Behandlung und Ausfallbehandlung korrekt sind —
-und beschreiben keinen realen Betrieb. Sobald echte Daten vorliegen, wird dieser Abschnitt
-ersetzt.
+Diese Seiten sind eine **Vorschau im Aufbau**. Sie zeigen zwei Quellen nebeneinander, und
+die beiden stehen auf sehr unterschiedlichem Grund — wer eine Zahl liest, muss wissen,
+welche davon er vor sich hat:
 
-Zwei Quellen sind vorgesehen:
+- **Deutsche Echtzeitdaten: echt**, aus der eigenen Mitschrift seit dem 19.08.2026. Die
+  Sammlung läuft erst wenige Tage; für Aussagen über Linien oder Bahnhöfe ist das zu kurz.
+  Stationsnamen und Liniennummern fehlen noch, weil der Fahrplan-Datensatz nicht
+  angeschlossen ist.
+- **Schweizer Daten: synthetisch.** Sie prüfen die Rechenwege — Fensterlogik,
+  Betriebstag-Behandlung, Ausfallbehandlung — und beschreiben **keinen realen Betrieb**.
+  Keine Zahl auf diesen Seiten, die aus der Schweizer Quelle stammt, sagt etwas über
+  tatsächliche Züge aus.
+
+Die Herkunft steht in jeder Tabelle in der Spalte `quelle`: `de_gtfsrt` ist echt,
+`ch_istdaten` ist synthetisch.
+
+Die beiden Quellen:
 
 - **Schweizer Ist-Daten-Archiv** (opentransportdata.swiss): fertig gejointe Soll- und
   Ist-Zeiten je Halt, rückwirkend verfügbar. Dient dazu, die Auswertungen zu entwickeln,

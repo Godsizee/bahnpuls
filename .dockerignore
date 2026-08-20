@@ -11,9 +11,13 @@ data/static
 data/ch
 data/*.duckdb
 
-# Evidence-Dashboard: baut das Dashboard, nicht den Collector. node_modules
-# waeren ~900 npm-Pakete Build-Kontext fuer ein Go-Binary
-dashboard
+# Evidence-Dashboard: nur die schweren Verzeichnisse raus, nicht der ganze Ordner.
+# Der Dashboard-Build braucht denselben Kontext wie der Collector (er liest transform/
+# mit), und .dockerignore gilt fuer den Kontext, nicht je Dockerfile.
+dashboard/node_modules
+dashboard/build
+dashboard/.svelte-kit
+dashboard/.evidence
 
 # dbt/Python-Tooling: 395 MB venv plus Build-Artefakte, fuer das Binary irrelevant
 .venv

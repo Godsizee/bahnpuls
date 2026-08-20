@@ -8,7 +8,8 @@
     "test": "evidence build",
     "sources": "evidence sources",
     "sources:strict": "evidence sources --strict",
-    "preview": "evidence preview"
+    "preview": "evidence preview",
+    "serve": "sirv build --host 0.0.0.0 --port 3000 --single --quiet"
   },
   "engines": {
     "npm": ">=7.0.0",
@@ -27,6 +28,7 @@
     "axios": "^1.7.4"
   },
   "devDependencies": {
-    "typescript": "5.4.2"
+    "typescript": "5.4.2",
+    "sirv-cli": "^3.0.0"
   }
 }
