@@ -76,6 +76,13 @@ else
 	fi
 fi
 
+# --- Speichertrend ---------------------------------------------------------
+# Kein Schwellwert, sondern eine Zahl fuer die Zeitreihe: der Dedup-Tracker ist
+# der einzige Teil des Speicherbedarfs, der von aussen sichtbar ist. Er sollte
+# sich bei laufendem Betrieb einpendeln, nicht monoton steigen (BPULS-028).
+schluessel=$(json_zahl tracked_keys)
+[ -n "$schluessel" ] && echo "dedup: ${schluessel} Schluessel verfolgt"
+
 # --- Landet ueberhaupt etwas auf dem Volume? -------------------------------
 # Sortiert nach Pfad: date=/hour= sind nullgepolstert, der Dateiname ist die
 # Nanosekundenzeit des Flushes -- die letzte Zeile ist damit die neueste Datei.

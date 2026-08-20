@@ -22,6 +22,10 @@ type Heartbeat struct {
 	EntityCount   int       `json:"entity_count"`
 	InScopeCount  int       `json:"in_scope_count"`
 	ChangedCount  int       `json:"changed_count"`
+	// TrackedKeys is the size of the dedup tracker — the cheapest proxy for
+	// the collector's memory trend there is, and the only one visible from
+	// outside the container (BPULS-028).
+	TrackedKeys int `json:"tracked_keys"`
 	// Err carries the last poll error, if any, so a failing-but-alive
 	// process is visible instead of silently going stale.
 	Err string `json:"error,omitempty"`

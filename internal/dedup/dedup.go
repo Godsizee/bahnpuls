@@ -85,22 +85,69 @@ func equalInt64(a, b *int64) bool {
 	return *a == *b
 }
 
+// entry is one tracked key's last-written state plus the snapshot generation
+// it was last present in, which is what makes eviction possible.
+type entry struct {
+	snap     snapshot
+	lastSeen uint64
+}
+
 // Tracker remembers the last-written state per (trip, stop position) and
 // decides whether a new event is a real change worth writing.
 //
 // Not safe for concurrent use — the collector's poll loop is single-threaded
 // by design (Bahnpuls_Architektur), so a mutex would be unused complexity.
 //
-// State is never evicted. Bounding memory for a wider (e.g. nationwide)
-// scope by discarding entries for completed trips is BPULS-028, deliberately
-// deferred until the scope decision (Q12) is made.
+// Keys are forgotten once they have been absent from the feed for
+// maxIdlePolls snapshots (BPULS-028). Without that the map grows for the
+// lifetime of the process: the key carries the Betriebstag, so yesterday's
+// keys can never recur and would be kept forever.
+//
+// A forgotten key that reappears is written once more as a change. That is a
+// duplicate row, not a lost one — and raw duplicates have to be handled
+// downstream anyway, because a Coolify redeploy runs the old and the new
+// container side by side for a moment (BPULS-030).
 type Tracker struct {
-	seen map[key]snapshot
+	seen         map[key]entry
+	gen          uint64
+	maxIdlePolls uint64
+	evictable    bool
 }
 
-// NewTracker returns an empty Tracker.
-func NewTracker() *Tracker {
-	return &Tracker{seen: make(map[key]snapshot)}
+// NewTracker returns an empty Tracker that forgets a key after maxIdlePolls
+// consecutive snapshots without it. A value <= 0 disables eviction entirely,
+// which is what the tests that only care about change detection use.
+func NewTracker(maxIdlePolls int) *Tracker {
+	t := &Tracker{seen: make(map[key]entry)}
+	if maxIdlePolls > 0 {
+		t.maxIdlePolls = uint64(maxIdlePolls)
+		t.evictable = true
+	}
+	return t
+}
+
+// StartPoll opens a new snapshot generation and forgets every key that has
+// been absent for longer than maxIdlePolls generations. It returns how many
+// keys were forgotten.
+//
+// Call it once per *successfully decoded* poll, before feeding that poll's
+// events to Changed. Deliberately not called on a failed fetch: generations
+// count observations, not wall-clock time, so a feed outage must not age out
+// trips that are still running.
+func (t *Tracker) StartPoll() int {
+	t.gen++
+	if !t.evictable || t.gen <= t.maxIdlePolls {
+		return 0
+	}
+	cutoff := t.gen - t.maxIdlePolls
+	evicted := 0
+	for k, e := range t.seen {
+		if e.lastSeen < cutoff {
+			delete(t.seen, k)
+			evicted++
+		}
+	}
+	return evicted
 }
 
 // Changed reports whether ev differs from the last-seen state for its
@@ -112,11 +159,11 @@ func (t *Tracker) Changed(ev gtfsrt.StopEvent) bool {
 	next := snapshotFor(ev)
 
 	prev, ok := t.seen[k]
-	t.seen[k] = next
+	t.seen[k] = entry{snap: next, lastSeen: t.gen}
 	if !ok {
 		return true
 	}
-	return !equalSnapshot(prev, next)
+	return !equalSnapshot(prev.snap, next)
 }
 
 // Len returns the number of tracked (trip, stop) keys.

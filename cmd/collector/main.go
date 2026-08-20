@@ -28,12 +28,21 @@ import (
 	"bahnpuls/internal/writer"
 )
 
+const defaultPollInterval = 30 * time.Second
+
+// dedupIdleWindow is how long a (trip, stop) key survives without appearing
+// in the feed before the tracker forgets it (BPULS-028). Two hours is well
+// past the point where a producer drops a finished trip, so eviction should
+// normally cost nothing; if a trip does reappear later, the price is one
+// duplicate row, never a lost one.
+const dedupIdleWindow = 2 * time.Hour
+
 func main() {
 	feedURL := flag.String("feed-url", envOr("BAHNPULS_FEED_URL", "https://realtime.gtfs.de/realtime-free.pb"), "GTFS-RT feed URL")
 	scopePath := flag.String("scope-config", envOr("BAHNPULS_SCOPE_CONFIG", "config/scope_stops.csv"), "path to the target-area stop-list CSV")
 	dataDir := flag.String("data-dir", envOr("BAHNPULS_DATA_DIR", "data/raw"), "base directory for partitioned Parquet output (Persistent Volume in production)")
 	heartbeatPath := flag.String("heartbeat-path", envOr("BAHNPULS_HEARTBEAT_PATH", "data/heartbeat.json"), "path to the heartbeat status file")
-	pollInterval := flag.Duration("poll-interval", envDurationOr("BAHNPULS_POLL_INTERVAL", 30*time.Second), "how often to poll the feed")
+	pollInterval := flag.Duration("poll-interval", envDurationOr("BAHNPULS_POLL_INTERVAL", defaultPollInterval), "how often to poll the feed")
 	// 15 s waren zu knapp: im 24 h-Lauf liefen 1,96 % der Polls in "read body:
 	// context deadline exceeded", geclustert in den Stunden, in denen der Feed
 	// langsam antwortet -- der Timeout deckt das Lesen des ~2 MB grossen Bodys
@@ -49,9 +58,14 @@ func main() {
 	}
 	log.Printf("collector: scope loaded from %s, %d stops", *scopePath, scopeFilter.Len())
 
+	if *pollInterval <= 0 {
+		log.Printf("collector: ignoring poll-interval %s, using %s: must be positive", *pollInterval, defaultPollInterval)
+		*pollInterval = defaultPollInterval
+	}
+
 	rawWriter := writer.New(*dataDir)
 	hbWriter := health.NewWriter(*heartbeatPath)
-	tracker := dedup.NewTracker()
+	tracker := dedup.NewTracker(int(dedupIdleWindow / *pollInterval))
 	httpClient := &http.Client{Timeout: *fetchTimeout}
 
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
@@ -134,6 +148,13 @@ func poll(ctx context.Context, client *http.Client, feedURL string, scopeFilter 
 	hb.FeedTimestamp = feed.Timestamp
 	hb.FeedAgeSec = int64(health.FeedAge(feed.Timestamp, now).Seconds())
 
+	// Nur nach einem erfolgreichen Decode: Generationen zaehlen Beobachtungen,
+	// nicht Wanduhrzeit -- ein Feed-Ausfall darf keine laufenden Fahrten
+	// altern lassen (BPULS-028).
+	if evicted := tracker.StartPoll(); evicted > 0 {
+		log.Printf("collector: dedup forgot %d keys absent for %s", evicted, dedupIdleWindow)
+	}
+
 	trips := groupByTrip(feed.StopEvents)
 	hb.EntityCount = len(trips)
 
@@ -150,11 +171,13 @@ func poll(ctx context.Context, client *http.Client, feedURL string, scopeFilter 
 		}
 	}
 
+	hb.TrackedKeys = tracker.Len()
+
 	if err := hbWriter.Write(hb); err != nil {
 		log.Printf("collector: write heartbeat failed: %v", err)
 	}
-	log.Printf("collector: poll ok — %d trips, %d in scope, %d changed, feed age %ds, buffer %d rows",
-		hb.EntityCount, hb.InScopeCount, hb.ChangedCount, hb.FeedAgeSec, w.Len())
+	log.Printf("collector: poll ok — %d trips, %d in scope, %d changed, feed age %ds, buffer %d rows, %d keys tracked",
+		hb.EntityCount, hb.InScopeCount, hb.ChangedCount, hb.FeedAgeSec, w.Len(), hb.TrackedKeys)
 }
 
 // tripKey groups a flat StopEvent list back into per-trip-instance batches.
