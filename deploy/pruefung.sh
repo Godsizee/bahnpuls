@@ -94,7 +94,10 @@ fi
 # --- Plattenplatz ----------------------------------------------------------
 # Coolifys eigene 80-%-Warnung ist kein Sicherheitsnetz: auf strato stand sie
 # auf 80 %, waehrend die Platte bei 99 % lag, ohne dass etwas passiert waere.
+# -P ist POSIX, BusyBox kennt es -- aber falls nicht, lieber auf das nackte
+# df zurueckfallen als die Pruefung an der Formatierung scheitern zu lassen.
 frei_mb=$(df -Pk "$DATA_DIR" 2>/dev/null | awk 'NR==2 {print int($4/1024)}')
+[ -z "$frei_mb" ] && frei_mb=$(df -k "$DATA_DIR" 2>/dev/null | awk 'NR==2 {print int($4/1024)}')
 if [ -z "$frei_mb" ]; then
 	warne "Plattenplatz nicht ermittelbar fuer $DATA_DIR"
 elif [ "$frei_mb" -lt "$MIN_FREI_MB" ]; then

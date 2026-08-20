@@ -180,9 +180,20 @@ docker inspect <container> --format '{{ json .Mounts }}'
 
 **Bytes je Stunde** (`date=…/hour=…` sind die Partitionsebenen):
 
+Auf dem Host (GNU-Coreutils):
+
 ```bash
 MOUNT=<mountpoint aus dem inspect>
 du -b --max-depth=2 "$MOUNT/raw" | sort -k2
+```
+
+**Im Container geht das nicht so** — Alpine bringt BusyBox mit, `--max-depth` kennt es
+nicht, und `df /` zeigt das Overlay statt des Volumes:
+
+```sh
+du -b -s /data/raw
+du -b -s /data/raw/date=*/hour=* | sort -k2
+df -h /data
 ```
 
 **Zeilen je Stunde** — die DuckDB-CLI ist ein einzelnes Binary, es muss nichts installiert
