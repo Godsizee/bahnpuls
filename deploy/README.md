@@ -228,3 +228,49 @@ mehr als das Doppelte daneben.
 2. **Collector weiterlaufen lassen.** Ab hier zählt jeder Tag Historie.
 3. Nächste Betriebsaufgaben: Healthcheck auf den Heartbeat (BPULS-022), fachliche Prüfung
    als Scheduled Task (BPULS-026), Backup (BPULS-025).
+
+---
+
+## Monitoring: Healthcheck und fachliche Prüfung
+
+Zwei Ebenen, bewusst getrennt — ein Container kann laufen und trotzdem nichts Sinnvolles
+schreiben, und umgekehrt darf ein Feed-Ausfall keinen Neustart auslösen.
+
+| | `deploy/healthcheck.sh` (BPULS-022) | `deploy/pruefung.sh` (BPULS-026) |
+|---|---|---|
+| Frage | Lebt der Prozess? | Kommt Sinnvolles an? |
+| Läuft als | Docker-`HEALTHCHECK`, alle 60 s | Coolify Scheduled Task |
+| Prüft | Alter der `heartbeat.json` | Feed-Alter, Scope-Anteil, jüngste Parquet-Datei, Plattenplatz |
+| Reaktion | Container gilt als unhealthy | Task schlägt fehl → Coolify-Notification |
+
+### Healthcheck
+
+Steckt im Image (`HEALTHCHECK`-Instruktion im Dockerfile), es ist in Coolify **nichts
+einzustellen** — insbesondere weiterhin **kein HTTP-Healthcheck**: der Collector hat keinen
+Port, ein HTTP-Check meldet ihn dauerhaft unhealthy und erzeugt genau die Restart-Schleife
+aus Schritt 1.
+
+Der Check prüft ausschließlich das Alter des Heartbeats (Grenze 300 s, über
+`BAHNPULS_HEARTBEAT_MAX_AGE` verstellbar). Er schlägt **nicht** bei einem Feed-Ausfall an,
+denn der Heartbeat wird bei jedem Poll geschrieben, auch bei Fehlern. Das ist Absicht: ein
+Neustart behebt keinen Feed-Ausfall, kostet aber den offenen Stundenpuffer (Regel 3 und 4).
+
+### Fachliche Prüfung
+
+In Coolify unter der Application → **Scheduled Tasks** anlegen:
+
+- Name `fachliche-pruefung`
+- Command `/bin/sh /app/deploy/pruefung.sh`
+- Frequency `0 * * * *` (stündlich; seltener verzögert nur den Befund)
+
+Schwellwerte stehen als Konstanten oben im Skript, jede mit Begründung. Der wichtigste ist
+der **Scope-Anteil in Promille**, nicht die absolute Zahl: nachts schrumpft der ganze Feed
+(~5.000 statt ~76.000 Fahrten), der Anteil bleibt aber stabil — im 24 h-Lauf zwischen 21,5
+und 53,3 Promille über alle Tageszeiten. Ein absoluter Schwellwert auf `in_scope_count`
+würde jede Nacht falsch anschlagen; die Grenze von 10 Promille fängt dagegen den Fall ab, um
+den es fachlich geht: rotierende `stop_id`s, die den Scope stillschweigend gegen null laufen
+lassen (Q6 im Vault).
+
+Vor dem ersten scharfen Einsatz einmal von Hand laufen lassen und die Ausgabe ansehen —
+`pruefung ok` plus je eine Zeile zu Scope, jüngster Datei und Plattenplatz.
+

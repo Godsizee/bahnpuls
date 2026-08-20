@@ -1,0 +1,4 @@
+# Shell-Skripte laufen in einem Alpine-Container. Mit CRLF-Zeilenenden aus einer
+# Windows-Arbeitskopie scheitert schon die Shebang-Zeile ("/bin/sh\r" nicht gefunden),
+# deshalb hier festgenagelt -- unabhaengig von core.autocrlf.
+*.sh text eol=lf

@@ -19,6 +19,10 @@ RUN apk add --no-cache ca-certificates
 WORKDIR /app
 COPY --from=build /out/collector ./collector
 COPY config ./config
+# Healthcheck (BPULS-022) und fachliche Pruefung (BPULS-026) liegen als
+# Shell-Skripte bei, damit beide dieselbe Definition von "gesund" benutzen wie
+# das Runbook und nicht als Einzeiler in der Coolify-Oberflaeche verschwinden.
+COPY deploy/healthcheck.sh deploy/pruefung.sh ./deploy/
 
 # Raw data and the heartbeat file must live on the Coolify Persistent
 # Volume, never in the container filesystem (CLAUDE.md Regel 2) — mount it
@@ -26,4 +30,13 @@ COPY config ./config
 #   BAHNPULS_DATA_DIR=/data/raw
 #   BAHNPULS_HEARTBEAT_PATH=/data/heartbeat.json
 # See deploy/README.md.
+
+# Nur Lebendigkeit, nicht Sinnhaftigkeit -- die Begruendung steht in
+# deploy/healthcheck.sh. start-period ist grosszuegig, weil ein Healthcheck,
+# der beim Deployment nie gruen wird, den Container in eine Restart-Schleife
+# schickt und jeder Neustart den offenen Stundenpuffer kostet (Regel 4).
+# Aufruf ueber sh, damit das Skript kein Exec-Bit aus dem Git-Checkout braucht
+# (Windows-Arbeitskopie).
+HEALTHCHECK --interval=60s --timeout=10s --start-period=120s --retries=3 CMD ["/bin/sh", "/app/deploy/healthcheck.sh"]
+
 ENTRYPOINT ["./collector"]

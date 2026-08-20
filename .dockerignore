@@ -11,6 +11,10 @@ data/static
 data/ch
 data/*.duckdb
 
+# Evidence-Dashboard: baut das Dashboard, nicht den Collector. node_modules
+# waeren ~900 npm-Pakete Build-Kontext fuer ein Go-Binary
+dashboard
+
 # dbt/Python-Tooling: 395 MB venv plus Build-Artefakte, fuer das Binary irrelevant
 .venv
 __pycache__
