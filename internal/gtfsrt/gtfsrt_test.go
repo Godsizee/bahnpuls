@@ -1,9 +1,11 @@
 package gtfsrt
 
 import (
+	"errors"
 	"testing"
 
 	"github.com/MobilityData/gtfs-realtime-bindings/golang/gtfs"
+	"google.golang.org/protobuf/encoding/protowire"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -15,6 +17,17 @@ func mustMarshal(t *testing.T, msg *gtfs.FeedMessage) []byte {
 	}
 	return raw
 }
+
+func mustMarshalMessage(t *testing.T, msg proto.Message) []byte {
+	t.Helper()
+	raw, err := proto.Marshal(msg)
+	if err != nil {
+		t.Fatalf("proto.Marshal: %v", err)
+	}
+	return raw
+}
+
+var errStop = errors.New("aufrufer bricht ab")
 
 func baseHeader() *gtfs.FeedHeader {
 	return &gtfs.FeedHeader{
@@ -202,5 +215,114 @@ func TestStopIDs(t *testing.T) {
 		if got[i] != want[i] {
 			t.Errorf("StopIDs()[%d] = %q, want %q", i, got[i], want[i])
 		}
+	}
+}
+
+// tripEntity baut eine Entity mit genau einem Halt, damit sich mehrere
+// Entities in einer Momentaufnahme auseinanderhalten lassen.
+func tripEntity(id, tripID, stopID string) *gtfs.FeedEntity {
+	return &gtfs.FeedEntity{
+		Id: proto.String(id),
+		TripUpdate: &gtfs.TripUpdate{
+			Trip: &gtfs.TripDescriptor{
+				TripId:    proto.String(tripID),
+				StartDate: proto.String("20260810"),
+			},
+			StopTimeUpdate: []*gtfs.TripUpdate_StopTimeUpdate{
+				{StopId: proto.String(stopID)},
+			},
+		},
+	}
+}
+
+// Die Reihenfolge der Felder auf dem Draht ist in Protobuf nicht zugesichert.
+// DecodeTimestamp hat deshalb einen eigenen Durchlauf, statt anzunehmen, dass
+// der Header vorne steht -- stuende er hinten, truege jede Zeile Zeitstempel 0.
+func TestDecodeTimestamp_HeaderHinterDenEntities(t *testing.T) {
+	header := mustMarshalMessage(t, baseHeader())
+	entity := mustMarshalMessage(t, tripEntity("1", "830397", "52980"))
+
+	var raw []byte
+	raw = protowire.AppendTag(raw, fieldEntity, protowire.BytesType)
+	raw = protowire.AppendBytes(raw, entity)
+	raw = protowire.AppendTag(raw, fieldHeader, protowire.BytesType)
+	raw = protowire.AppendBytes(raw, header)
+
+	ts, err := DecodeTimestamp(raw)
+	if err != nil {
+		t.Fatalf("DecodeTimestamp: %v", err)
+	}
+	if ts != 1786348520 {
+		t.Errorf("Timestamp = %d, want 1786348520", ts)
+	}
+}
+
+// Ein spaeter hinzukommendes Feld im FeedMessage darf den Walk nicht
+// zerreissen -- auch keins mit einem anderen Wire-Type als bytes.
+func TestWalkTripUpdates_UeberspringtUnbekannteFelder(t *testing.T) {
+	entity := mustMarshalMessage(t, tripEntity("1", "830397", "52980"))
+
+	var raw []byte
+	raw = protowire.AppendTag(raw, 99, protowire.VarintType)
+	raw = protowire.AppendVarint(raw, 4711)
+	raw = protowire.AppendTag(raw, fieldEntity, protowire.BytesType)
+	raw = protowire.AppendBytes(raw, entity)
+	raw = protowire.AppendTag(raw, 98, protowire.Fixed64Type)
+	raw = protowire.AppendFixed64(raw, 42)
+
+	var gesehen int
+	if err := WalkTripUpdates(raw, func(events []StopEvent) error {
+		gesehen += len(events)
+		return nil
+	}); err != nil {
+		t.Fatalf("WalkTripUpdates: %v", err)
+	}
+	if gesehen != 1 {
+		t.Errorf("%d StopEvents, want 1", gesehen)
+	}
+}
+
+// Der Puffer wird zwischen den Entities wiederverwendet. Wer ihn festhaelt,
+// haelt spaeter fremde Daten in der Hand -- dieser Test schreibt fest, dass
+// jeder Aufruf genau die Ereignisse seiner eigenen Fahrt sieht.
+func TestWalkTripUpdates_JederAufrufSiehtNurSeineFahrt(t *testing.T) {
+	msg := &gtfs.FeedMessage{
+		Header: baseHeader(),
+		Entity: []*gtfs.FeedEntity{
+			tripEntity("1", "erste", "AAA"),
+			{Id: proto.String("2"), Alert: &gtfs.Alert{}},
+			tripEntity("3", "zweite", "BBB"),
+		},
+	}
+
+	var trips, stops []string
+	if err := WalkTripUpdates(mustMarshal(t, msg), func(events []StopEvent) error {
+		if len(events) != 1 {
+			t.Fatalf("%d Ereignisse in einem Aufruf, want 1", len(events))
+		}
+		trips = append(trips, events[0].TripID)
+		stops = append(stops, events[0].StopID)
+		return nil
+	}); err != nil {
+		t.Fatalf("WalkTripUpdates: %v", err)
+	}
+
+	if len(trips) != 2 || trips[0] != "erste" || trips[1] != "zweite" {
+		t.Errorf("Fahrten = %v, want [erste zweite]", trips)
+	}
+	if stops[0] != "AAA" || stops[1] != "BBB" {
+		t.Errorf("Halte = %v, want [AAA BBB]", stops)
+	}
+}
+
+func TestWalkTripUpdates_ReichtFehlerDesAufrufersDurch(t *testing.T) {
+	msg := &gtfs.FeedMessage{
+		Header: baseHeader(),
+		Entity: []*gtfs.FeedEntity{tripEntity("1", "830397", "52980")},
+	}
+	boom := errStop
+	err := WalkTripUpdates(mustMarshal(t, msg), func([]StopEvent) error { return boom })
+	if err == nil {
+		t.Fatal("WalkTripUpdates() = nil, want den Fehler des Aufrufers")
 	}
 }

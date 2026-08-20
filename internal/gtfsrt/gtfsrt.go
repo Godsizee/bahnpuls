@@ -16,6 +16,7 @@ import (
 	"fmt"
 
 	"github.com/MobilityData/gtfs-realtime-bindings/golang/gtfs"
+	"google.golang.org/protobuf/encoding/protowire"
 	"google.golang.org/protobuf/proto"
 )
 
@@ -83,39 +84,145 @@ type StopEvent struct {
 }
 
 // Decode parses a raw GTFS-RT FeedMessage protobuf payload.
-func Decode(raw []byte) (*Feed, error) {
-	msg := &gtfs.FeedMessage{}
-	if err := proto.Unmarshal(raw, msg); err != nil {
-		return nil, fmt.Errorf("gtfsrt: unmarshal feed message: %w", err)
-	}
+// Field numbers of FeedMessage, needed because the snapshot is walked entity
+// by entity instead of being unmarshalled in one piece (see WalkTripUpdates).
+const (
+	fieldHeader = 1
+	fieldEntity = 2
+)
 
-	feed := &Feed{Timestamp: msg.GetHeader().GetTimestamp()}
-	for _, entity := range msg.GetEntity() {
-		tu := entity.GetTripUpdate()
-		if tu == nil {
-			continue
-		}
-		feed.StopEvents = append(feed.StopEvents, stopEventsFromTripUpdate(tu)...)
+// Decode unmarshals a whole snapshot into memory. Convenient for tests and
+// small payloads; the collector uses WalkTripUpdates instead, because a real
+// nationwide snapshot is around 40 MB and materialising all of it at once
+// costs several hundred MB of heap (BPULS-059).
+func Decode(raw []byte) (*Feed, error) {
+	ts, err := DecodeTimestamp(raw)
+	if err != nil {
+		return nil, err
+	}
+	feed := &Feed{Timestamp: ts}
+	err = WalkTripUpdates(raw, func(events []StopEvent) error {
+		feed.StopEvents = append(feed.StopEvents, events...)
+		return nil
+	})
+	if err != nil {
+		return nil, err
 	}
 	return feed, nil
 }
 
-func stopEventsFromTripUpdate(tu *gtfs.TripUpdate) []StopEvent {
+// DecodeTimestamp reads only header.timestamp, skipping over the entity
+// payload without decoding it. The header is normally the first field on the
+// wire, but nothing guarantees that, so it gets its own cheap pass rather
+// than an assumption.
+func DecodeTimestamp(raw []byte) (uint64, error) {
+	var ts uint64
+	err := walkFields(raw, func(num protowire.Number, payload []byte) error {
+		if num != fieldHeader {
+			return nil
+		}
+		header := &gtfs.FeedHeader{}
+		if err := proto.Unmarshal(payload, header); err != nil {
+			return fmt.Errorf("unmarshal feed header: %w", err)
+		}
+		ts = header.GetTimestamp()
+		return nil
+	})
+	if err != nil {
+		return 0, fmt.Errorf("gtfsrt: %w", err)
+	}
+	return ts, nil
+}
+
+// WalkTripUpdates calls fn once per TripUpdate entity, with that trip's stop
+// events. Entities that carry no TripUpdate — roughly half of every snapshot
+// is Alerts (Bahnpuls_Datenquellen) — never reach the caller and are never
+// converted.
+//
+// The slice handed to fn is reused between calls: copy what you keep, never
+// retain it. That reuse is the whole point — it lets the collector filter to
+// its target area (~4 % of stop events) while only one trip is in memory at
+// a time, instead of building the nationwide list first (BPULS-059).
+//
+// Returns the number of TripUpdate entities seen, whether or not fn kept them.
+func WalkTripUpdates(raw []byte, fn func(events []StopEvent) error) error {
+	entity := &gtfs.FeedEntity{}
+	var events []StopEvent
+
+	err := walkFields(raw, func(num protowire.Number, payload []byte) error {
+		if num != fieldEntity {
+			return nil
+		}
+		// proto.Unmarshal resets entity first, so one instance serves the
+		// whole walk instead of one allocation per entity.
+		if err := proto.Unmarshal(payload, entity); err != nil {
+			return fmt.Errorf("unmarshal feed entity: %w", err)
+		}
+		tu := entity.GetTripUpdate()
+		if tu == nil {
+			return nil
+		}
+		events = appendStopEvents(events[:0], tu)
+		return fn(events)
+	})
+	if err != nil {
+		return fmt.Errorf("gtfsrt: %w", err)
+	}
+	return nil
+}
+
+// walkFields iterates the top-level fields of a protobuf message, handing
+// each length-delimited payload to fn without copying it. Fields of other
+// wire types are skipped, so an added scalar field in a future FeedMessage
+// version does not break the walk.
+func walkFields(raw []byte, fn func(num protowire.Number, payload []byte) error) error {
+	for len(raw) > 0 {
+		num, typ, n := protowire.ConsumeTag(raw)
+		if n < 0 {
+			return fmt.Errorf("read field tag: %w", protowire.ParseError(n))
+		}
+		raw = raw[n:]
+
+		if typ != protowire.BytesType {
+			n = protowire.ConsumeFieldValue(num, typ, raw)
+			if n < 0 {
+				return fmt.Errorf("skip field %d: %w", num, protowire.ParseError(n))
+			}
+			raw = raw[n:]
+			continue
+		}
+
+		payload, n := protowire.ConsumeBytes(raw)
+		if n < 0 {
+			return fmt.Errorf("read field %d: %w", num, protowire.ParseError(n))
+		}
+		raw = raw[n:]
+
+		if err := fn(num, payload); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+// appendStopEvents appends one trip's stop events to dst and returns it, so
+// the caller can keep reusing one buffer across entities.
+func appendStopEvents(dst []StopEvent, tu *gtfs.TripUpdate) []StopEvent {
 	trip := tu.GetTrip()
 	tripSchedRel := ScheduleRelationship(trip.GetScheduleRelationship().String())
 
 	updates := tu.GetStopTimeUpdate()
 	if len(updates) == 0 {
-		return []StopEvent{{
+		return append(dst, StopEvent{
 			TripID:                   trip.GetTripId(),
 			StartDate:                trip.GetStartDate(),
 			RouteID:                  trip.GetRouteId(),
 			TripScheduleRelationship: tripSchedRel,
 			IsTripLevelOnly:          true,
-		}}
+		})
 	}
 
-	events := make([]StopEvent, 0, len(updates))
+	events := dst
 	for _, stu := range updates {
 		ev := StopEvent{
 			TripID:                   trip.GetTripId(),

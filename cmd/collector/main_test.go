@@ -14,31 +14,6 @@ import (
 	"bahnpuls/internal/scope"
 )
 
-func TestGroupByTrip(t *testing.T) {
-	events := []gtfsrt.StopEvent{
-		{TripID: "1", StartDate: "20260810", StopID: "A"},
-		{TripID: "1", StartDate: "20260810", StopID: "B"},
-		{TripID: "2", StartDate: "20260810", StopID: "C"},
-		// Same trip_id, different Betriebstag: a different trip instance.
-		{TripID: "1", StartDate: "20260811", StopID: "D"},
-	}
-
-	trips := groupByTrip(events)
-
-	if len(trips) != 3 {
-		t.Fatalf("len(trips) = %d, want 3", len(trips))
-	}
-	if got := trips[tripKey{"1", "20260810"}]; len(got) != 2 {
-		t.Errorf("trip 1/20260810 has %d events, want 2", len(got))
-	}
-	if got := trips[tripKey{"2", "20260810"}]; len(got) != 1 {
-		t.Errorf("trip 2/20260810 has %d events, want 1", len(got))
-	}
-	if got := trips[tripKey{"1", "20260811"}]; len(got) != 1 {
-		t.Errorf("trip 1/20260811 has %d events, want 1", len(got))
-	}
-}
-
 func testScopeFilter(t *testing.T) *scope.Filter {
 	t.Helper()
 	path := filepath.Join(t.TempDir(), "scope.csv")

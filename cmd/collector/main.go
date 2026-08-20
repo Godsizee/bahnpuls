@@ -136,7 +136,7 @@ func poll(ctx context.Context, client *http.Client, feedURL string, scopeFilter 
 		return
 	}
 
-	feed, err := gtfsrt.Decode(raw)
+	feedTimestamp, err := gtfsrt.DecodeTimestamp(raw)
 	if err != nil {
 		hb.Err = err.Error()
 		log.Printf("collector: decode failed: %v", err)
@@ -145,8 +145,8 @@ func poll(ctx context.Context, client *http.Client, feedURL string, scopeFilter 
 		}
 		return
 	}
-	hb.FeedTimestamp = feed.Timestamp
-	hb.FeedAgeSec = int64(health.FeedAge(feed.Timestamp, now).Seconds())
+	hb.FeedTimestamp = feedTimestamp
+	hb.FeedAgeSec = int64(health.FeedAge(feedTimestamp, now).Seconds())
 
 	// Nur nach einem erfolgreichen Decode: Generationen zaehlen Beobachtungen,
 	// nicht Wanduhrzeit -- ein Feed-Ausfall darf keine laufenden Fahrten
@@ -155,20 +155,35 @@ func poll(ctx context.Context, client *http.Client, feedURL string, scopeFilter 
 		log.Printf("collector: dedup forgot %d keys absent for %s", evicted, dedupIdleWindow)
 	}
 
-	trips := groupByTrip(feed.StopEvents)
-	hb.EntityCount = len(trips)
-
-	for _, events := range trips {
+	// Entity fuer Entity statt erst die ganze Momentaufnahme aufbauen: die
+	// Datei ist rund 40 MB, davon bleiben nach dem Scope-Filter ~4 % uebrig
+	// (BPULS-059). Eine Fahrt steckt dabei immer in genau einer Entity --
+	// am 2026-08-20 gegen den echten Feed nachgezaehlt: 0 von 82.246 Fahrten
+	// verteilten sich auf mehrere. Sollte sich das aendern, wuerde ein
+	// aufgeteilter Trip stueckweise gefiltert, und ein Stueck ohne Halt im
+	// Gebiet fiele heraus -- deshalb steht die Zahl hier und nicht nur im
+	// Backlog.
+	err = gtfsrt.WalkTripUpdates(raw, func(events []gtfsrt.StopEvent) error {
+		hb.EntityCount++
 		if !tripInScope(scopeFilter, events) {
-			continue
+			return nil
 		}
 		hb.InScopeCount++
 		for _, ev := range events {
 			if tracker.Changed(ev) {
 				hb.ChangedCount++
-				w.Add(writer.RowFromStopEvent(ev, feed.Timestamp, now))
+				w.Add(writer.RowFromStopEvent(ev, feedTimestamp, now))
 			}
 		}
+		return nil
+	})
+	if err != nil {
+		hb.Err = err.Error()
+		log.Printf("collector: decode failed: %v", err)
+		if werr := hbWriter.Write(hb); werr != nil {
+			log.Printf("collector: write heartbeat failed: %v", werr)
+		}
+		return
 	}
 
 	hb.TrackedKeys = tracker.Len()
@@ -178,21 +193,6 @@ func poll(ctx context.Context, client *http.Client, feedURL string, scopeFilter 
 	}
 	log.Printf("collector: poll ok — %d trips, %d in scope, %d changed, feed age %ds, buffer %d rows, %d keys tracked",
 		hb.EntityCount, hb.InScopeCount, hb.ChangedCount, hb.FeedAgeSec, w.Len(), hb.TrackedKeys)
-}
-
-// tripKey groups a flat StopEvent list back into per-trip-instance batches.
-type tripKey struct {
-	tripID    string
-	startDate string
-}
-
-func groupByTrip(events []gtfsrt.StopEvent) map[tripKey][]gtfsrt.StopEvent {
-	trips := make(map[tripKey][]gtfsrt.StopEvent)
-	for _, ev := range events {
-		k := tripKey{tripID: ev.TripID, startDate: ev.StartDate}
-		trips[k] = append(trips[k], ev)
-	}
-	return trips
 }
 
 // tripInScope decides whether a trip's events should be kept. A trip with no
