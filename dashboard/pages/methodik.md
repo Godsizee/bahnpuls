@@ -66,11 +66,11 @@ Betroffen sind vier Fälle:
 - **Unvollständige Meldungen.** Wird nur die Ankunft gemeldet, ist der Haltezeitanteil
   an diesem Halt nicht bestimmbar — und der Laufzeitanteil des Folgeabschnitts ebenfalls,
   weil er gegen die fehlende Abfahrtsverspätung rechnen müsste.
+- **Halte in der Stunde der Zeitumstellung**, siehe nächster Abschnitt.
 
 Davon zu unterscheiden ist der planmäßige Fall: Am Startbahnhof gibt es keine Ankunft, am
 Endbahnhof keine Abfahrt. Dort wird kein Haltezeitanteil ausgewiesen, weil es keinen gibt
 — das ist kein fehlender Messwert und wird auch nicht als solcher gekennzeichnet.
-- **Halte in der Stunde der Zeitumstellung**, siehe nächster Abschnitt.
 
 In den Diagrammen erscheinen solche Beiträge deshalb gar nicht, statt als Nulllinie.
 
@@ -87,6 +87,33 @@ löst sie nicht auf, weil sie für beide Werte denselben Durchgang wählt. Bahnp
 korrigiert die betroffenen Halte deshalb nicht, sondern **markiert sie und nimmt sie aus
 jeder Kennzahl heraus**. Betroffen sind zwei Nächte im Jahr. Wo ein solcher Halt in einem
 Laufweg vorkommt, entfällt zusätzlich der Laufzeitanteil des Folgeabschnitts.
+
+## Abdeckung — worauf diese Zahlen stehen
+
+Jede Aussage über Pünktlichkeit ist nur so viel wert wie der Beleg, dass die Datenbasis
+vollständig war. Deshalb wird je Betriebstag mitgeführt, **wie viele Halt-Ereignisse
+überhaupt einen Ist-Wert hatten** und aus welchem Grund die übrigen keinen haben.
+
+Die Abdeckungsquote zählt ausschließlich Ereignisse, die der Fahrplan vorsieht. Der
+Startbahnhof geht nicht als fehlende Ankunft in den Nenner ein — sonst sänke die Quote
+allein dadurch, dass ein Tag mehr kurze Läufe enthält, ohne dass ein einziger Messwert
+fehlte.
+
+Die Gründe für einen fehlenden Wert werden **einzeln ausgewiesen und nie addiert**. Sie
+können gleichzeitig zutreffen: ein Zug kann ausfallen und dabei in der Umstellungsstunde
+liegen. Eine Summe dieser Spalten wäre eine Doppelzählung.
+
+Vier Gründe werden unterschieden — ausgefallener Zug, ausgelassener Halt, Halt in der
+Umstellungsstunde, und schließlich der Fall, der die anderen drei nicht erklärt: der Halt
+stand im Fahrplan, fiel nicht aus, wurde nicht ausgelassen, lag nicht in der
+Umstellungsstunde — und trotzdem kam keine Ist-Meldung. Das ist die Zahl, die eine echte
+Lücke in der Datenquelle anzeigt, und die einzige, bei der ein Anstieg ein Problem der
+Erhebung bedeutet und nicht des Betriebs.
+
+Was hier noch **nicht** erfasst ist: Lücken in der Sammlung der deutschen Echtzeitdaten
+selbst, also Zeiträume, in denen kein Abruf zustande kam. Die sind aus den Ist-Daten
+nicht sichtbar; sie werden ergänzt, sobald die deutsche Quelle angeschlossen ist. Bis
+dahin gilt die Abdeckung ausdrücklich nur für das, was in der Quelle stand.
 
 ## Normierung je Zug
 

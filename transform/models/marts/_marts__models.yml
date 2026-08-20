@@ -156,3 +156,58 @@ models:
               - quelle
               - von_stop_id
               - nach_stop_id
+
+  - name: mart_datenqualitaet
+    description: >
+      Abdeckungsprotokoll je Betriebstag und Quelle (BPULS-024). Belegt, worauf die
+      übrigen Kennzahlen stehen: wie viele Halt-Ereignisse einen Ist-Wert hatten und
+      aus welchem Grund die übrigen keinen haben. Die Gründe überschneiden sich
+      bewusst und werden nie addiert. Nenner sind ausschließlich planmäßig vorhandene
+      Ereignisse — am Startbahnhof gibt es keine Ankunft, am Endbahnhof keine
+      Abfahrt, und das ist keine Datenlücke. **Feed-Lücken der GTFS-RT-Sammlung
+      fehlen noch**, sie kommen mit stg_de_gtfsrt (BPULS-030).
+    columns:
+      - name: betriebstag
+        description: Partitionsschlüssel des inkrementellen Laufs. Ein Betriebstag je Zeile und Quelle.
+        tests:
+          - not_null
+      - name: quelle
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['ch_istdaten']
+      - name: fahrten
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 1
+      - name: halte
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 1
+      - name: abdeckung_an
+        description: >
+          Anteil der Halte mit planmäßiger Ankunft, für die eine Ankunftsverspätung
+          bestimmbar war. NULL, wenn an diesem Tag kein Halt eine planmäßige Ankunft
+          hatte — das ist keine Abdeckung von 0.
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1
+      - name: abdeckung_ab
+        description: Dasselbe für die Abfahrt.
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: ['betriebstag', 'quelle']
+
