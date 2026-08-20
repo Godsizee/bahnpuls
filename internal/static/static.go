@@ -96,6 +96,15 @@ func Laden(ctx context.Context, client *http.Client, baseDir, version string, fe
 	if err != nil {
 		return "", fmt.Errorf("static: temporaeres verzeichnis: %w", err)
 	}
+	// MkdirTemp legt mit 0700 an, und os.Rename behaelt das bei -- die fertige
+	// Version waere damit nur fuer den schreibenden Nutzer lesbar. Das faellt hier
+	// nicht auf, sondern erst nebenan: der Collector schreibt als root, das
+	// Dashboard liest als node und sah "keine Dateien gefunden", obwohl die Dateien
+	// da waren. Wer schreiben darf, ist eine andere Frage als wer lesen darf.
+	if err := os.Chmod(tmp, 0o755); err != nil {
+		os.RemoveAll(tmp)
+		return "", fmt.Errorf("static: rechte am temporaeren verzeichnis: %w", err)
+	}
 	erfolgreich := false
 	defer func() {
 		if !erfolgreich {

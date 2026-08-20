@@ -9,6 +9,7 @@ import (
 	"net/http/httptest"
 	"os"
 	"path/filepath"
+	"runtime"
 	"testing"
 	"time"
 )
@@ -164,5 +165,32 @@ func TestLaden_ArchiveintragKannNichtAusbrechen(t *testing.T) {
 	}
 	if _, err := os.Stat(filepath.Join(ziel, "rv", "stops.txt")); err != nil {
 		t.Errorf("Eintrag landete nicht im Ziel: %v", err)
+	}
+}
+
+func TestLaden_VersionIstLesbarFuerAndere(t *testing.T) {
+	// Der schreibende Prozess laeuft als root, der lesende als node. Legt die
+	// Version mit 0700 an -- so tut es os.MkdirTemp von sich aus --, sieht der
+	// Leser ein leeres Verzeichnis statt einer Fehlermeldung. Genau so ist es in
+	// Produktion passiert (2026-08-20).
+	if runtime.GOOS == "windows" {
+		t.Skip("Unix-Dateirechte auf Windows nicht aussagekraeftig")
+	}
+
+	srv, _ := testServer(t, testArchiv(t, map[string]string{"stops.txt": "stop_id,stop_name"}))
+	basis := t.TempDir()
+
+	ziel, err := Laden(context.Background(), srv.Client(), basis, "2026-08-20",
+		[]Feed{{Name: "rv", URL: srv.URL}}, StandardDateien())
+	if err != nil {
+		t.Fatalf("Laden: %v", err)
+	}
+
+	info, err := os.Stat(ziel)
+	if err != nil {
+		t.Fatalf("Stat: %v", err)
+	}
+	if info.Mode().Perm()&0o055 == 0 {
+		t.Errorf("Version hat Rechte %v -- fuer andere weder lesbar noch betretbar", info.Mode().Perm())
 	}
 }
