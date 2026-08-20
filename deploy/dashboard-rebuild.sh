@@ -21,10 +21,13 @@ else
 	# Kein Abbruch: die vorhandene Seite ist besser als keine. Der Task meldet den
 	# Fehler trotzdem als Befund, damit er nicht untergeht.
 	echo "rebuild: BEFUND -- dbt meldete Fehler, Seite behaelt den alten Datenstand"
-	cd /app/dashboard && npm run build >/dev/null 2>&1 || true
+	cd /app/dashboard && npm run sources >/dev/null 2>&1 || true
+	npm run build >/dev/null 2>&1 || true
 	exit 1
 fi
 
 cd /app/dashboard
+# Erst die Quellen, dann die Seite -- `evidence build` frischt die Daten nicht auf.
+npm run sources >/dev/null
 npm run build >/dev/null
 echo "rebuild: seite neu gebaut"

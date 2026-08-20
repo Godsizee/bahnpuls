@@ -27,8 +27,14 @@ if ! /opt/venv/bin/dbt build --full-refresh --vars "$VARS"; then
 	echo "dashboard: dbt meldete Fehler -- Seite wird mit dem vorhandenen Stand gebaut"
 fi
 
-echo "dashboard: evidence build"
+echo "dashboard: evidence sources"
 cd /app/dashboard
+# Muss ausdruecklich laufen: `evidence build` erzeugt die Quelldateien **nicht** neu.
+# Ohne diesen Schritt baut die Seite fehlerfrei und ist trotzdem leer -- im Browser als
+# "No sources found" und DuckDB-WASM-Timeout sichtbar, von aussen als HTTP 200.
+npm run sources
+
+echo "dashboard: evidence build"
 npm run build
 
 echo "dashboard: serving on :3000"
