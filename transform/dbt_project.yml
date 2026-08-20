@@ -25,5 +25,9 @@ models:
       +materialized: view
     intermediate:
       +materialized: table
-    # marts-Konfiguration folgt mit dem ersten Mart-Modell (BPULS-016, dann
-    # incremental) -- dbt warnt sonst vor unbenutzten Config-Pfaden.
+    marts:
+      # Ab dem ersten Mart inkrementell, nicht erst wenn es weh tut (BPULS-016,
+      # CLAUDE.md Regel 10): ein naechtlicher Vollaufbau waechst linear mit der
+      # Historie. delete+insert ersetzt ganze Betriebstags-Partitionen.
+      +materialized: incremental
+      +incremental_strategy: delete+insert

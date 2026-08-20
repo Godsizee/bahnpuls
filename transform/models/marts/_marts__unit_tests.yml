@@ -1,0 +1,83 @@
+unit_tests:
+
+  # Dieser Fall kommt in echten Daten an zwei Nächten im Jahr vor und lässt sich
+  # nicht auf Zuruf herstellen — genau deshalb ein Unit-Test und kein Data-Test:
+  # ein Halt in der Umstellungsstunde entwertet nicht nur sich selbst, sondern auch
+  # den Laufzeitanteil des Folgehalts, der gegen seine Abfahrtsverspätung rechnet.
+  # Ohne diese Prüfung sieht die Folgezeile sauber aus und trägt trotzdem einen um
+  # bis zu 3.600 s verschobenen Wert.
+  - name: mart_zuglauf_entwertet_umstellungshalt_und_folgehalt
+    model: mart_zuglauf
+    overrides:
+      macros:
+        # Ohne diesen Override würde der Unit-Test den inkrementellen Zweig
+        # kompilieren und gegen die reale Tabelle statt gegen die Fixture laufen.
+        is_incremental: false
+    given:
+      - input: ref('int_segment_delta')
+        rows:
+          # Rücksprungnacht: die lokale Stunde 02:00–02:59 existiert zweimal.
+          - {betriebstag: "2026-10-25", trip_key: "t1", quelle: "ch_istdaten", nach_stop_sequence: 1,
+             abschnitt_direkt: null, soll_an: null, soll_ab: "2026-10-25 01:30:00",
+             delay_an_sek: null, delay_ab_sek: 60, laufzeit_delta_sek: null, haltezeit_delta_sek: null,
+             halt_ausgelassen: false, zug_ausgefallen: false, ist_endgueltig: true}
+          - {betriebstag: "2026-10-25", trip_key: "t1", quelle: "ch_istdaten", nach_stop_sequence: 2,
+             abschnitt_direkt: true, soll_an: "2026-10-25 02:10:00", soll_ab: "2026-10-25 02:15:00",
+             delay_an_sek: 300, delay_ab_sek: 240, laufzeit_delta_sek: 240, haltezeit_delta_sek: -60,
+             halt_ausgelassen: false, zug_ausgefallen: false, ist_endgueltig: true}
+          - {betriebstag: "2026-10-25", trip_key: "t1", quelle: "ch_istdaten", nach_stop_sequence: 3,
+             abschnitt_direkt: true, soll_an: "2026-10-25 03:00:00", soll_ab: "2026-10-25 03:05:00",
+             delay_an_sek: 120, delay_ab_sek: 100, laufzeit_delta_sek: -120, haltezeit_delta_sek: -20,
+             halt_ausgelassen: false, zug_ausgefallen: false, ist_endgueltig: true}
+          # Frühjahr: die lokale Stunde 02:00–02:59 existiert gar nicht. Gleiche
+          # Behandlung, andere Ursache.
+          - {betriebstag: "2026-03-29", trip_key: "t2", quelle: "ch_istdaten", nach_stop_sequence: 1,
+             abschnitt_direkt: null, soll_an: null, soll_ab: "2026-03-29 02:40:00",
+             delay_an_sek: null, delay_ab_sek: 90, laufzeit_delta_sek: null, haltezeit_delta_sek: null,
+             halt_ausgelassen: false, zug_ausgefallen: false, ist_endgueltig: true}
+          # Kontrolle: derselbe Betriebstag, aber außerhalb der Umstellungsstunde —
+          # hier darf nichts entwertet werden.
+          - {betriebstag: "2026-03-29", trip_key: "t2", quelle: "ch_istdaten", nach_stop_sequence: 2,
+             abschnitt_direkt: true, soll_an: "2026-03-29 04:10:00", soll_ab: "2026-03-29 04:12:00",
+             delay_an_sek: 150, delay_ab_sek: 140, laufzeit_delta_sek: 60, haltezeit_delta_sek: -10,
+             halt_ausgelassen: false, zug_ausgefallen: false, ist_endgueltig: true}
+    expect:
+      rows:
+        - {trip_key: "t1", halt_nr: 1, delay_ab_sek: 60, laufzeit_delta_sek: null,
+           haltezeit_delta_sek: null, zeitumstellung_mehrdeutig: false}
+        - {trip_key: "t1", halt_nr: 2, delay_ab_sek: null, laufzeit_delta_sek: null,
+           haltezeit_delta_sek: null, zeitumstellung_mehrdeutig: true}
+        # Der springende Punkt: eigene Werte bleiben, der Laufzeitanteil nicht.
+        - {trip_key: "t1", halt_nr: 3, delay_ab_sek: 100, laufzeit_delta_sek: null,
+           haltezeit_delta_sek: -20, zeitumstellung_mehrdeutig: false}
+        - {trip_key: "t2", halt_nr: 1, delay_ab_sek: null, laufzeit_delta_sek: null,
+           haltezeit_delta_sek: null, zeitumstellung_mehrdeutig: true}
+        - {trip_key: "t2", halt_nr: 2, delay_ab_sek: 140, laufzeit_delta_sek: null,
+           haltezeit_delta_sek: -10, zeitumstellung_mehrdeutig: false}
+
+  # Ein Ausfall darf die Kennzahl nicht rechnerisch verbessern (CLAUDE.md Regel 8).
+  # Die Prüfung gehört auf die Aggregatsicht, weil dort der Nenner entsteht: der
+  # ausgefallene Zug zählt bei `zuege` mit, bei `laufzeit_messwerte` nicht.
+  - name: mart_verspaetungsentstehung_ausfall_nicht_im_nenner
+    model: mart_verspaetungsentstehung
+    overrides:
+      macros:
+        is_incremental: false
+    given:
+      - input: ref('mart_zuglauf')
+        rows:
+          - {betriebstag: "2026-08-11", quelle: "ch_istdaten", trip_key: "a", halt_nr: 2,
+             abschnitt_direkt: true, von_stop_id: "A", von_stop_name: "A", stop_id: "B", stop_name: "B",
+             laufzeit_delta_sek: 300, haltezeit_delta_sek: 60,
+             zug_ausgefallen: false, halt_ausgelassen: false, zeitumstellung_mehrdeutig: false}
+          - {betriebstag: "2026-08-11", quelle: "ch_istdaten", trip_key: "b", halt_nr: 2,
+             abschnitt_direkt: true, von_stop_id: "A", von_stop_name: "A", stop_id: "B", stop_name: "B",
+             laufzeit_delta_sek: null, haltezeit_delta_sek: null,
+             zug_ausgefallen: true, halt_ausgelassen: false, zeitumstellung_mehrdeutig: false}
+    expect:
+      rows:
+        # 300/1, nicht 300/2 — der ausgefallene Zug ist sichtbar (zuege,
+        # ausgefallene_halte), aber nicht Teil des Durchschnitts.
+        - {betriebstag: "2026-08-11", von_stop_id: "A", nach_stop_id: "B", zuege: 2,
+           laufzeit_delta_sek_summe: 300, laufzeit_messwerte: 1, laufzeit_delta_sek_je_zug: 300.0,
+           ausgefallene_halte: 1, ausgelassene_halte: 0, halte_zeitumstellung: 0}

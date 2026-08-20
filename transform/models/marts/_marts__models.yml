@@ -1,0 +1,158 @@
+version: 2
+
+models:
+  - name: mart_zuglauf
+    description: >
+      A1 in der Detailsicht — eine Zeile je Halt-Ereignis einer Fahrt, aus der sich
+      der Wasserfall eines Laufwegs lesen lässt. Einzige Quelle des Dashboards für
+      Einzelfahrten (CLAUDE.md Regel 11). Alle Verspätungswerte in Sekunden, positiv
+      = zu spät. NULL heißt durchgehend "nicht bestimmbar", nie 0 — das betrifft
+      Ausfälle, ausgelassene Halte und Halte in der Umstellungsstunde.
+    columns:
+      - name: betriebstag
+        description: Betriebstag, nicht Kalendertag. Partitionsschlüssel des inkrementellen Laufs.
+        tests:
+          - not_null
+      - name: trip_key
+        tests:
+          - not_null
+      - name: halt_nr
+        description: Position im Laufweg, ab 1 (entspricht stop_sequence der Faktentabelle).
+        tests:
+          - not_null
+      - name: quelle
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['ch_istdaten']
+      - name: delay_an_sek
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: -3600
+                max_value: 86400
+                inclusive: true
+      - name: delay_ab_sek
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: -3600
+                max_value: 86400
+                inclusive: true
+      - name: laufzeit_delta_sek
+        description: >
+          Was auf dem Abschnitt vom Vorhalt hierher entstanden ist. Negativ =
+          Pufferabbau (A2), kein Fehler. NULL am ersten Halt und überall dort, wo
+          eine der beiden Verspätungen nicht bestimmbar ist — auch dann, wenn nur
+          der Vorhalt in der Umstellungsstunde liegt.
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: -86400
+                max_value: 86400
+                inclusive: true
+      - name: haltezeit_delta_sek
+        description: Was während des Halts entstanden ist. NULL, wo eine der beiden Zeiten fehlt.
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: -86400
+                max_value: 86400
+                inclusive: true
+      - name: zeitumstellung_mehrdeutig
+        description: >
+          Soll-Zeit liegt in der Stunde der Zeitumstellung; die Verspätung kann um
+          genau 3.600 s danebenliegen und ist nicht rekonstruierbar (BPULS-013).
+          Die Zeile bleibt stehen, damit der Laufweg lückenlos lesbar ist, trägt aber
+          keine Kennzahl. Gehört auf die Methodik-Seite und in mart_datenqualitaet.
+        tests:
+          - not_null
+      - name: halt_ausgelassen
+        tests:
+          - not_null
+      - name: zug_ausgefallen
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - trip_key
+              - halt_nr
+
+  - name: mart_verspaetungsentstehung
+    description: >
+      A1 aggregiert — Laufzeit- und Haltezeitanteil je Betriebstag und Abschnitt
+      (von → nach). Enthält nur direkte Abschnitte; der Startbahnhof jeder Fahrt hat
+      keinen Vorhalt und ist deshalb nicht enthalten. Summe und Zähler stehen
+      nebeneinander, damit über mehrere Tage korrekt weiteraggregiert werden kann.
+    columns:
+      - name: betriebstag
+        tests:
+          - not_null
+      - name: quelle
+        tests:
+          - not_null
+      - name: zuege
+        description: Zahl unterschiedlicher Fahrten über diesen Abschnitt an diesem Betriebstag.
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 1
+                inclusive: true
+      - name: laufzeit_messwerte
+        description: >
+          Zahl der Fahrten, für die der Laufzeitanteil bestimmbar war — Nenner der
+          je-Zug-Kennzahl. Kleiner als `zuege`, wenn Ausfälle, ausgelassene Halte
+          oder Umstellungshalte darunter sind.
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                inclusive: true
+      - name: haltezeit_messwerte
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                inclusive: true
+      - name: laufzeit_delta_sek_je_zug
+        description: >
+          Summe/Zähler, nur für die Ein-Tages-Sicht. Über mehrere Tage nicht mitteln,
+          sondern aus laufzeit_delta_sek_summe und laufzeit_messwerte neu rechnen.
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: -86400
+                max_value: 86400
+                inclusive: true
+      - name: haltezeit_delta_sek_je_zug
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: -86400
+                max_value: 86400
+                inclusive: true
+      - name: ausgefallene_halte
+        description: Danebengestellt, nie eingerechnet (CLAUDE.md Regel 8).
+        tests:
+          - not_null
+      - name: ausgelassene_halte
+        tests:
+          - not_null
+      - name: halte_zeitumstellung
+        description: Halte, die wegen der Umstellungsstunde in keine Kennzahl eingeflossen sind.
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns:
+              - betriebstag
+              - quelle
+              - von_stop_id
+              - nach_stop_id

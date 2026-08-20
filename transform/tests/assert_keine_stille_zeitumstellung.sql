@@ -31,13 +31,13 @@ with halt_zeiten as (
 
 ),
 
-umstellungstage as (
+umstellungshalte as (
 
-    select
-        *,
-        cast(zeit as date) as tag
+    select *
     from halt_zeiten
-    where month(zeit) in (3, 10)
+    -- Definition liegt im Makro, weil die Marts genau dieselben Halte ausschliessen
+    -- muessen (BPULS-013). Zwei Formulierungen wuerden auseinanderlaufen.
+    where {{ ist_umstellungszeit('zeit') }}
 
 )
 
@@ -46,11 +46,7 @@ select
     stop_sequence,
     quelle,
     zeit,
-    case when month(tag) = 3 then 'uebersprungene Stunde'
+    case when month(zeit) = 3 then 'uebersprungene Stunde'
          else 'doppelte Stunde' end as umstellungsart
 
-from umstellungstage
--- letzter Sonntag des Monats: Sonntag, dessen Datum + 7 Tage im Folgemonat liegt
-where dayofweek(tag) = 0
-  and month(tag + interval 7 day) != month(tag)
-  and hour(zeit) = 2
+from umstellungshalte

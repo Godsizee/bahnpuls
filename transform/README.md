@@ -126,3 +126,40 @@ Unit-Tests **nicht möglich**: dbt muss für eine gemockte Eingabe die Spalten d
 Relation introspizieren, und die Quelle ist über `external_location` nur ein
 `read_csv`-Ausdruck, keine Relation. Diese Ebene wird deshalb über die Fixture-Dateien
 abgedeckt.
+
+## Stand BPULS-016
+
+Erste Marts, von Anfang an `materialized='incremental'` mit
+`incremental_strategy='delete+insert'` auf `betriebstag` (CLAUDE.md Regel 10). Der
+zuletzt geladene Betriebstag wird bei jedem Lauf neu gebaut (`>=` statt `>`), weil ein
+Betriebstag bis zu 30 h reicht und beim ersten Durchlauf regelmäßig unvollständig ist —
+`delete+insert` räumt ihn vorher weg, sonst stünden Nachtfahrten doppelt da.
+
+- **`mart_zuglauf`** — eine Zeile je Halt-Ereignis, Grundlage der Laufweg-Seite im
+  Dashboard. Existiert als eigener Mart, weil Evidence `int_segment_delta` nicht sehen
+  darf (Regel 11).
+- **`mart_verspaetungsentstehung`** — Laufzeit- und Haltezeitanteil je Betriebstag und
+  Abschnitt. Führt **Summe und Zähler getrennt**, nicht nur den Mittelwert: über mehrere
+  Tage muss aus beiden neu gerechnet werden, ein Mittel von Tagesmitteln gewichtet einen
+  Sonntag wie einen Werktag. Quelle ist bewusst `mart_zuglauf` und nicht
+  `int_segment_delta` — die Entwertungsregeln dürfen nur einmal existieren, sonst zeigen
+  Detail- und Aggregatsicht widersprüchliche Zahlen, ohne dass ein Test anschlägt.
+
+Damit ist die offene Folgeaufgabe aus BPULS-013 erledigt: die Halte aus der
+Umstellungsstunde fließen in **keine** Kennzahl mehr. Die Definition liegt im Makro
+`ist_umstellungszeit` und wird von `assert_keine_stille_zeitumstellung` (meldet sie) und
+den Marts (schließen sie aus) gemeinsam genutzt — zwei Formulierungen wären
+auseinandergelaufen. `assert_marts_ohne_zeitumstellung` prüft das hart.
+
+**Ein Fall, den nur der Unit-Test fängt:** ein Halt in der Umstellungsstunde entwertet
+auch den **Laufzeitanteil des Folgehalts**, der gegen dessen Abfahrtsverspätung rechnet.
+Die Folgezeile sieht sauber aus und trägt trotzdem einen um bis zu 3.600 s verschobenen
+Wert. Die Fixtures decken das nicht ab (dort ist der Folgehalt selbst mehrdeutig) —
+gegengeprüft, indem die Vorhalt-Bedingung testweise entfernt wurde: nur der Unit-Test
+schlug an, kein Data-Test.
+
+Neue Fixture `2026-08-12_istdaten.csv`: drei Fahrten über einen vollständigen Laufweg
+(Basel–Interlaken Ost), zwei davon auf denselben Abschnitten, damit die je-Zug-Normierung
+im Aggregat mit mehr als einer Fahrt rechnet. Enthält Pufferabbau, eine Abfahrt mit
+Prognosestatus ≠ `REAL` (Haltezeitanteil und Folgeabschnitt nicht bestimmbar) und
+Endhalte ohne Abfahrt.
