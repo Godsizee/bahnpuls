@@ -211,17 +211,28 @@ order by tag, stunde;
 
 Daraus die Zahlen, die den Betrieb planbar machen:
 
-Ergebnis des ersten Laufs (2026-08-19 08:03 UTC bis 2026-08-20; 23 volle Stunden
-ausgewertet — `hour=09` enthält den Kaltstart und wird verworfen, verwertbar ab `hour=10`):
+Ergebnis des ersten Laufs, 24 volle Stundenpartitionen (2026-08-19 `hour=10` bis 2026-08-20
+`hour=09`). Verworfen werden `hour=08` — die Flush-Datei des Redeploy-Tests — und `hour=09`
+des ersten Tages, die den Kaltstart enthält:
 
 | Kennzahl | Wert |
 |---|---|
-| Bytes/Tag (ohne Kaltstartstunde) | **offen** — braucht `du -b` auf dem Host, die Coolify-API (4.3.9) hat keinen Exec-Endpoint |
-| Zeilen/Tag | ~2,45 Mio (2.349.734 in 23 h), im Mittel ~102.000/h |
-| Hochrechnung 1 Monat / 1 Jahr | ~74 Mio / ~895 Mio Zeilen; in Bytes offen, s. o. |
-| Freier Plattenplatz danach (`df -h`) | offen, zusammen mit der Byte-Messung |
+| Bytes/Tag (ohne Kaltstartstunde) | **20.297.300 B = 19,4 MiB** |
+| Zeilen/Tag | 2.476.328 (~103.000/h im Mittel) |
+| Bytes/Zeile nach ZSTD | **8,20** |
+| Hochrechnung 1 Monat / 1 Jahr | 0,57 GiB / **6,90 GiB** |
+| Freier Plattenplatz danach (`df -h /data`) | 45,7 GB von 463,9 GB (90 % belegt) → ~6,6 Jahre Reichweite |
 | RSS des Collectors (`docker stats`) | offen — über die API nicht auslesbar (BPULS-028) |
 | Feed-Ausfälle im Log (`fetch failed`) | 57 von 2.901 Versuchen (1,96 %), alle `read body: context deadline exceeded` → BPULS-058 |
+
+**`du -b` zählt 4.096 B je `hour=`-Verzeichnis mit.** Ohne Abzug liegt jede Stunde um diesen
+Betrag zu hoch. Gegenprobe an `date=2026-08-19/hour=08`: 343.847 − 4.096 = 339.751 B, exakt
+die Größe der einen SIGTERM-Flush-Datei aus dem Redeploy-Test.
+
+**Die 7,5 B/Zeile aus dem Kaltstart waren nicht zu optimistisch.** Die Befürchtung, verstreute
+Einzeländerungen komprimierten deutlich schlechter, bestätigt sich nicht: Kaltstartstunde
+8,01 B/Zeile, eingeschwungene Stunden 8,2–8,4. Die daraus abgeleitete Schätzung „realistisch
+60–120 MB/Tag" lag um das Drei- bis Sechsfache daneben.
 
 Die Zeilenzahlen lassen sich **ohne Shell** gewinnen: jede `poll ok`-Zeile trägt den
 Pufferstand, und der Wert unmittelbar vor einem `flushed …`-Eintrag ist der Inhalt genau
