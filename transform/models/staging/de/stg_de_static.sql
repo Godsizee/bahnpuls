@@ -57,8 +57,13 @@ linien as (
     from {{ source('de_static', 'trips') }} as trips
     join {{ source('de_static', 'routes') }} as routes
       on  trips.route_id = routes.route_id
-      and regexp_extract(trips.filename, 'v=([0-9-]+)', 1)
-        = regexp_extract(routes.filename, 'v=([0-9-]+)', 1)
+      -- Version **und** Feed muessen uebereinstimmen. route_id ist je Feed ein eigener
+      -- Namensraum: dieselbe Nummer steht im Regional- und im Fernverkehrsdatensatz fuer
+      -- verschiedene Linien. Ohne den Feed im Join bekam eine Regionalfahrt den Namen
+      -- einer Fernverkehrslinie -- 14.344 Fahrten mit mehrdeutigem Namen, gemeldet vom
+      -- eigenen Test, nicht in den Fixtures aufgefallen (dort waren die IDs zufaellig
+      -- disjunkt).
+      and {{ static_herkunft('trips.filename') }} = {{ static_herkunft('routes.filename') }}
     where trips.trip_id is not null
       and routes.route_short_name is not null
     group by trips.trip_id
