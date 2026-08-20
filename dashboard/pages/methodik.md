@@ -88,6 +88,33 @@ korrigiert die betroffenen Halte deshalb nicht, sondern **markiert sie und nimmt
 jeder Kennzahl heraus**. Betroffen sind zwei Nächte im Jahr. Wo ein solcher Halt in einem
 Laufweg vorkommt, entfällt zusätzlich der Laufzeitanteil des Folgeabschnitts.
 
+## Woher der Ist-Wert bei den deutschen Daten kommt
+
+Die deutsche Quelle liefert keine fertigen Ist-Zeiten, sondern alle 30 Sekunden eine
+Momentaufnahme mit Prognosen. Als Ist gilt daraus **der zeitlich letzte Wert, der bis
+fünf Minuten nach der planmäßigen Zeit gemeldet wurde**. Die fünf Minuten fangen ab, dass
+die letzte Meldung leicht nach dem Ereignis eintrifft; sie sind eine Annahme und
+beeinflussen jede Zahl auf diesen Seiten.
+
+Kommt für einen Halt bis dahin keine Meldung, bleibt der Wert leer — es wird nicht auf
+eine frühere Prognose zurückgegriffen. Eine Prognose von vor zwanzig Minuten ist keine
+Messung.
+
+Zwei Eigenheiten dieser Quelle, die man den Zahlen ansehen kann:
+
+- **Eine Momentaufnahme enthält oft nur einen Teil der Halte einer Fahrt.** Der
+  vollständige Laufweg entsteht erst aus der Zusammenschau vieler Aufnahmen. Fehlt ein
+  Halt in allen, bleibt eine Lücke im Laufweg — sie wird als solche markiert, und
+  Abschnitte über eine Lücke hinweg gehen in keine Auswertung ein.
+- **Die Nummer eines Halts ist die Fahrplannummer, nicht seine Position.** Sie kann bei 0
+  beginnen, und bei einem Zug, der beim Beginn der Beobachtung schon unterwegs war, bei
+  einem beliebigen Wert. Der erste angezeigte Halt einer Fahrt ist deshalb nicht
+  zwangsläufig ihr Startbahnhof.
+
+Stationsnamen und Liniennummern fehlen bei dieser Quelle vorerst: der freie Echtzeit-Feed
+enthält beide nicht. Angezeigt wird die Haltestellen-ID, bis der Fahrplan-Datensatz
+angeschlossen ist.
+
 ## Abdeckung — worauf diese Zahlen stehen
 
 Jede Aussage über Pünktlichkeit ist nur so viel wert wie der Beleg, dass die Datenbasis

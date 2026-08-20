@@ -29,3 +29,30 @@ select
     quelle
 
 from {{ ref('stg_ch_istdaten') }}
+
+union all by name
+
+-- Zweiter Zweig (BPULS-030). Er haengt an int_de_stop_events statt an einem
+-- Staging-Modell, weil GTFS-RT Snapshots liefert und die Verdichtung auf ein
+-- Halt-Ereignis Zustandslogik ist -- die gehoert nicht in den Staging-Layer. Die
+-- Nahtstelle selbst bleibt unveraendert: eine Quelle, ein union-Zweig.
+select
+    betriebstag,
+    trip_key,
+    stop_sequence,
+    stop_id,
+    stop_name,
+    soll_an,
+    soll_ab,
+    ist_an,
+    ist_ab,
+    delay_an_sek,
+    delay_ab_sek,
+    ist_endgueltig,
+    halt_ausgelassen,
+    zug_ausgefallen,
+    route_kurzname,
+    block_id,
+    quelle
+
+from {{ ref('int_de_stop_events') }}

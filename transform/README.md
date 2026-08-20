@@ -163,3 +163,34 @@ Neue Fixture `2026-08-12_istdaten.csv`: drei Fahrten über einen vollständigen 
 im Aggregat mit mehr als einer Fahrt rechnet. Enthält Pufferabbau, eine Abfahrt mit
 Prognosestatus ≠ `REAL` (Haltezeitanteil und Folgeabschnitt nicht bestimmbar) und
 Endhalte ohne Abfahrt.
+
+## Fallstrick: eine neue Quelle braucht `--full-refresh`
+
+Die Marts laden inkrementell und filtern mit `betriebstag >= max(betriebstag)`. Das ist
+richtig für den Normalbetrieb — es lädt vorwärts und baut den Grenztag neu auf — aber es
+lädt **nie rückwärts**.
+
+Kommt eine Quelle mit älteren Betriebstagen dazu, als bereits in der Tabelle stehen,
+passiert deshalb *nichts*, und zwar lautlos: kein Fehler, kein leerer Lauf, die Modelle
+melden Erfolg. Beim Anschluss von `stg_de_gtfsrt` (BPULS-030) trat genau das auf — die
+CH-Fixture der Rücksprungnacht (2026-10-25) stand als `max(betriebstag)` in den Marts und
+schluckte den DE-Tag 2026-08-13 vollständig.
+
+**Regel:** nach dem Anschluss einer Quelle oder beim Nachladen historischer Tage einmal
+
+```bash
+dbt build --full-refresh
+```
+
+Im laufenden Betrieb ist das nicht nötig und auch nicht erwünscht — dort ist genau das
+Vorwärtsladen gewollt.
+
+## Lauf gegen die Fixtures
+
+```bash
+dbt build --vars '{"ch_istdaten_glob": "tests/fixtures/ch/*_istdaten.csv", "de_gtfsrt_glob": "tests/fixtures/de/*.parquet"}'
+```
+
+Erwartung: alle Tests grün bis auf `assert_keine_stille_zeitumstellung`, das mit
+`severity: warn` konfiguriert ist und die Halte der Rücksprungnacht meldet — so gewollt.
+

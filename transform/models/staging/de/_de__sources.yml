@@ -1,0 +1,13 @@
+version: 2
+
+sources:
+  - name: de_raw
+    description: >
+      Rohe GTFS-RT-Momentaufnahmen des eigenen Collectors, Parquet+ZSTD, partitioniert
+      als date=YYYY-MM-DD/hour=HH auf dem Persistent Volume. Eine Zeile = eine
+      **Änderung** an einem stop_time_update, nicht ein Halt: der Collector schreibt
+      nur, was sich gegenüber dem vorigen Poll geändert hat (ADR-003).
+    meta:
+      external_location: "read_parquet('{{ var('de_gtfsrt_glob') }}', union_by_name = true)"
+    tables:
+      - name: stop_events

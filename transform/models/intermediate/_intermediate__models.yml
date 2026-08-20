@@ -48,7 +48,7 @@ models:
           - not_null
           - accepted_values:
               arguments:
-                values: ['ch_istdaten']
+                values: ['ch_istdaten', 'de_gtfsrt']
     tests:
       - dbt_utils.unique_combination_of_columns:
           arguments:
@@ -104,3 +104,34 @@ models:
             combination_of_columns:
               - trip_key
               - nach_stop_sequence
+
+  - name: int_de_stop_events
+    description: >
+      Verdichtet die GTFS-RT-Momentaufnahmen auf ein Halt-Ereignis je Halt und bringt
+      sie auf das fct_stop_events-Schema (BPULS-030). Als Ist gilt der zeitlich letzte
+      Wert, der bis Soll + Karenz gemeldet wurde; die Karenz ist eine Annahme
+      (`de_ist_karenz_minuten`, Standard 5) und steht auf der Methodik-Seite.
+      stop_name, route_kurzname und block_id sind durchgängig NULL — der freie
+      Echtzeit-Feed liefert keinen Stationsnamen, route_id ist zu 100 % leer, und
+      block_id gibt es dort gar nicht.
+    columns:
+      - name: betriebstag
+        tests:
+          - not_null
+      - name: trip_key
+        tests:
+          - not_null
+      - name: stop_sequence
+        tests:
+          - not_null
+      - name: quelle
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['de_gtfsrt']
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: ['trip_key', 'stop_sequence']
+

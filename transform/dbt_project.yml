@@ -18,6 +18,12 @@ vars:
   # Pfad/Glob zu den rohen CH-Ist-Daten-CSVs, siehe Bahnpuls_Datenquellen.md.
   # Relativ zu transform/, wo dbt ausgefuehrt wird.
   ch_istdaten_glob: "../data/ch/*_istdaten.csv"
+  # Pfad/Glob zu den rohen GTFS-RT-Momentaufnahmen des Collectors. Produktiv zeigt er
+  # auf das Persistent Volume (/data/raw), lokal auf das Entwicklungsverzeichnis.
+  de_gtfsrt_glob: "../data/raw/**/*.parquet"
+  # Karenz fuer die Ist-Bestimmung aus GTFS-RT: als Ist gilt der letzte Wert, der bis
+  # Soll + diese Spanne gemeldet wurde. Annahme, siehe Methodik-Seite (BPULS-030).
+  de_ist_karenz_minuten: 5
 
 models:
   bahnpuls:
