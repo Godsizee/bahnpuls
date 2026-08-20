@@ -12,26 +12,80 @@ Wie die Kennzahlen gerechnet werden, steht vollständig auf der [Methodik](/meth
 
 ```sql datenstand
 select
+    quelle,
+    case quelle when 'de_gtfsrt' then 'Deutschland, echt'
+                when 'ch_istdaten' then 'Schweiz, synthetisch'
+                else quelle end                  as herkunft,
     count(distinct betriebstag)                  as betriebstage,
     count(distinct trip_key)                     as fahrten,
     count(*)                                     as halt_ereignisse,
     min(betriebstag)                             as von,
     max(betriebstag)                             as bis
 from bahnpuls.mart_zuglauf
+group by quelle
+order by quelle desc
+```
+
+```sql echt
+select * from ${datenstand} where quelle = 'de_gtfsrt'
 ```
 
 <Alert status=warning>
 
-**Datenstand: synthetische Testdaten.** Die hier gezeigten Zahlen stammen aus
-konstruierten Fixtures, nicht aus echtem Betrieb — sie prüfen die Rechenwege, nicht die
-Wirklichkeit. Die Sammlung eigener Daten läuft seit dem 19.08.2026; das Schweizer
-Ist-Daten-Archiv ist noch nicht eingebunden.
+**Vorschau im Aufbau — zwei Quellen auf sehr unterschiedlichem Grund.** Die deutschen
+Zahlen sind **echt**, aus eigener Mitschrift seit dem 19.08.2026; für Aussagen über
+einzelne Linien oder Bahnhöfe ist die Historie noch zu kurz, und Stationsnamen fehlen,
+solange der Fahrplan-Datensatz nicht angeschlossen ist. Die schweizerischen Zahlen sind
+**synthetisch** und beschreiben keinen realen Betrieb — sie prüfen die Rechenwege. Welche
+Zeile woher stammt, steht überall in der Spalte `quelle`.
 
 </Alert>
 
-<BigValue data={datenstand} value=fahrten title="Fahrten" />
-<BigValue data={datenstand} value=halt_ereignisse title="Halt-Ereignisse" />
-<BigValue data={datenstand} value=betriebstage title="Betriebstage" />
+<BigValue data={echt} value=fahrten title="Fahrten (echt, DE)" />
+<BigValue data={echt} value=halt_ereignisse title="Halt-Ereignisse (echt, DE)" />
+<BigValue data={echt} value=bis title="Daten bis" />
+
+<DataTable data={datenstand} rows=5>
+    <Column id=herkunft title="Quelle" />
+    <Column id=betriebstage title="Betriebstage" />
+    <Column id=fahrten title="Fahrten" />
+    <Column id=halt_ereignisse title="Halt-Ereignisse" />
+    <Column id=von title="von" />
+    <Column id=bis title="bis" />
+</DataTable>
+
+## Worauf diese Zahlen stehen
+
+```sql abdeckung
+select
+    betriebstag,
+    case quelle when 'de_gtfsrt' then 'DE, echt' else 'CH, synthetisch' end as herkunft,
+    halte,
+    round(100 * abdeckung_an, 1) as abdeckung_an_prozent,
+    round(100 * abdeckung_ab, 1) as abdeckung_ab_prozent,
+    halte_ohne_ist_an + halte_ohne_ist_ab as ohne_meldung,
+    ausgefallene_halte,
+    ausgelassene_halte
+from bahnpuls.mart_datenqualitaet
+order by betriebstag desc, quelle
+```
+
+Für wie viele Halte lag überhaupt ein gemessener Wert vor — und wo nicht, aus welchem
+Grund. Ohne diesen Beleg ist jede andere Zahl auf diesen Seiten angreifbar. Die Spalte
+**ohne Meldung** ist die einzige, bei der ein Anstieg ein Problem der Erhebung anzeigt und
+nicht des Betriebs; Ausfälle und ausgelassene Halte sind Betrieb. Die Rechenwege stehen
+auf der [Methodik](/methodik).
+
+<DataTable data={abdeckung} rows=10>
+    <Column id=betriebstag title="Betriebstag" />
+    <Column id=herkunft title="Quelle" />
+    <Column id=halte title="Halte" />
+    <Column id=abdeckung_an_prozent title="Abdeckung an %" fmt='#,##0.0' />
+    <Column id=abdeckung_ab_prozent title="Abdeckung ab %" fmt='#,##0.0' />
+    <Column id=ohne_meldung title="ohne Meldung" />
+    <Column id=ausgefallene_halte title="Ausfälle" />
+    <Column id=ausgelassene_halte title="ausgelassen" />
+</DataTable>
 
 ## Wo entsteht die Verspätung?
 
