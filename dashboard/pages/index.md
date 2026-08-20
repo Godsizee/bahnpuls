@@ -141,9 +141,15 @@ ein Ausreißer schnell dabei.
     <Column id=bahnhof_min title="Im Bahnhof (Min. je Zug)" fmt="#,##0.0" />
 </DataTable>
 
-Wo statt eines Bahnhofsnamens eine Nummer steht, fehlt der Name noch: Der Echtzeit-Feed
-liefert nur Kennnummern, die Namen stammen aus dem Fahrplandatensatz und werden gerade
-erst zugeordnet.
+Wo statt eines Bahnhofsnamens eine Nummer steht, ist der Name schlicht nicht bekannt: Der
+Echtzeit-Feed liefert nur Kennnummern, und der amtliche Fahrplandatensatz vergibt diese
+Nummern bei jeder Neuveröffentlichung anders. Der Echtzeit-Feed benutzt dabei mehrere
+Nummernkreise nebeneinander, ein einzelner Fahrplandatensatz kennt also nur einen Teil
+davon — zurzeit rund ein Drittel.
+
+Deshalb wird jede Woche ein neuer Fahrplandatensatz geholt und **zu den bisherigen
+hinzugefügt**, statt sie zu ersetzen. Mit jeder Woche werden mehr Nummern auflösbar. Wie
+weit das gediehen ist, steht unten in der Spalte „Bahnhofsname bekannt".
 
 ## Wie verlässlich ist das?
 
@@ -155,6 +161,7 @@ select
     round(100 * abdeckung_an, 1) as gemessen_an,
     round(100 * abdeckung_ab, 1) as gemessen_ab,
     halte_ohne_ist_an + halte_ohne_ist_ab as keine_meldung,
+    round(100 * namensquote, 1) as name_bekannt,
     ausgefallene_halte,
     ausgelassene_halte
 from bahnpuls.mart_datenqualitaet
@@ -177,6 +184,7 @@ drei sind Betrieb und gehören zum Bild.
     <Column id=gemessen_an title="Ankunft gemessen %" fmt="#,##0.0" />
     <Column id=gemessen_ab title="Abfahrt gemessen %" fmt="#,##0.0" />
     <Column id=keine_meldung title="keine Meldung" />
+    <Column id=name_bekannt title="Bahnhofsname bekannt %" fmt="#,##0.0" />
     <Column id=ausgefallene_halte title="Ausfälle" />
     <Column id=ausgelassene_halte title="ausgelassen" />
 </DataTable>

@@ -89,6 +89,14 @@ gezaehlt as (
         -- Vorhalt und zaehlt deshalb nicht als Luecke.
         count(*) filter (where halt_nr > 1 and not abschnitt_direkt) as abschnitte_mit_luecke,
 
+        -- Wie viele Halte ueberhaupt einen Namen tragen. Mit einer einzigen
+        -- Fahrplan-Version waren es am 2026-08-20 nur **31,4 %**: der Echtzeit-Feed
+        -- referenziert mehrere stop_id-Namensraeume gleichzeitig, ein Datensatz deckt
+        -- nur einen Teil ab (Q6). Die Quote muss mit jeder woechentlichen Version
+        -- steigen -- diese Spalte ist der Kanal, an dem sich das ablesen laesst, statt
+        -- es zu hoffen.
+        count(stop_name) as halte_mit_name,
+
         -- Nicht endgueltige Werte sind noch in Bewegung: eine Aussage ueber heute
         -- steht auf anderem Grund als eine ueber vorgestern.
         count(*) filter (where not ist_endgueltig) as halte_nicht_endgueltig
@@ -104,6 +112,7 @@ select
     -- planmaessig vorhandenen Ereignisse -- sonst driftet die Quote mit dem Anteil
     -- der Start- und Endbahnhoefe, also mit der Laenge der Laufwege.
     delay_an_messwerte / nullif(halte_mit_soll_an, 0)::double as abdeckung_an,
-    delay_ab_messwerte / nullif(halte_mit_soll_ab, 0)::double as abdeckung_ab
+    delay_ab_messwerte / nullif(halte_mit_soll_ab, 0)::double as abdeckung_ab,
+    halte_mit_name     / nullif(halte, 0)::double            as namensquote
 
 from gezaehlt
