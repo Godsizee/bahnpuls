@@ -1,0 +1,6 @@
+name: bahnpuls
+type: duckdb
+options:
+  # Build-Artefakt aus transform/ (dbt-duckdb), liegt bewusst nicht im Repo.
+  # Vor jedem Dashboard-Build muss dbt gelaufen sein.
+  filename: ../../../data/bahnpuls.duckdb

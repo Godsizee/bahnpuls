@@ -19,6 +19,16 @@
 /transform/logs/
 /transform/.user.yml
 
+# Evidence (dashboard/) -- Abhaengigkeiten und Build-Artefakte. dashboard/.gitignore
+# deckt dasselbe ab; hier zusaetzlich, damit ein versehentliches Entfernen jener Datei
+# nicht 900 npm-Pakete ins Repo zieht (CLAUDE.md Regel 14)
+/dashboard/node_modules/
+/dashboard/build/
+/dashboard/.svelte-kit/
+/dashboard/.evidence/template/
+/dashboard/.evidence/meta/
+/dashboard/static/data/
+
 # Python (dbt-Tooling)
 .venv/
 __pycache__/
