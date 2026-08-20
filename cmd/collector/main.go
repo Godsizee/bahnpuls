@@ -33,8 +33,12 @@ func main() {
 	scopePath := flag.String("scope-config", envOr("BAHNPULS_SCOPE_CONFIG", "config/scope_stops.csv"), "path to the target-area stop-list CSV")
 	dataDir := flag.String("data-dir", envOr("BAHNPULS_DATA_DIR", "data/raw"), "base directory for partitioned Parquet output (Persistent Volume in production)")
 	heartbeatPath := flag.String("heartbeat-path", envOr("BAHNPULS_HEARTBEAT_PATH", "data/heartbeat.json"), "path to the heartbeat status file")
-	pollInterval := flag.Duration("poll-interval", 30*time.Second, "how often to poll the feed")
-	fetchTimeout := flag.Duration("fetch-timeout", 15*time.Second, "per-attempt HTTP timeout")
+	pollInterval := flag.Duration("poll-interval", envDurationOr("BAHNPULS_POLL_INTERVAL", 30*time.Second), "how often to poll the feed")
+	// 15 s waren zu knapp: im 24 h-Lauf liefen 1,96 % der Polls in "read body:
+	// context deadline exceeded", geclustert in den Stunden, in denen der Feed
+	// langsam antwortet -- der Timeout deckt das Lesen des ~2 MB grossen Bodys
+	// mit ab, nicht nur den Verbindungsaufbau (BPULS-058).
+	fetchTimeout := flag.Duration("fetch-timeout", envDurationOr("BAHNPULS_FETCH_TIMEOUT", 25*time.Second), "per-attempt HTTP timeout, covering the response body read")
 	flag.Parse()
 
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
@@ -76,7 +80,13 @@ func main() {
 
 		case <-flushTimer.C:
 			flushBuffer(rawWriter)
-			flushTimer.Reset(time.Hour)
+			// Gegen die naechste Stundengrenze zuruecksetzen, nicht "in einer
+			// Stunde": Flush und Poll teilen sich diesen Loop, ein blockierender
+			// Fetch verschiebt das Feuern nach hinten. Mit time.Hour bliebe die
+			// Verschiebung dauerhaft -- im 24 h-Lauf gemessen: +2 min 57 s, nach
+			// rund 20 Tagen faellt eine hour=-Partition ganz aus (BPULS-057).
+			flushedAt := time.Now().UTC()
+			flushTimer.Reset(nextHourBoundary(flushedAt).Sub(flushedAt))
 		}
 	}
 }
@@ -233,10 +243,33 @@ func flushBuffer(w *writer.Writer) {
 }
 
 // nextHourBoundary returns the next full wall-clock hour after now, so
-// flushes align with the date=/hour= partition scheme instead of drifting
-// with process start time.
+// flushes align with the date=/hour= partition scheme instead of drifting.
+// It is recomputed after every flush, not only at start-up: a fixed one-hour
+// reset would carry each delay forward for good (BPULS-057).
 func nextHourBoundary(now time.Time) time.Time {
 	return now.Truncate(time.Hour).Add(time.Hour)
+}
+
+// envDurationOr reads a duration such as "25s" or "1m" from the environment,
+// falling back to the built-in default. A malformed or non-positive value is
+// logged and ignored instead of fatal: eine vertippte Env-Variable darf den
+// Collector nicht in eine Restart-Schleife schicken, in der jeder Neustart
+// den offenen Stundenpuffer kostet (CLAUDE.md Regel 3).
+func envDurationOr(key string, fallback time.Duration) time.Duration {
+	raw, ok := os.LookupEnv(key)
+	if !ok || raw == "" {
+		return fallback
+	}
+	d, err := time.ParseDuration(raw)
+	if err != nil {
+		log.Printf("collector: ignoring %s=%q, using %s: %v", key, raw, fallback, err)
+		return fallback
+	}
+	if d <= 0 {
+		log.Printf("collector: ignoring %s=%q, using %s: must be positive", key, raw, fallback)
+		return fallback
+	}
+	return d
 }
 
 func envOr(key, fallback string) string {

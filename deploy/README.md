@@ -20,8 +20,15 @@ gemountet ist:
 | `BAHNPULS_DATA_DIR` | `data/raw` | `/data/raw` |
 | `BAHNPULS_HEARTBEAT_PATH` | `data/heartbeat.json` | `/data/heartbeat.json` |
 
-`-poll-interval` und `-fetch-timeout` sind reine Flags (kein Env-Fallback bisher), Default
-30 s bzw. 15 s.
+| `BAHNPULS_POLL_INTERVAL` | `30s` | unverändert |
+| `BAHNPULS_FETCH_TIMEOUT` | `25s` | unverändert |
+
+`-poll-interval` und `-fetch-timeout` gibt es weiterhin als Flags; die Env-Variablen setzen
+nur deren Default, damit sich der Wert in Coolify ändern lässt, ohne das Image neu zu bauen
+(BPULS-058). Angaben im Go-Format (`25s`, `1m30s`). Ein unlesbarer oder nicht positiver Wert
+wird geloggt und ignoriert — der Collector startet trotzdem, statt in eine Restart-Schleife
+zu laufen (Regel 3). Der Fetch-Timeout deckt **das Lesen des Bodys** mit ab, nicht nur den
+Verbindungsaufbau: mit 15 s liefen im ersten 24 h-Lauf 1,96 % der Polls in einen Timeout.
 
 Gesammelt wird **ausschließlich der Scope VRN + RMV** (ADR-008, ADR-010). Der zweite
 Scope-Filter für eine bundesweite Vergleichsmessung wurde am 2026-08-19 wieder ausgebaut —
@@ -193,18 +200,27 @@ order by tag, stunde;
 
 Daraus die Zahlen, die den Betrieb planbar machen:
 
-| Kennzahl                              | Wert |
-|---------------------------------------|------|
-| Bytes/Tag (ohne Kaltstartstunde)      | —    |
-| Zeilen/Tag                            | —    |
-| Hochrechnung 1 Monat / 1 Jahr         | —    |
-| Freier Plattenplatz danach (`df -h`)  | —    |
-| RSS des Collectors (`docker stats`)   | —    |
-| Feed-Ausfälle im Log (`fetch failed`) | —    |
+Ergebnis des ersten Laufs (2026-08-19 08:03 UTC bis 2026-08-20; 23 volle Stunden
+ausgewertet — `hour=09` enthält den Kaltstart und wird verworfen, verwertbar ab `hour=10`):
+
+| Kennzahl | Wert |
+|---|---|
+| Bytes/Tag (ohne Kaltstartstunde) | **offen** — braucht `du -b` auf dem Host, die Coolify-API (4.3.9) hat keinen Exec-Endpoint |
+| Zeilen/Tag | ~2,45 Mio (2.349.734 in 23 h), im Mittel ~102.000/h |
+| Hochrechnung 1 Monat / 1 Jahr | ~74 Mio / ~895 Mio Zeilen; in Bytes offen, s. o. |
+| Freier Plattenplatz danach (`df -h`) | offen, zusammen mit der Byte-Messung |
+| RSS des Collectors (`docker stats`) | offen — über die API nicht auslesbar (BPULS-028) |
+| Feed-Ausfälle im Log (`fetch failed`) | 57 von 2.901 Versuchen (1,96 %), alle `read body: context deadline exceeded` → BPULS-058 |
+
+Die Zeilenzahlen lassen sich **ohne Shell** gewinnen: jede `poll ok`-Zeile trägt den
+Pufferstand, und der Wert unmittelbar vor einem `flushed …`-Eintrag ist der Inhalt genau
+dieser Stundenpartition. Für Bytes gilt das nicht — die stehen nur auf dem Volume.
 
 Tagesgang prüfen: die Änderungsrate muss nachts einbrechen und in den Spitzenstunden
 steigen. Eine flache Kurve wäre ein Hinweis darauf, dass etwas anderes gemessen wird als
-Verkehr.
+Verkehr. Im ersten Lauf erfüllt: 4.540 Zeilen um 01 Uhr gegenüber 161.002 um 15 Uhr — Faktor
+35. Wer aus einer einzelnen Tagesstunde hochrechnet, misst den Tagesgang mit und liegt um
+mehr als das Doppelte daneben.
 
 ### 8. Danach
 

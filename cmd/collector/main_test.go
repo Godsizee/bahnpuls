@@ -114,6 +114,84 @@ func TestNextHourBoundary(t *testing.T) {
 	}
 }
 
+// Regression fuer BPULS-057: der Flush-Timer wird nach jedem Flush gegen die
+// naechste Stundengrenze gestellt. Feuert er verspaetet -- weil ein
+// blockierender Fetch den gemeinsamen Loop aufgehalten hat --, muss die
+// naechste Wartezeit *kuerzer* als eine Stunde sein, sonst wandert die
+// Verspaetung dauerhaft mit und die hour=-Partition driftet gegen ihren Inhalt.
+func TestFlushTimerHoltVerspaetungAuf(t *testing.T) {
+	tests := []struct {
+		name     string
+		flushbar time.Time
+		want     time.Duration
+	}{
+		{
+			name:     "puenktlich",
+			flushbar: time.Date(2026, 8, 19, 9, 0, 0, 0, time.UTC),
+			want:     time.Hour,
+		},
+		{
+			name:     "knapp verspaetet",
+			flushbar: time.Date(2026, 8, 19, 12, 1, 48, 0, time.UTC),
+			want:     58*time.Minute + 12*time.Second,
+		},
+		{
+			name:     "stark verspaetet, Rest der Stunde bleibt",
+			flushbar: time.Date(2026, 8, 20, 8, 2, 57, 0, time.UTC),
+			want:     57*time.Minute + 3*time.Second,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := nextHourBoundary(tt.flushbar).Sub(tt.flushbar)
+			if got != tt.want {
+				t.Errorf("Wartezeit nach Flush um %v = %v, want %v", tt.flushbar, got, tt.want)
+			}
+			if got > time.Hour {
+				t.Errorf("Wartezeit %v laenger als eine Stunde -- Flush wuerde eine Partition ueberspringen", got)
+			}
+		})
+	}
+}
+
+func TestEnvDurationOr(t *testing.T) {
+	const key = "BAHNPULS_TEST_ENV_DURATION"
+	const fallback = 25 * time.Second
+
+	tests := []struct {
+		name string
+		set  bool
+		val  string
+		want time.Duration
+	}{
+		{name: "unset falls back", set: false, want: fallback},
+		{name: "empty falls back", set: true, val: "", want: fallback},
+		{name: "valid overrides", set: true, val: "45s", want: 45 * time.Second},
+		{name: "minutes work too", set: true, val: "1m30s", want: 90 * time.Second},
+		// Eine kaputte Angabe darf den Collector nicht stoppen: sie faellt auf
+		// den Default zurueck, statt den Prozess in eine Restart-Schleife zu
+		// schicken (CLAUDE.md Regel 3).
+		{name: "garbage falls back", set: true, val: "eine Stunde", want: fallback},
+		{name: "unitless falls back", set: true, val: "30", want: fallback},
+		{name: "zero falls back", set: true, val: "0s", want: fallback},
+		{name: "negative falls back", set: true, val: "-5s", want: fallback},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.set {
+				t.Setenv(key, tt.val)
+			} else {
+				os.Unsetenv(key)
+			}
+			if got := envDurationOr(key, fallback); got != tt.want {
+				t.Errorf("envDurationOr(%q) = %v, want %v", tt.val, got, tt.want)
+			}
+		})
+	}
+}
+
 func TestEnvOr(t *testing.T) {
 	const key = "BAHNPULS_TEST_ENV_OR"
 
