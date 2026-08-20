@@ -111,6 +111,17 @@ Kommt für einen Halt bis dahin keine Meldung, bleibt der Wert leer — es wird 
 eine frühere Prognose zurückgegriffen. Eine Prognose von vor zwanzig Minuten ist keine
 Messung.
 
+**Unplausible Werte werden verworfen, nicht gerundet.** Der Feed meldet vereinzelt Züge,
+die Stunden *zu früh* wären — gemessen bis zu 23 Stunden. Solche Fahrten gibt es nicht;
+die Werte entstehen, wenn sich eine Prognosezeit auf einen anderen Betriebstag bezieht.
+Ein Wert außerhalb von einer Stunde zu früh bis 24 Stunden zu spät gilt deshalb als nicht
+bestimmbar, und mit ihm die daraus abgeleitete planmäßige Zeit. Der Halt bleibt im Laufweg
+stehen und trägt keine Zahl.
+
+Das ist keine Kosmetik: ein Zug, der rechnerisch 23 Stunden zu früh ist, zöge jeden
+Durchschnitt nach unten — also in die schmeichelhafte Richtung. Bei einer Auswertung über
+Verspätungen ist das die schlechteste Richtung, in die ein Fehler zeigen kann.
+
 Zwei Eigenheiten dieser Quelle, die man den Zahlen ansehen kann:
 
 - **Eine Momentaufnahme enthält oft nur einen Teil der Halte einer Fahrt.** Der

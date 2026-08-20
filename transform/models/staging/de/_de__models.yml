@@ -26,15 +26,36 @@ models:
         description: Zeitstempel des Feeds selbst (header.timestamp), nicht die Abrufzeit.
         tests:
           - not_null
+      # Zwei Grenzen mit verschiedenen Aufgaben. Die harte faengt Einheiten- und
+      # Schemafehler -- waeren die Werte plötzlich Millisekunden, laege alles im
+      # Millionenbereich. Die weiche faengt Unplausibles: gemessen am 2026-08-20 liefert
+      # der Feed bis zu -83.050 s, also 23 Stunden "zu frueh". Solche Werte gibt es
+      # wirklich, deshalb darf der Build daran nicht scheitern -- sie sind aber ein
+      # Befund und bleiben als Warnung sichtbar. Entwertet werden sie in
+      # int_de_stop_events, nicht hier: Staging normalisiert, es urteilt nicht.
       - name: delay_an_sek
         tests:
           - dbt_utils.accepted_range:
+              arguments:
+                min_value: -604800
+                max_value: 604800
+          - dbt_utils.accepted_range:
+              config:
+                severity: warn
+                alias: warn_delay_an_unplausibel
               arguments:
                 min_value: -3600
                 max_value: 86400
       - name: delay_ab_sek
         tests:
           - dbt_utils.accepted_range:
+              arguments:
+                min_value: -604800
+                max_value: 604800
+          - dbt_utils.accepted_range:
+              config:
+                severity: warn
+                alias: warn_delay_ab_unplausibel
               arguments:
                 min_value: -3600
                 max_value: 86400

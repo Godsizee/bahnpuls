@@ -17,6 +17,24 @@
 
 {% set karenz = var('de_ist_karenz_minuten', 5) %}
 
+-- Plausibilitaetsfenster fuer Verspaetungswerte. Gemessen am 2026-08-20 ueber 3.986.272
+-- Rohzeilen: die Maxima sind unauffaellig (+17.820 s Ankunft, +18.120 s Abfahrt -- fuenf
+-- Stunden Verspaetung gibt es), die Minima nicht: **-19.611 s bei der Ankunft und
+-- -83.050 s bei der Abfahrt**. Ein Zug, der 23 Stunden zu frueh ist, existiert nicht;
+-- das sind Artefakte, vermutlich Fahrten mit einer Prognosezeit auf einem anderen
+-- Betriebstag.
+--
+-- Sie werden **entwertet, nicht korrigiert** (CLAUDE.md Regel 8): ein unplausibler Wert
+-- ist nicht bestimmbar, nicht "sehr puenktlich". Wuerde man ihn stehen lassen, zoege er
+-- jeden Durchschnitt nach unten -- also in die schmeichelhafte Richtung, was bei einem
+-- Projekt ueber Verspaetungen die schlechteste aller Fehlerrichtungen waere.
+--
+-- Mit entwertet wird die **Soll-Zeit**: sie ist aus Prognose minus Verspaetung
+-- abgeleitet, ist die Verspaetung Muell, ist es die Soll-Zeit auch. Der Halt bleibt als
+-- Zeile stehen und traegt NULL; mart_datenqualitaet zaehlt ihn damit unter den Halten
+-- ohne Ist-Meldung, wo er hingehoert -- das ist ein Problem der Erhebung, keines des
+-- Betriebs.
+
 with snapshots as (
 
     select * from {{ ref('stg_de_gtfsrt') }}
@@ -61,8 +79,8 @@ soll as (
     select
         trip_key,
         stop_sequence,
-        max(soll_an) as soll_an,
-        max(soll_ab) as soll_ab
+        max(soll_an) filter (where {{ ist_plausible_verspaetung('delay_an_sek') }}) as soll_an,
+        max(soll_ab) filter (where {{ ist_plausible_verspaetung('delay_ab_sek') }}) as soll_ab
 
     from snapshots
     group by trip_key, stop_sequence
@@ -83,6 +101,7 @@ ankunft as (
     -- aus Prognose minus Verspaetung rekonstruiert, und fehlt eines von beiden, gibt
     -- es keinen Bezugspunkt. Dann bleibt der Wert nicht bestimmbar statt geraten.
     where soll_an is not null
+      and {{ ist_plausible_verspaetung('delay_an_sek') }}
       and snapshot_ts <= soll_an + interval {{ karenz }} minute
     qualify row_number() over (
         partition by trip_key, stop_sequence order by snapshot_ts desc
@@ -101,6 +120,7 @@ abfahrt as (
 
     from snapshots
     where soll_ab is not null
+      and {{ ist_plausible_verspaetung('delay_ab_sek') }}
       and snapshot_ts <= soll_ab + interval {{ karenz }} minute
     qualify row_number() over (
         partition by trip_key, stop_sequence order by snapshot_ts desc

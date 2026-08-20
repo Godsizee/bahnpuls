@@ -19,7 +19,7 @@ RUN python3 -m venv /opt/venv  && /opt/venv/bin/pip install --no-cache-dir dbt-c
 
 COPY transform ./transform
 COPY dashboard ./dashboard
-COPY deploy/dashboard-entrypoint.sh ./deploy/dashboard-entrypoint.sh
+COPY deploy/dashboard-entrypoint.sh deploy/dashboard-rebuild.sh ./deploy/
 COPY --from=webdeps /app/dashboard/node_modules ./dashboard/node_modules
 
 # dbt-Pakete beim Bauen holen, nicht beim Start -- sonst braucht der Container Netz zu
