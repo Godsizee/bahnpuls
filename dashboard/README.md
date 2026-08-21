@@ -5,9 +5,10 @@ Fachliche Definitionen stehen im Vault (`Referenz/Bahnpuls_Analysen.md`,
 auf der Seite `pages/methodik.md` — hier steht nur, was den Betrieb dieses Ordners betrifft.
 
 **Das Dashboard fragt ausschließlich `marts` ab** (CLAUDE.md Regel 11). Die
-Source-Definitionen unter `sources/bahnpuls/` sind deshalb bewusst simple
-`select * from mart_…` — kommt eine Kennzahl im Dashboard vor, hat sie vorher ein
-dbt-Modell.
+Source-Definitionen unter `sources/bahnpuls/` rechnen deshalb nichts aus — kommt eine
+Kennzahl im Dashboard vor, hat sie vorher ein dbt-Modell. Was sie tun dürfen, ist
+**begrenzen**: `zuglauf_auswahl.sql` liefert einen ausgeschriebenen Ausschnitt statt des
+ganzen Marts, siehe unten.
 
 ## Lokal starten
 
@@ -17,7 +18,7 @@ liegt nicht im Repo, **dbt muss also vorher gelaufen sein**:
 ```bash
 cd transform
 export DBT_PROFILES_DIR="$(pwd)"
-../.venv/Scripts/dbt build --vars '{"ch_istdaten_glob": "tests/fixtures/ch/*_istdaten.csv"}'
+../.venv/Scripts/dbt build --vars '{"ch_istdaten_glob": "tests/fixtures/ch/*_istdaten.csv", "de_gtfsrt_glob": "tests/fixtures/de/*.parquet", "de_static_dir": "tests/fixtures/de_static"}'
 
 cd ../dashboard
 npm install
@@ -26,8 +27,12 @@ npm run dev
 ```
 
 Ohne echte Rohdaten zeigt das Dashboard die synthetischen Fixtures aus
-`transform/tests/fixtures/ch/`. Jede Seite weist diesen Datenstand aus — eine Zahl ohne
+`transform/tests/fixtures/`. Jede Seite weist diesen Datenstand aus — eine Zahl ohne
 Herkunftsangabe wäre eine Behauptung.
+
+**`npm run build` frischt die Daten nicht auf.** `npm run sources` ist ein eigener
+Schritt. Lokal fällt das nicht auf, solange noch Ausgabe eines früheren Laufs herumliegt —
+im frischen Container antwortet die Seite dann mit 200 und ist leer.
 
 ## Zwei Stolpersteine
 
@@ -51,7 +56,46 @@ Beiträge je Abschnitt und Halt als Balken (nach Laufzeit und Haltezeit eingefä
 der Wasserfall gar nicht unterscheiden würde) und den Verspätungsstand daneben als Linie.
 Dieselbe Information, ohne die Fehlerquelle.
 
+## Warum die Laufweg-Seite nur einen Ausschnitt anbietet
+
+Evidence liefert seine Quelldaten **an den Browser** aus und rechnet dort. Ein
+`select * from mart_zuglauf` ergab bei echten Daten 707.585 Zeilen und 347 MB je
+Seitenaufruf — bei 36 Fixture-Zeilen war davon nichts zu merken, im Browser dann ein
+Timeout beim Initialisieren der Datenbank.
+
+`sources/bahnpuls/zuglauf_auswahl.sql` begrenzt deshalb auf **je Quelle die letzten drei
+Betriebstage, darin je Tag und Linie die ersten sechs Fahrten** nach planmäßiger Abfahrt.
+Die Grenze steht ausgeschrieben in der Datei und im Hinweiskasten der Seite — eine
+Stichprobe, die sich nicht als solche zu erkennen gibt, ist schlimmer als keine.
+
+Zwei Dinge daran sind nicht beliebig:
+
+- **Die Quote gilt je Linie**, nicht je Tag insgesamt. Ein Schnitt über alle Fahrten
+  (vorher: `row_number() over (order by trip_key)`) ist reproduzierbar, aber sinnlos —
+  welche Linien überleben, entscheidet die Sortierung der Schlüssel, und der Linienfilter
+  darüber kennte dann die halben Linien gar nicht.
+- **Der Betriebstag wird als Text ausgewählt.** Der Wert eines Dropdowns landet über eine
+  Zeichenkette wieder in der Abfrage; ein `DATE` wird dabei zu dem, was der Browser daraus
+  macht (`Thu Aug 13 2026 …`), und der Vergleich liefe leer — ohne Fehlermeldung, nur mit
+  leerer Seite.
+
+Der eigentliche Umbau — serverseitige Abfrage oder je Fahrt vorbereitete Seiten — bleibt
+offen und ist mit einem statischen Evidence-Build nicht zu haben.
+
+## Wenn ein Bahnhof zweimal im Laufweg steht
+
+Kopfmachen, Ringlauf, Wendefahrt: Ein Zug kann denselben Bahnhof zweimal anfahren. Die
+Daten unterscheiden die beiden Halte über `halt_nr`, eine Diagrammachse über den Namen
+aber nicht — beide Schritte fielen auf dieselbe Kategorie und würden zusammengezählt.
+`pages/laufweg.md` hängt deshalb eine Nummer an den Namen, aber nur dort, wo er mehrdeutig
+ist. Der Fall steckt als Fixture in `transform/tests/fixtures/ch/2026-08-12_istdaten.csv`
+(Linie `S 1`, Bern–Thun–Spiez–Thun–Bern): ohne die Nummerierung werden aus acht
+Achsenkategorien sechs.
+
 ## Deployment
 
-Noch keins. Build nach Cloudflare Pages ist BPULS-040 — die Build-Kette braucht dann
-zuerst `dbt build`, dann `npm run sources && npm run build`.
+Selbst gehostet unter Coolify auf dem eigenen VPS (ADR-012, war Cloudflare Pages). Der
+Build läuft im Container zur Laufzeit über `deploy/dashboard-entrypoint.sh`: erst `dbt`
+gegen die Rohdaten des Volumes, dann `npm run sources`, dann `npm run build`, dann `sirv`.
+Stündlicher Rebuild als Coolify Scheduled Task. Einzelheiten in
+`Referenz/Bahnpuls_Betrieb_und_Deployment.md`.

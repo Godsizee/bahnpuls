@@ -14,72 +14,171 @@ Balken nach unten heißt, dort wurde welche aufgeholt. Die Farbe sagt, ob es unt
 passierte oder im Bahnhof. Das untere Diagramm zeigt denselben Zug noch einmal anders: wie
 viel Verspätung er zu jedem Zeitpunkt insgesamt mit sich trug.
 
-<Alert status=info>
+## Fahrt auswählen
 
-**Zur Auswahl steht nur ein Ausschnitt.** Diese Seite bietet eine Stichprobe von bis zu
-150 Fahrten des zuletzt aufgezeichneten Tages an, nicht alle. Das liegt an der Technik,
-nicht an fehlenden Daten: Die Diagramme rechnen direkt im Browser, und ein vollständiger
-Tag wären mehrere hundert Megabyte, die jeder Besucher erst herunterladen müsste. Die
-Zahlen auf der Startseite beruhen dagegen auf allem, was aufgezeichnet wurde.
-
-</Alert>
-
-```sql fahrten
--- Der erste Halt einer Fahrt ist der mit der kleinsten Nummer, nicht die 1: bei den
--- deutschen Echtzeitdaten ist halt_nr die Fahrplannummer und beginnt bei 0 oder höher.
--- Und er ist nicht zwangsläufig der Startbahnhof — ein Zug, der beim Beginn der
--- Beobachtung schon unterwegs war, taucht erst ab seinem nächsten Halt auf.
-with erster_halt as (
-    select trip_key, min(halt_nr) as halt_nr
-    from bahnpuls.mart_zuglauf
-    group by trip_key
-)
+```sql herkuenfte
 select
-    z.trip_key,
-    -- Linienname und Stationsname fehlen bei der deutschen Quelle, solange der
-    -- Fahrplan-Datensatz nicht angeschlossen ist. Dann steht hier die ID statt eines
-    -- Namens — sichtbar, aber nicht kaputt.
-    coalesce(z.route_kurzname, z.quelle) || ' · '
-        || strftime(z.betriebstag, '%d.%m.%Y') || ' · ab '
-        || coalesce(z.stop_name, z.stop_id) as bezeichnung
-from bahnpuls.mart_zuglauf z
-join erster_halt e on z.trip_key = e.trip_key and z.halt_nr = e.halt_nr
-order by z.betriebstag, bezeichnung
+    quelle,
+    case quelle
+        when 'de_gtfsrt'   then 'Deutschland — eigene Aufzeichnung'
+        when 'ch_istdaten' then 'Schweiz — konstruierte Testfälle'
+        else quelle
+    end                      as bezeichnung,
+    max(betriebstag)         as tag,
+    count(distinct trip_key) as fahrten
+from bahnpuls.zuglauf_auswahl
+group by quelle
+-- absteigend, damit die echten deutschen Daten vorne stehen und nicht die Testfälle
+order by quelle desc
 ```
 
-<Dropdown data={fahrten} name=fahrt value=trip_key label=bezeichnung title="Fahrt" />
+```sql tage
+-- Der Betriebstag wird als **Text** ausgewählt, nicht als Datum: der Wert eines
+-- Dropdowns landet über eine Zeichenkette wieder in der Abfrage, und ein Datum wird
+-- dabei zu dem, was der Browser daraus macht ("Thu Aug 13 2026 …"). Der Vergleich liefe
+-- dann leer — ohne Fehlermeldung, nur mit leerer Seite.
+select
+    strftime(betriebstag, '%Y-%m-%d')  as tag,
+    strftime(betriebstag, '%d.%m.%Y')  as beschriftung,
+    max(betriebstag)                   as sortierung,
+    count(distinct trip_key)           as fahrten
+from bahnpuls.zuglauf_auswahl
+where quelle = '${inputs.herkunft.value}'
+group by tag, beschriftung
+order by sortierung desc
+```
 
-```sql schritte
-with halte as (
+```sql linien
+-- Die Linienliste folgt der Tagesauswahl. Zöge sie ihre Werte aus dem ungefilterten
+-- Bestand, ließen sich Tag und Linie zu einer Kombination zusammenstellen, die keine
+-- einzige Fahrt trifft — die Seite stünde dann leer da, ohne dass erkennbar wäre, warum.
+select linie, count(distinct trip_key) as fahrten
+from bahnpuls.zuglauf_auswahl
+where quelle = '${inputs.herkunft.value}'
+  and strftime(betriebstag, '%Y-%m-%d') = '${inputs.tag.value}'
+group by linie
+order by linie
+```
+
+```sql fahrten
+with gefiltert as (
 
     select *
-    from bahnpuls.mart_zuglauf
-    where trip_key = '${inputs.fahrt.value}'
+    from bahnpuls.zuglauf_auswahl
+    where quelle = '${inputs.herkunft.value}'
+      and strftime(betriebstag, '%Y-%m-%d') = '${inputs.tag.value}'
+      and linie like '${inputs.linie.value}'
 
 ),
 
 grenzen as (
 
-    -- Erster und letzter gelieferter Halt dieser Fahrt. Nicht 1 und n: die Nummer ist
-    -- bei den deutschen Daten die Fahrplannummer, nicht die Position.
-    select min(halt_nr) as erster, max(halt_nr) as letzter from halte
+    -- Erster und letzter **gelieferter** Halt, nicht 1 und n: bei den deutschen
+    -- Echtzeitdaten ist halt_nr die Fahrplannummer, nicht die Position, und ein Zug,
+    -- der beim Beobachtungsbeginn schon unterwegs war, taucht erst später darin auf.
+    select
+        trip_key,
+        min(halt_nr)           as erster,
+        max(halt_nr)           as letzter,
+        count(*)               as halte,
+        any_value(linie)       as linie,
+        any_value(ab_soll)     as ab_soll,
+        any_value(betriebstag) as betriebstag
+    from gefiltert
+    group by trip_key
+
+)
+
+select
+    grenzen.trip_key,
+    grenzen.linie || ' · ab '
+        || coalesce(strftime(grenzen.ab_soll, '%H:%M'), '--:--') || ' · '
+        || start.halt || ' → ' || ziel.halt as bezeichnung,
+    grenzen.halte
+from grenzen
+join gefiltert as start
+  on  start.trip_key = grenzen.trip_key and start.halt_nr = grenzen.erster
+join gefiltert as ziel
+  on  ziel.trip_key  = grenzen.trip_key and ziel.halt_nr  = grenzen.letzter
+order by grenzen.ab_soll nulls last, bezeichnung
+```
+
+<Dropdown data={herkuenfte} name=herkunft value=quelle label=bezeichnung title="Herkunft" />
+
+<Dropdown data={tage} name=tag value=tag label=beschriftung title="Betriebstag" />
+
+<Dropdown data={linien} name=linie value=linie title="Linie">
+    <DropdownOption value="%" valueLabel="alle Linien" />
+</Dropdown>
+
+<Dropdown data={fahrten} name=fahrt value=trip_key label=bezeichnung title="Fahrt" />
+
+<Alert status=info>
+
+**Zur Auswahl steht ein Ausschnitt, kein Gesamtbestand.** Angeboten werden je Herkunft
+die letzten drei aufgezeichneten Betriebstage, darin je Tag und Linie die ersten sechs
+Fahrten nach planmäßiger Abfahrt. Das liegt an der Technik, nicht an fehlenden Daten:
+Die Diagramme rechnen direkt im Browser, und ein vollständiger Betriebstag wären mehrere
+hundert Megabyte, die jeder Besucher erst herunterladen müsste. Die Zahlen auf der
+[Startseite](/) beruhen dagegen auf allem, was aufgezeichnet wurde.
+
+Die Quote gilt **je Linie**, damit jede Linie überhaupt in der Auswahl vorkommt. Ein
+Schnitt über alle Fahrten hinweg wäre einfacher gewesen und hätte den Linienfilter
+darüber wertlos gemacht — er kennte dann die halben Linien gar nicht. Aus demselben Grund
+ist die Fahrt eines Tages, die hier fehlt, **nicht** als „nicht aufgezeichnet" zu lesen:
+sie ist nur nicht in dieser Auswahl.
+
+</Alert>
+
+```sql schritte
+with halte as (
+
+    select *
+    from bahnpuls.zuglauf_auswahl
+    where trip_key = '${inputs.fahrt.value}'
+
+),
+
+benannt as (
+
+    select
+        *,
+        min(halt_nr) over ()                                   as erster,
+        count(*)     over (partition by halt)                  as vorkommen,
+        row_number() over (partition by halt order by halt_nr) as lauf
+    from halte
+
+),
+
+etikettiert as (
+
+    -- Ein Bahnhof kann in einem Laufweg **zweimal** vorkommen: Kopfmachen, Ringlauf,
+    -- Wendefahrt. Die Daten unterscheiden die beiden Halte über halt_nr, eine
+    -- Diagrammachse über den Namen aber nicht — beide Schritte fielen dort auf dieselbe
+    -- Kategorie und würden stillschweigend zusammengezählt. Deshalb bekommt der Name
+    -- eine Nummer, aber nur dort, wo er mehrdeutig ist.
+    select
+        *,
+        case when vorkommen > 1 then halt || ' (' || lauf || '. Mal)' else halt end
+            as halt_eindeutig
+    from benannt
 
 ),
 
 zerlegt as (
 
-    -- Startverspätung: der Stand, mit dem die Fahrt beginnt
+    -- Startverspätung: der Stand, mit dem die Fahrt in die Beobachtung eintritt
     select
-        halt_nr * 10                             as reihenfolge,
-        'Start ' || coalesce(stop_name, stop_id) as schritt,
-        'Startverspätung'                        as art,
-        coalesce(delay_an_sek, delay_ab_sek)     as beitrag_sek,
-        coalesce(delay_an_sek, delay_ab_sek)     as stand_sek,
+        halt_nr * 10                         as reihenfolge,
+        'Start ' || halt_eindeutig           as schritt,
+        'Startverspätung'                    as art,
+        coalesce(delay_an_sek, delay_ab_sek) as beitrag_sek,
+        coalesce(delay_an_sek, delay_ab_sek) as stand_sek,
         zeitumstellung_mehrdeutig,
         zug_ausgefallen,
         halt_ausgelassen
-    from halte, grenzen
-    where halt_nr = grenzen.erster
+    from etikettiert
+    where halt_nr = erster
 
     union all
 
@@ -88,33 +187,32 @@ zerlegt as (
     -- delay_an − laufzeit_delta ist genau die Abfahrtsverspätung des Vorhalts.
     select
         halt_nr * 10 + 1,
-        '→ ' || coalesce(stop_name, stop_id),
+        '→ ' || halt_eindeutig,
         'Unterwegs',
         laufzeit_delta_sek,
         delay_an_sek,
         zeitumstellung_mehrdeutig,
         zug_ausgefallen,
         halt_ausgelassen
-    from halte, grenzen
-    where halt_nr > grenzen.erster
+    from etikettiert
+    where halt_nr > erster
 
     union all
 
-    -- Haltezeitanteil: was während des Halts entstand. Nur wo der Fahrplan
-    -- überhaupt Ankunft und Abfahrt vorsieht -- am Start- und am Endhalt fehlt eine
-    -- der beiden planmäßig, und das ist kein fehlender Messwert.
+    -- Haltezeitanteil: was während des Halts entstand. Nur wo der Fahrplan überhaupt
+    -- Ankunft und Abfahrt vorsieht — am Start- und am Endhalt fehlt eine der beiden
+    -- planmäßig, und das ist kein fehlender Messwert.
     select
         halt_nr * 10 + 2,
-        'Halt ' || coalesce(stop_name, stop_id),
+        'Halt ' || halt_eindeutig,
         'Im Bahnhof',
         haltezeit_delta_sek,
         delay_ab_sek,
         zeitumstellung_mehrdeutig,
         zug_ausgefallen,
         halt_ausgelassen
-    from halte
-    where soll_an is not null
-      and soll_ab is not null
+    from etikettiert
+    where halt_mit_aufenthalt
 
 )
 
@@ -125,10 +223,10 @@ select
     beitrag_sek / 60.0 as beitrag_min,
     stand_sek   / 60.0 as stand_min,
     case
-        when zug_ausgefallen             then 'Zug ausgefallen'
-        when halt_ausgelassen            then 'Halt ausgelassen'
-        when zeitumstellung_mehrdeutig   then 'Nacht der Zeitumstellung — nicht eindeutig'
-        when beitrag_sek is null         then 'keine Meldung'
+        when zug_ausgefallen           then 'Zug ausgefallen'
+        when halt_ausgelassen          then 'Halt ausgelassen'
+        when zeitumstellung_mehrdeutig then 'Nacht der Zeitumstellung — nicht eindeutig'
+        when beitrag_sek is null       then 'keine Meldung'
     end as hinweis
 from zerlegt
 order by reihenfolge
@@ -160,6 +258,10 @@ nötig. Ein verspäteter Zug holt damit auf. Genau dafür ist sie da.
 Wo für einen Abschnitt kein Balken erscheint, fehlt die Angabe. Sie wird dann **nicht als
 Null gezeichnet**, denn Null hieße „hier hat sich nichts verändert" — und das ist etwas
 anderes als „wir wissen es nicht".
+
+Fährt ein Zug denselben Bahnhof zweimal an — beim Kopfmachen oder auf einer Wendefahrt —,
+steht hinter dem Namen, das wievielte Mal es ist. Ohne diese Unterscheidung fielen beide
+Halte auf dieselbe Stelle der Achse und würden zusammengezählt.
 
 ## Wie viel Verspätung der Zug jeweils hatte
 
