@@ -31,6 +31,7 @@ select
     puenktlichkeit.fahrten,
     puenktlichkeit.fahrten_ausgefallen,
     puenktlichkeit.fahrten_unbedienter_lauf,
+    puenktlichkeit.fahrten_unbedienter_lauf_bestaetigt,
     puenktlichkeit.fahrten_verkuerzt,
 
     puenktlichkeit.halte_mit_ankunft,

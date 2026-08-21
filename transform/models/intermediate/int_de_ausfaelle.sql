@@ -59,41 +59,12 @@ ohne_beobachtete_halte as (
 
 ),
 
--- Die zum Betriebstag gueltige Fahrplan-Version: die juengste, die nicht nach dem
--- Betriebstag veroeffentlicht wurde.
-gueltige_version as (
-
-    select
-        a.trip_key,
-        max(f.static_version) as static_version
-
-    from ohne_beobachtete_halte as a
-    join {{ ref('stg_de_fahrplanhalt') }} as f
-      on  f.trip_id        = a.trip_id
-      and f.static_version <= a.betriebstag
-    group by 1
-
-),
-
--- trip_id ist **je Feed** ein eigener Namensraum (BPULS-023). Taucht dieselbe id in
--- derselben Version in beiden Feeds auf, ist nicht entscheidbar, welcher Laufweg
--- gemeint ist. Solche Fahrten bleiben unaufgeloest, statt einen der beiden Laufwege
--- zu raten -- ein geratener Laufweg saehe vollstaendig aus und waere frei erfunden.
+-- Version und Feed nach CLAUDE.md Regel 9. Die Zuordnung steht im Makro, weil
+-- int_de_soll_laufweg sie ebenfalls braucht -- eine Regel, die den Laufweg einer
+-- Fahrt bestimmt, darf nicht an zwei Stellen leicht verschieden stehen.
 eindeutig as (
 
-    select
-        g.trip_key,
-        g.static_version,
-        min(f.feed) as feed
-
-    from gueltige_version as g
-    join {{ ref('stg_de_fahrplanhalt') }} as f
-      on  f.static_version = g.static_version
-    join ohne_beobachtete_halte as a
-      on  a.trip_key = g.trip_key
-     and f.trip_id  = a.trip_id
-    group by 1, 2
-    having count(distinct f.feed) = 1
+    {{ gueltige_fahrplanversion('ohne_beobachtete_halte') }}
 
 ),
 

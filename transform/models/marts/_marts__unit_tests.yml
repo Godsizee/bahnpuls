@@ -128,14 +128,28 @@ unit_tests:
           - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'd', halt_nr: 2, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false}
           - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'd', halt_nr: 3, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false}
           - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'd', halt_nr: 4, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false}
+          # Fahrt E: ebenfalls **kein** bedienter Halt — aber ohne Zeile in
+          # int_de_soll_laufweg, also gegen den Fahrplan **nicht belegt**. Damit
+          # unterscheiden sich die beiden Fahrtzahlen (2 unbedient, davon 1 belegt);
+          # bei gleicher Zahl bliebe eine Verwechslung der beiden Spalten unbemerkt.
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'e', halt_nr: 1, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'e', halt_nr: 2, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'e', halt_nr: 3, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false}
+      - input: ref('int_de_soll_laufweg')
+        rows:
+          # Nur Fahrt D deckt ihren Soll-Laufweg vollständig ab. Fahrt E fehlt hier
+          # bewusst ganz — so wie eine Fahrt fehlt, deren Fahrplan-Version sich nicht
+          # eindeutig zuordnen ließ. Der left join muss daraus "nicht belegt" machen,
+          # nicht NULL weiterreichen.
+          - {betriebstag: '2026-08-13', trip_key: 'd', laufweg_vollstaendig: true}
     expect:
       # Der erste Halt jeder Fahrt zählt nie mit — dort kommt planmäßig nichts an.
-      # Von fünfzehn Zeilen bleiben elf: 2 verkürzt (Halt 2 vorne, Halt 7 hinten),
+      # Von achtzehn Zeilen bleiben dreizehn: 2 verkürzt (Halt 2 vorne, Halt 7 hinten),
       # 1 ausgelassen (Halt 4, mitten im Lauf), 2 gemessen, 1 ohne Meldung,
-      # 1 ausgefallen, 1 mehrdeutig, 3 aus dem unbedienten Lauf D.
+      # 1 ausgefallen, 1 mehrdeutig, 5 aus den unbedienten Läufen D (3) und E (2).
       rows:
-        - {schwelle_sek: 60, halte_mit_ankunft: 11, halte_ausgefallen: 1, halte_unbedienter_lauf: 3, halte_verkuerzt: 2, halte_ausgelassen: 1, halte_mehrdeutig: 1, halte_ohne_meldung: 1, halte_gemessen: 2, halte_puenktlich: 0, fahrten: 4, fahrten_ausgefallen: 1, fahrten_unbedienter_lauf: 1, fahrten_verkuerzt: 1}
-        - {schwelle_sek: 180, halte_mit_ankunft: 11, halte_ausgefallen: 1, halte_unbedienter_lauf: 3, halte_verkuerzt: 2, halte_ausgelassen: 1, halte_mehrdeutig: 1, halte_ohne_meldung: 1, halte_gemessen: 2, halte_puenktlich: 1, fahrten: 4, fahrten_ausgefallen: 1, fahrten_unbedienter_lauf: 1, fahrten_verkuerzt: 1}
-        - {schwelle_sek: 360, halte_mit_ankunft: 11, halte_ausgefallen: 1, halte_unbedienter_lauf: 3, halte_verkuerzt: 2, halte_ausgelassen: 1, halte_mehrdeutig: 1, halte_ohne_meldung: 1, halte_gemessen: 2, halte_puenktlich: 1, fahrten: 4, fahrten_ausgefallen: 1, fahrten_unbedienter_lauf: 1, fahrten_verkuerzt: 1}
-        - {schwelle_sek: 900, halte_mit_ankunft: 11, halte_ausgefallen: 1, halte_unbedienter_lauf: 3, halte_verkuerzt: 2, halte_ausgelassen: 1, halte_mehrdeutig: 1, halte_ohne_meldung: 1, halte_gemessen: 2, halte_puenktlich: 2, fahrten: 4, fahrten_ausgefallen: 1, fahrten_unbedienter_lauf: 1, fahrten_verkuerzt: 1}
-        - {schwelle_sek: 3600, halte_mit_ankunft: 11, halte_ausgefallen: 1, halte_unbedienter_lauf: 3, halte_verkuerzt: 2, halte_ausgelassen: 1, halte_mehrdeutig: 1, halte_ohne_meldung: 1, halte_gemessen: 2, halte_puenktlich: 2, fahrten: 4, fahrten_ausgefallen: 1, fahrten_unbedienter_lauf: 1, fahrten_verkuerzt: 1}
+        - {schwelle_sek: 60, halte_mit_ankunft: 13, halte_ausgefallen: 1, halte_unbedienter_lauf: 5, halte_verkuerzt: 2, halte_ausgelassen: 1, halte_mehrdeutig: 1, halte_ohne_meldung: 1, halte_gemessen: 2, halte_puenktlich: 0, fahrten: 5, fahrten_ausgefallen: 1, fahrten_unbedienter_lauf: 2, fahrten_unbedienter_lauf_bestaetigt: 1, fahrten_verkuerzt: 1}
+        - {schwelle_sek: 180, halte_mit_ankunft: 13, halte_ausgefallen: 1, halte_unbedienter_lauf: 5, halte_verkuerzt: 2, halte_ausgelassen: 1, halte_mehrdeutig: 1, halte_ohne_meldung: 1, halte_gemessen: 2, halte_puenktlich: 1, fahrten: 5, fahrten_ausgefallen: 1, fahrten_unbedienter_lauf: 2, fahrten_unbedienter_lauf_bestaetigt: 1, fahrten_verkuerzt: 1}
+        - {schwelle_sek: 360, halte_mit_ankunft: 13, halte_ausgefallen: 1, halte_unbedienter_lauf: 5, halte_verkuerzt: 2, halte_ausgelassen: 1, halte_mehrdeutig: 1, halte_ohne_meldung: 1, halte_gemessen: 2, halte_puenktlich: 1, fahrten: 5, fahrten_ausgefallen: 1, fahrten_unbedienter_lauf: 2, fahrten_unbedienter_lauf_bestaetigt: 1, fahrten_verkuerzt: 1}
+        - {schwelle_sek: 900, halte_mit_ankunft: 13, halte_ausgefallen: 1, halte_unbedienter_lauf: 5, halte_verkuerzt: 2, halte_ausgelassen: 1, halte_mehrdeutig: 1, halte_ohne_meldung: 1, halte_gemessen: 2, halte_puenktlich: 2, fahrten: 5, fahrten_ausgefallen: 1, fahrten_unbedienter_lauf: 2, fahrten_unbedienter_lauf_bestaetigt: 1, fahrten_verkuerzt: 1}
+        - {schwelle_sek: 3600, halte_mit_ankunft: 13, halte_ausgefallen: 1, halte_unbedienter_lauf: 5, halte_verkuerzt: 2, halte_ausgelassen: 1, halte_mehrdeutig: 1, halte_ohne_meldung: 1, halte_gemessen: 2, halte_puenktlich: 2, fahrten: 5, fahrten_ausgefallen: 1, fahrten_unbedienter_lauf: 2, fahrten_unbedienter_lauf_bestaetigt: 1, fahrten_verkuerzt: 1}

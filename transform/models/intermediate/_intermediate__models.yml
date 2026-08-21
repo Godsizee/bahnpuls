@@ -136,6 +136,61 @@ models:
             combination_of_columns: ['trip_key', 'stop_sequence']
 
 
+  - name: int_de_soll_laufweg
+    description: >
+      Hält den beobachteten Laufweg gegen den planmäßigen — nur für Fahrten, in denen
+      **kein einziger** Halt bedient wurde (BPULS-064).
+
+      Diese Fahrten sind in den deutschen Daten die Form, in der ein vollständiger
+      Ausfall ankommt: der Feed setzt `trip.schedule_relationship = CANCELED` nie,
+      sondern streicht die Halte einzeln. Ohne diesen Abgleich ließe sich ein solcher
+      Lauf nicht von einer Fahrt unterscheiden, die erst ab der Mitte beobachtet wurde
+      und deren Rest gestrichen war — beide sehen in den Ist-Daten gleich aus.
+
+      Version und Feed kommen aus dem Makro `gueltige_fahrplanversion` (Regel 9),
+      gemeinsam mit `int_de_ausfaelle`. Fahrten ohne eindeutige Zuordnung erscheinen
+      hier **gar nicht**; nachgelagert wirkt das als „nicht belegt", und genau so ist
+      es gemeint.
+    columns:
+      - name: betriebstag
+        tests:
+          - not_null
+      - name: trip_key
+        tests:
+          - not_null
+          - unique
+      - name: static_version
+        description: Die zum Betriebstag gültige Version, nie die neueste (Regel 9).
+        tests:
+          - not_null
+      - name: feed
+        tests:
+          - not_null
+      - name: beobachtete_halte
+        description: Anzahl der Halte, die überhaupt gemeldet wurden.
+        tests:
+          - not_null
+      - name: soll_halte
+        description: Anzahl der Halte, die der gültige Fahrplan für diese Fahrt vorsieht.
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 1
+      - name: soll_halte_beobachtet
+        description: >
+          Wie viele der Soll-Halte in den Ist-Daten vorkommen. Gezählt wird die
+          **Deckung**, nicht ein Vergleich zweier Anzahlen: zwei gleich große, aber
+          verschiedene Mengen wären sonst „vollständig".
+        tests:
+          - not_null
+      - name: laufweg_vollstaendig
+        description: >
+          `soll_halte_beobachtet = soll_halte`. Nur hier ist ausgeschlossen, dass bloß
+          das gestrichene Ende einer sonst gefahrenen Fahrt beobachtet wurde.
+        tests:
+          - not_null
+
   - name: int_de_ausfaelle
     description: >
       Löst vollständige Ausfälle in Halt-Ereignisse auf (BPULS-032, A5). Ein

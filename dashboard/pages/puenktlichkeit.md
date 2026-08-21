@@ -91,6 +91,7 @@ select
     sum(fahrten)            as fahrten,
     sum(fahrten_ausgefallen) as fahrten_ausgefallen,
     sum(fahrten_unbedienter_lauf) as fahrten_unbedienter_lauf,
+    sum(fahrten_unbedienter_lauf_bestaetigt) as fahrten_unbedienter_lauf_bestaetigt,
     sum(fahrten_verkuerzt)   as fahrten_verkuerzt
 from bahnpuls.puenktlichkeit
 -- Eine einzige Schwelle: die Zustände hängen nicht von ihr ab und stünden sonst fünffach
@@ -135,6 +136,13 @@ dass im *beobachteten* Lauf kein Halt bedient wurde. Wird eine Fahrt erst ab der
 beobachtet und ist der Rest gestrichen, sieht eine gekappte Fahrt genauso aus. Deshalb
 steht sie neben „Ausfall gemeldet" und nicht darin.
 
+**Für einen Teil dieser Fahrten lässt sich der Zweifel ausräumen** — und die Tabelle je
+Linie weiter unten weist ihn getrennt aus. Deckt der beobachtete Laufweg den
+**planmäßigen vollständig** ab, wurde nicht nur ein gestrichenes Ende gesehen, sondern die
+ganze Fahrt. Der Abgleich läuft gegen die zum Betriebstag gültige Fahrplan-Version, nicht
+gegen die neueste. Was übrig bleibt, ist nicht Ungenauigkeit, sondern die Reichweite der
+Beobachtung.
+
 Eine Lücke bleibt: ein Zug, über den der Feed **gar nichts** meldet, taucht nirgends auf.
 Wie oft das vorkommt, ist offen.
 
@@ -162,8 +170,9 @@ select
     linie,
     sum(fahrten)             as fahrten,
     sum(fahrten_ausgefallen)      as ausgefallen,
-    sum(fahrten_unbedienter_lauf) as unbedient,
-    sum(fahrten_verkuerzt)        as verkuerzt,
+    sum(fahrten_unbedienter_lauf)            as unbedient,
+    sum(fahrten_unbedienter_lauf_bestaetigt) as unbedient_belegt,
+    sum(fahrten_verkuerzt)                   as verkuerzt,
     sum(halte_mit_ankunft)   as halte,
     100.0 * sum(halte_puenktlich) / nullif(sum(halte_gemessen), 0)    as quote_gemessen,
     100.0 * sum(halte_puenktlich) / nullif(sum(halte_mit_ankunft), 0) as quote_planmaessig
@@ -179,6 +188,7 @@ order by halte desc, linie
     <Column id=fahrten title="Fahrten" />
     <Column id=ausgefallen title="Ausfall gemeldet" />
     <Column id=unbedient title="kein Halt bedient" />
+    <Column id=unbedient_belegt title="davon am Fahrplan belegt" />
     <Column id=verkuerzt title="davon gekappt" />
     <Column id=halte title="planmäßige Halte" />
     <Column id=quote_gemessen title="pünktlich, gefahrene (%)" fmt='#,##0.0' />
@@ -188,6 +198,12 @@ order by halte desc, linie
 Beide Quoten bei der Sechs-Minuten-Grenze. Linien mit wenigen Halten stehen unten — bei
 kleiner Grundmenge schwankt eine Quote stark, und eine Rangliste über solche Werte wäre
 Zufall mit Nachkommastellen.
+
+„Davon am Fahrplan belegt" heißt: der beobachtete Laufweg deckt den planmäßigen
+vollständig ab, es wurde also nicht bloß ein gestrichenes Ende gesehen. Steht die Spalte
+weit unter der linken, sagt das mehr über die Reichweite der Aufzeichnung als über den
+Betrieb — die Aufzeichnung läuft erst seit dem 19.08.2026, und für Betriebstage vor der
+ersten Fahrplan-Ladung lässt sich nichts belegen.
 
 <Alert status=info>
 

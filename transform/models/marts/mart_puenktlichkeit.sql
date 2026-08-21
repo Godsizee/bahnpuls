@@ -35,6 +35,12 @@
 -- Ein Zug, der ausfaellt *und* in der Umstellungsstunde liegt, zaehlt als ausgefallen.
 -- Die sieben Zustaende ergeben zusammen exakt `halte_mit_ankunft`; ein Test prueft das.
 --
+-- **Woher `laufweg_vollstaendig` kommt.** Dieses Modell liest sonst ausschliesslich
+-- mart_zuglauf -- die Entwertungsregeln liegen genau einmal, und das bleibt so. Die
+-- Laufwegdeckung ist keine Entwertung, sondern eine Zusatztatsache ueber die Fahrt, und
+-- sie steht in int_de_soll_laufweg, weil sie den statischen Fahrplan braucht (den ein
+-- Mart nicht anfassen soll). Der join ist bewusst der einzige.
+--
 -- **Warum `unbedienter_lauf` neben `ausgefallen` steht und nicht darin** (BPULS-064):
 -- `zug_ausgefallen` heisst "die Quelle sagt, der Zug faellt aus". Dass in einem Lauf
 -- kein einziger Halt bedient wurde, ist dagegen eine **Beobachtung an den Daten** --
@@ -42,6 +48,12 @@
 -- Spalte zu legen machte aus einer Messung eine Vermutung, ohne dass man es der
 -- Spalte ansieht. Die Trennung kostet eine Spalte und erhaelt dafuer die Aussage:
 -- gemeldet gegen abgeleitet, nebeneinander lesbar.
+--
+-- `fahrten_unbedienter_lauf_bestaetigt` ist die Teilmenge davon, bei der der
+-- **beobachtete Laufweg den planmaessigen vollstaendig deckt**. Nur dort ist
+-- ausgeschlossen, dass wir bloss das gestrichene Ende einer sonst gefahrenen Fahrt
+-- gesehen haben. Die Differenz zwischen beiden Spalten ist keine Ungenauigkeit, die man
+-- wegrechnet -- sie ist die Reichweite der Beobachtung, und die gehoert ausgewiesen.
 --
 -- **Ueber Schwellen hinweg wird nie summiert.** Jede Zeile ist eine eigene Auswertung
 -- derselben Grundmenge, die zaehlbaren Spalten wiederholen sich deshalb fuenfmal. Wer
@@ -166,14 +178,23 @@ eingeordnet as (
 fahrtzustand as (
 
     select
-        betriebstag,
-        quelle,
-        route_kurzname,
-        trip_key,
-        bool_or(zug_ausgefallen)                as fahrt_ausgefallen,
-        bool_or(zustand = 'unbedienter_lauf')   as fahrt_unbedienter_lauf,
-        bool_or(zustand = 'verkuerzt')          as fahrt_verkuerzt
+        eingeordnet.betriebstag,
+        eingeordnet.quelle,
+        eingeordnet.route_kurzname,
+        eingeordnet.trip_key,
+        bool_or(eingeordnet.zug_ausgefallen)                as fahrt_ausgefallen,
+        bool_or(eingeordnet.zustand = 'unbedienter_lauf')   as fahrt_unbedienter_lauf,
+        bool_or(eingeordnet.zustand = 'verkuerzt')          as fahrt_verkuerzt,
+
+        -- coalesce auf false, nicht NULL: eine Fahrt, die sich nicht gegen den Fahrplan
+        -- pruefen liess, ist nicht bestaetigt. NULL waere hier eine dritte Lesart, die
+        -- niemand braucht -- gezaehlt wird ohnehin nur, was belegt ist.
+        coalesce(bool_or(soll_laufweg.laufweg_vollstaendig), false)
+            as fahrt_laufweg_vollstaendig
     from eingeordnet
+    left join {{ ref('int_de_soll_laufweg') }} as soll_laufweg
+      on  soll_laufweg.betriebstag = eingeordnet.betriebstag
+      and soll_laufweg.trip_key    = eingeordnet.trip_key
     group by 1, 2, 3, 4
 
 ),
@@ -233,6 +254,7 @@ select
     fahrten.fahrten,
     fahrten.fahrten_ausgefallen,
     fahrten.fahrten_unbedienter_lauf,
+    fahrten.fahrten_unbedienter_lauf_bestaetigt,
     fahrten.fahrten_verkuerzt,
 
     gezaehlt.halte_mit_ankunft,
@@ -266,6 +288,9 @@ join (
         count(*)                                       as fahrten,
         count(*) filter (where fahrt_ausgefallen)      as fahrten_ausgefallen,
         count(*) filter (where fahrt_unbedienter_lauf) as fahrten_unbedienter_lauf,
+        count(*) filter (
+            where fahrt_unbedienter_lauf and fahrt_laufweg_vollstaendig
+        ) as fahrten_unbedienter_lauf_bestaetigt,
         count(*) filter (where fahrt_verkuerzt)        as fahrten_verkuerzt
     from fahrtzustand
     group by 1, 2, 3

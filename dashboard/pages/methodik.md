@@ -313,6 +313,13 @@ diese Rangfolge:
    die Form, in der ein vollständiger Ausfall in den deutschen Daten ankommt, aber
    **abgeleitet und nicht gemeldet**: die Spalte sagt, was beobachtet wurde, nicht, dass
    der Zug nicht fuhr. Deshalb steht sie neben Nummer 1 und nicht darin.
+
+   Für einen Teil dieser Fahrten lässt sich der Zweifel ausräumen. Deckt der beobachtete
+   Laufweg den **planmäßigen vollständig** ab, wurde nicht bloß ein gestrichenes Ende
+   gesehen. Verglichen wird gegen die zum Betriebstag **gültige** Fahrplan-Version — nie
+   gegen die neueste, denn der Laufweg einer Fahrt ändert sich mit dem Fahrplan. Die
+   Tabelle je Linie auf der Seite [Pünktlichkeit](/puenktlichkeit) weist beide Zahlen
+   nebeneinander aus; die Differenz ist die Reichweite der Beobachtung.
 3. **Laufweg gekappt** — ein ausgelassener Halt am Anfang oder Ende des Laufs. Der Zug
    fuhr, aber nicht die ganze Strecke. Für Reisende an den entfallenen Bahnhöfen ist das
    ein vollständiger Ausfall; in einer Ausfallquote je Zug taucht es meist nicht auf.

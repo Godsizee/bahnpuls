@@ -329,6 +329,17 @@ models:
           addiert werden, ohne dass man weiß, was man addiert.
         tests:
           - not_null
+      - name: fahrten_unbedienter_lauf_bestaetigt
+        description: >
+          Teilmenge von `fahrten_unbedienter_lauf`, bei der der beobachtete Laufweg den
+          planmäßigen **vollständig deckt** (`int_de_soll_laufweg`). Nur dort ist
+          ausgeschlossen, dass bloß das gestrichene Ende einer sonst gefahrenen Fahrt
+          beobachtet wurde.
+
+          Die Differenz zu `fahrten_unbedienter_lauf` ist keine Ungenauigkeit, die man
+          wegrechnet — sie ist die Reichweite der Beobachtung und gehört ausgewiesen.
+        tests:
+          - not_null
       - name: fahrten_verkuerzt
         description: Fahrten mit mindestens einem ausgelassenen Halt am Laufwegsrand.
         tests:
