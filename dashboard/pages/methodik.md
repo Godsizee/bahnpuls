@@ -1,6 +1,7 @@
 ---
 title: Methodik
 description: Wie die Kennzahlen gerechnet werden — und was sie bewusst nicht behaupten
+sidebar_position: 3
 ---
 
 Eine Zahl ohne offengelegte Definition ist eine Behauptung. Diese Seite beschreibt jede
@@ -196,7 +197,7 @@ Tagesmittelwerten gemittelt — sonst zählte ein Sonntag so viel wie ein Werkta
 tatsächlich gemessen kennzeichnet. Prognostizierte oder geschätzte Zeiten werden nicht als
 Ist verwendet, auch wenn sie vorliegen.
 
-**Eigene GTFS-Realtime-Daten** (in Vorbereitung): Die Quelle liefert fortlaufend
+**Eigene GTFS-Realtime-Daten:** Die Quelle liefert fortlaufend
 Prognose-Schnappschüsse. Als Ist-Wert gilt der zeitlich letzte Schnappschuss, der
 höchstens **fünf Minuten nach** dem prognostizierten Ereigniszeitpunkt eingetroffen ist.
 Die Karenz fängt ab, dass die letzte Meldung leicht nach dem Ereignis eintrifft. Der Wert
@@ -213,10 +214,17 @@ wo im Netz Verspätung entsteht, und nicht, wer sie zu verantworten hat.
 
 ## Quellen
 
+- Deutsche Echtzeitdaten: [gtfs.de](https://gtfs.de), lizenziert unter CC BY-SA 4.0.
+- Deutsche Fahrplandaten: [gtfs.de](https://gtfs.de) auf Grundlage des NeTEx-Datensatzes
+  des DELFI e. V., lizenziert unter CC BY 4.0.
 - Schweizer Ist-Daten: [opentransportdata.swiss](https://opentransportdata.swiss) als
   Bezugsort der Rohdaten.
-- Deutsche Fahrplan- und Echtzeitdaten: [gtfs.de](https://gtfs.de), lizenziert unter
-  CC BY-SA 4.0.
 
-Die vollständige Lizenzseite mit Attribution, Weitergabebedingungen und Impressum folgt
-vor der Veröffentlichung.
+Vollständige Attribution, die Bedingungen für eine Weiterverwendung und die Lizenz des
+Codes stehen auf der Seite [Lizenz und Quellen](/lizenz).
+
+---
+
+Daten von [gtfs.de](https://gtfs.de) (CC BY-SA 4.0 bzw. CC BY 4.0) — vollständige
+Angaben unter [Lizenz und Quellen](/lizenz) · [Impressum](/impressum) ·
+[Datenschutz](/datenschutz)

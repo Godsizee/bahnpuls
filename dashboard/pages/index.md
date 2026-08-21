@@ -1,6 +1,7 @@
 ---
 title: Bahnpuls
 description: Wo Verspätung im Schienenverkehr entsteht — auf der Strecke oder im Bahnhof
+sidebar_position: 1
 ---
 
 Ein Zug kommt zwölf Minuten zu spät an. Das steht in jeder Statistik. Was nirgends steht:
@@ -194,3 +195,9 @@ drei sind Betrieb und gehören zum Bild.
 Wie eine einzelne Fahrt Halt für Halt verläuft, zeigt die Seite
 [Laufweg einer Fahrt](/laufweg). Wer genau wissen will, wie gerechnet wird — mit allen
 Annahmen und ihren Grenzen —, findet das auf der Seite [Methodik](/methodik).
+
+---
+
+Daten von [gtfs.de](https://gtfs.de) (CC BY-SA 4.0 bzw. CC BY 4.0) — vollständige
+Angaben unter [Lizenz und Quellen](/lizenz) · [Impressum](/impressum) ·
+[Datenschutz](/datenschutz)

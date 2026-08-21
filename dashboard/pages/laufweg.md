@@ -1,6 +1,7 @@
 ---
 title: Laufweg einer Fahrt
 description: Der Verspätungsverlauf einer einzelnen Fahrt, zerlegt in Laufzeit- und Haltezeitanteil
+sidebar_position: 2
 ---
 
 Eine einzelne Fahrt, von Halt zu Halt nachgezeichnet. Statt einer Zahl am Ende — „zwölf
@@ -192,3 +193,9 @@ erfinden, die plausibel aussieht.
     <Column id=stand_min title="Verspätung danach (Min.)" fmt='#,##0.0' />
     <Column id=hinweis title="Warum keine Zahl" />
 </DataTable>
+
+---
+
+Daten von [gtfs.de](https://gtfs.de) (CC BY-SA 4.0 bzw. CC BY 4.0) — vollständige
+Angaben unter [Lizenz und Quellen](/lizenz) · [Impressum](/impressum) ·
+[Datenschutz](/datenschutz)
