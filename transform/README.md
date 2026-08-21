@@ -188,9 +188,51 @@ Vorwärtsladen gewollt.
 ## Lauf gegen die Fixtures
 
 ```bash
-dbt build --vars '{"ch_istdaten_glob": "tests/fixtures/ch/*_istdaten.csv", "de_gtfsrt_glob": "tests/fixtures/de/*.parquet"}'
+dbt build --vars '{"ch_istdaten_glob": "tests/fixtures/ch/*_istdaten.csv", "de_gtfsrt_glob": "tests/fixtures/de/*.parquet", "de_static_dir": "tests/fixtures/de_static"}'
 ```
 
-Erwartung: alle Tests grün bis auf `assert_keine_stille_zeitumstellung`, das mit
-`severity: warn` konfiguriert ist und die Halte der Rücksprungnacht meldet — so gewollt.
+Ohne `de_static_dir` bricht `stg_de_static` ab — es sucht dann unter `../data/static/`
+nach einem Fahrplanarchiv, das lokal niemand hat.
+
+Erwartung: alle Tests grün bis auf drei Warnungen. `assert_keine_stille_zeitumstellung`
+meldet die Halte der Rücksprungnacht, die beiden `accepted_range`-Warnungen die
+unplausiblen Verspätungswerte der DE-Fixture — alle drei mit `severity: warn`, alle drei
+so gewollt: sie beschreiben Eigenschaften der Quelle, keine Modellfehler, und dürfen
+deshalb den Seitenbau nicht anhalten.
+
+## Dubletten in den Rohdaten sind unschädlich — aber nur hier
+
+Beim Redeploy startet Coolify den neuen Container, bevor er den alten stoppt. Am
+2026-08-20 schrieben beide zwei Minuten lang gleichzeitig auf dasselbe Volume, dazu kommt
+der Kaltstart-Burst des neuen Containers, dessen Dedup-Tracker leer ist. Dieselbe
+Momentaufnahme steht danach mehrfach in den Rohdaten. Das ist Absicht in dem Sinne, dass
+es die bessere von zwei Möglichkeiten ist: eine Lücke wäre nicht nachlieferbar, eine
+Dublette schon (Regel 1).
+
+**Gemessen, nicht angenommen** (2026-08-21): derselbe Fixture-Bestand einmal und zweimal
+geladen, beide Male `--full-refresh`.
+
+| | einfach | doppelt |
+|---|---|---|
+| `stg_de_gtfsrt` | 14 Zeilen | 28 Zeilen |
+| `int_de_stop_events` | 12 | 12 |
+| `mart_zuglauf`, Summe `delay_an_sek` | 660 | 660 |
+| `mart_verspaetungsentstehung` | 2 | 2 |
+| `mart_datenqualitaet`, Halte | 12 | 12 |
+
+Die Rohschicht verdoppelt sich, **kein einziger Mart ändert sich**. Der Grund ist nicht
+eine Deduplizierung, sondern das Korn: `int_de_stop_events` verdichtet über
+`(trip_key, stop_sequence)` — mit `distinct`, `qualify row_number()` und `max()`, und
+jede dieser drei Formen verschluckt eine identische Zweitzeile. Ein `dedupe`-Schritt in
+`stg_de_gtfsrt` wäre damit wirkungslose Arbeit.
+
+**Die Grenze steht genau dort, wo über Rohzeilen gezählt wird.** Ein Modell, das
+Momentaufnahmen zählt statt sie zu verdichten — Änderungsrate, Poll-Abdeckung, die noch
+fehlenden Feed-Lücken aus BPULS-024 —, zählt das Überlappungsfenster jedes Deploys
+doppelt. Solche Modelle müssen auf
+`(trip_id, start_date, stop_sequence, snapshot_timestamp)` deduplizieren; die Verdichtung
+auf Halt-Ereignisse muss es nicht.
+
+Festgenagelt ist das im Unit-Test `int_de_dubletten_aendern_das_ergebnis_nicht`. Er ist
+gegengeprüft: ohne das `distinct` in der `halte`-CTE schlägt er fehl.
 

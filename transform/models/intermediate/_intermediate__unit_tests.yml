@@ -54,3 +54,44 @@ unit_tests:
         - {trip_key: 't4', nach_stop_sequence: 1, von_stop_sequence: null, laufzeit_delta_sek: null, haltezeit_delta_sek: null}
         # Negativer Laufzeitanteil ist Pufferabbau (A2), kein Fehler und keine Null.
         - {trip_key: 't4', nach_stop_sequence: 2, von_stop_sequence: 1, laufzeit_delta_sek: -120, haltezeit_delta_sek: 60}
+
+  - name: int_de_dubletten_aendern_das_ergebnis_nicht
+    description: >
+      Beim Redeploy startet Coolify den neuen Container, bevor es den alten stoppt —
+      am 2026-08-20 schrieben beide zwei Minuten lang gleichzeitig auf dasselbe
+      Volume, dazu der Kaltstart-Burst des neuen Containers mit leerem
+      Dedup-Tracker. Dieselbe Momentaufnahme steht danach mehrfach in den Rohdaten.
+      Das ist die bessere von zwei Möglichkeiten (eine Lücke wäre nicht
+      nachlieferbar, eine Dublette schon) und betrifft **jeden** künftigen Deploy.
+
+      Hier steht deshalb jede Momentaufnahme doppelt. Die Verdichtung auf ein
+      Halt-Ereignis muss davon unberührt bleiben — nicht weil dedupliziert würde,
+      sondern weil das Korn der Verdichtung (trip_key, stop_sequence) die Dublette
+      verschluckt. Der Test nagelt genau diese Eigenschaft fest: wer die Verdichtung
+      später gegen eine Aggregation über Rohzeilen tauscht, zählt sonst still doppelt.
+    model: int_de_stop_events
+    given:
+      - input: ref('stg_de_static')
+        rows:
+          - {art: 'stop',  schluessel: 'A', bezeichnung: 'Bahnhof A'}
+          - {art: 'stop',  schluessel: 'B', bezeichnung: 'Bahnhof B'}
+          - {art: 'linie', schluessel: 'trip1', bezeichnung: 'RE 5'}
+      - input: ref('stg_de_gtfsrt')
+        rows:
+          # Starthalt, kein Ankunftsereignis. Zwei Momentaufnahmen, jede doppelt.
+          - {betriebstag: '2026-08-13', trip_key: '2026-08-13_trip1', trip_id: 'trip1', stop_sequence: 1, stop_id: 'A', soll_an: null, soll_ab: '2026-08-13 10:00:00', ist_an: null, ist_ab: '2026-08-13 10:00:30', delay_an_sek: null, delay_ab_sek: 30,  halt_ausgelassen: false, zug_ausgefallen: false, snapshot_ts: '2026-08-13 09:50:00', quelle: 'de_gtfsrt'}
+          - {betriebstag: '2026-08-13', trip_key: '2026-08-13_trip1', trip_id: 'trip1', stop_sequence: 1, stop_id: 'A', soll_an: null, soll_ab: '2026-08-13 10:00:00', ist_an: null, ist_ab: '2026-08-13 10:00:30', delay_an_sek: null, delay_ab_sek: 30,  halt_ausgelassen: false, zug_ausgefallen: false, snapshot_ts: '2026-08-13 09:50:00', quelle: 'de_gtfsrt'}
+          - {betriebstag: '2026-08-13', trip_key: '2026-08-13_trip1', trip_id: 'trip1', stop_sequence: 1, stop_id: 'A', soll_an: null, soll_ab: '2026-08-13 10:00:00', ist_an: null, ist_ab: '2026-08-13 10:02:00', delay_an_sek: null, delay_ab_sek: 120, halt_ausgelassen: false, zug_ausgefallen: false, snapshot_ts: '2026-08-13 09:58:00', quelle: 'de_gtfsrt'}
+          - {betriebstag: '2026-08-13', trip_key: '2026-08-13_trip1', trip_id: 'trip1', stop_sequence: 1, stop_id: 'A', soll_an: null, soll_ab: '2026-08-13 10:00:00', ist_an: null, ist_ab: '2026-08-13 10:02:00', delay_an_sek: null, delay_ab_sek: 120, halt_ausgelassen: false, zug_ausgefallen: false, snapshot_ts: '2026-08-13 09:58:00', quelle: 'de_gtfsrt'}
+          # Zwischenhalt. Die dritte Momentaufnahme liegt jenseits der Karenz: sie
+          # entscheidet noch, ob der Wert endgueltig ist, aber nicht mehr, wie hoch.
+          - {betriebstag: '2026-08-13', trip_key: '2026-08-13_trip1', trip_id: 'trip1', stop_sequence: 2, stop_id: 'B', soll_an: '2026-08-13 10:20:00', soll_ab: '2026-08-13 10:22:00', ist_an: '2026-08-13 10:22:00', ist_ab: '2026-08-13 10:24:00', delay_an_sek: 120, delay_ab_sek: 120, halt_ausgelassen: false, zug_ausgefallen: false, snapshot_ts: '2026-08-13 10:05:00', quelle: 'de_gtfsrt'}
+          - {betriebstag: '2026-08-13', trip_key: '2026-08-13_trip1', trip_id: 'trip1', stop_sequence: 2, stop_id: 'B', soll_an: '2026-08-13 10:20:00', soll_ab: '2026-08-13 10:22:00', ist_an: '2026-08-13 10:22:00', ist_ab: '2026-08-13 10:24:00', delay_an_sek: 120, delay_ab_sek: 120, halt_ausgelassen: false, zug_ausgefallen: false, snapshot_ts: '2026-08-13 10:05:00', quelle: 'de_gtfsrt'}
+          - {betriebstag: '2026-08-13', trip_key: '2026-08-13_trip1', trip_id: 'trip1', stop_sequence: 2, stop_id: 'B', soll_an: '2026-08-13 10:20:00', soll_ab: '2026-08-13 10:22:00', ist_an: '2026-08-13 10:23:00', ist_ab: '2026-08-13 10:26:00', delay_an_sek: 180, delay_ab_sek: 240, halt_ausgelassen: false, zug_ausgefallen: false, snapshot_ts: '2026-08-13 10:24:00', quelle: 'de_gtfsrt'}
+          - {betriebstag: '2026-08-13', trip_key: '2026-08-13_trip1', trip_id: 'trip1', stop_sequence: 2, stop_id: 'B', soll_an: '2026-08-13 10:20:00', soll_ab: '2026-08-13 10:22:00', ist_an: '2026-08-13 10:23:00', ist_ab: '2026-08-13 10:26:00', delay_an_sek: 180, delay_ab_sek: 240, halt_ausgelassen: false, zug_ausgefallen: false, snapshot_ts: '2026-08-13 10:24:00', quelle: 'de_gtfsrt'}
+          - {betriebstag: '2026-08-13', trip_key: '2026-08-13_trip1', trip_id: 'trip1', stop_sequence: 2, stop_id: 'B', soll_an: '2026-08-13 10:20:00', soll_ab: '2026-08-13 10:22:00', ist_an: '2026-08-13 10:23:00', ist_ab: '2026-08-13 10:26:00', delay_an_sek: 180, delay_ab_sek: 240, halt_ausgelassen: false, zug_ausgefallen: false, snapshot_ts: '2026-08-13 10:30:00', quelle: 'de_gtfsrt'}
+          - {betriebstag: '2026-08-13', trip_key: '2026-08-13_trip1', trip_id: 'trip1', stop_sequence: 2, stop_id: 'B', soll_an: '2026-08-13 10:20:00', soll_ab: '2026-08-13 10:22:00', ist_an: '2026-08-13 10:23:00', ist_ab: '2026-08-13 10:26:00', delay_an_sek: 180, delay_ab_sek: 240, halt_ausgelassen: false, zug_ausgefallen: false, snapshot_ts: '2026-08-13 10:30:00', quelle: 'de_gtfsrt'}
+    expect:
+      rows:
+        - {trip_key: '2026-08-13_trip1', stop_sequence: 1, stop_name: 'Bahnhof A', route_kurzname: 'RE 5', delay_an_sek: null, delay_ab_sek: 120, ist_endgueltig: false}
+        - {trip_key: '2026-08-13_trip1', stop_sequence: 2, stop_name: 'Bahnhof B', route_kurzname: 'RE 5', delay_an_sek: 180, delay_ab_sek: 240, ist_endgueltig: true}
