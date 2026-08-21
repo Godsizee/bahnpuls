@@ -211,3 +211,123 @@ models:
           arguments:
             combination_of_columns: ['betriebstag', 'quelle']
 
+
+  - name: mart_puenktlichkeit
+    description: >
+      A5 (BPULS-032): Pünktlichkeit und das, was aus Pünktlichkeitsquoten herausfällt,
+      nebeneinander. Korn: Betriebstag × Quelle × Linie × Schwelle. Fünf Schwellen
+      (1, 3, 6, 15, 60 Minuten) statt einer Zahl — die branchenübliche 6-Minuten-Grenze
+      als Einzelwert verdeckt genau die Fälle, um die es Reisenden geht.
+
+      **Über Schwellen hinweg wird nie summiert.** Jede Zeile ist eine eigene
+      Auswertung derselben Grundmenge; alle zählbaren Spalten außer `halte_puenktlich`
+      wiederholen sich je Gruppe fünfmal.
+
+      **Der Nenner ist der beobachtete Laufweg, nicht der Fahrplan.** Ein Halt, den der
+      Feed nie erwähnt hat, fehlt auch hier. Die Quoten sind damit obere Schranken.
+    columns:
+      - name: betriebstag
+        description: Betriebstag, nicht Kalendertag. Partitionsschlüssel des inkrementellen Laufs.
+        tests:
+          - not_null
+      - name: quelle
+        tests:
+          - not_null
+      - name: route_kurzname
+        description: >
+          Linie. Bleibt NULL, wo keine Fahrplan-Version die Fahrt kennt — dann steht
+          hier eine eigene Gruppe „ohne Liniennummer", keine Zuordnung zu einer
+          fremden Linie.
+      - name: schwelle_sek
+        description: Pünktlichkeitsschwelle in Sekunden. Pünktlich heißt `delay_an_sek < schwelle_sek`.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [60, 180, 360, 900, 3600]
+                quote: false
+      - name: halte_mit_ankunft
+        description: >
+          Nenner der ehrlichen Quote: alle beobachteten Halte, an denen planmäßig eine
+          Ankunft vorgesehen ist — einschließlich der ausgefallenen, ausgelassenen und
+          der ohne Meldung. Der erste Halt eines Laufs zählt nie mit, dort kommt
+          planmäßig nichts an.
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+      - name: halte_gemessen
+        description: >
+          Nenner der üblichen Quote: nur Halte, für die eine Ankunftsverspätung
+          vorliegt.
+        tests:
+          - not_null
+      - name: halte_puenktlich
+        description: Teilmenge von `halte_gemessen` mit `delay_an_sek < schwelle_sek`.
+        tests:
+          - not_null
+      - name: halte_ausgefallen
+        description: Halte ausgefallener Züge. Nie als Verspätung 0 (CLAUDE.md Regel 8).
+        tests:
+          - not_null
+      - name: halte_verkuerzt
+        description: >
+          Ausgelassene Halte am Anfang oder Ende des Laufs — der Zug fährt, aber
+          verkürzt. Für Reisende an diesen Bahnhöfen ein vollständiger Ausfall.
+        tests:
+          - not_null
+      - name: halte_ausgelassen
+        description: Ausgelassene Halte mitten im Lauf.
+        tests:
+          - not_null
+      - name: halte_mehrdeutig
+        description: Halte in der Umstellungsstunde — nicht bestimmbar, nicht unpünktlich.
+        tests:
+          - not_null
+      - name: halte_ohne_meldung
+        description: >
+          Planmäßig vorhanden, nicht ausgefallen, nicht ausgelassen, nicht mehrdeutig —
+          und trotzdem keine Ist-Meldung. Nur hier bedeutet ein Anstieg ein Problem der
+          Erhebung statt des Betriebs.
+        tests:
+          - not_null
+      - name: fahrten
+        description: Fahrten der Gruppe. Je Fahrt einmal gezählt, nicht je Halt.
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 1
+      - name: fahrten_ausgefallen
+        description: >
+          Vollständig ausgefallene Fahrten. Zählt auch dann, wenn die Fahrt nur an
+          ihrem ersten Halt beobachtet wurde und deshalb keinen Ankunftshalt beisteuert.
+        tests:
+          - not_null
+      - name: fahrten_verkuerzt
+        description: Fahrten mit mindestens einem ausgelassenen Halt am Laufwegsrand.
+        tests:
+          - not_null
+      - name: quote_gemessen
+        description: >
+          `halte_puenktlich / halte_gemessen` — die übliche Quote. NULL, wenn nichts
+          gemessen wurde; das ist keine Pünktlichkeit von 0.
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1
+      - name: quote_planmaessig
+        description: >
+          `halte_puenktlich / halte_mit_ankunft` — die ehrliche Quote. Liegt nie über
+          `quote_gemessen`; die Lücke zwischen beiden ist der Befund dieser Analyse.
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: ['betriebstag', 'quelle', 'route_kurzname', 'schwelle_sek']

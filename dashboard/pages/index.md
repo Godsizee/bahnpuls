@@ -193,8 +193,10 @@ drei sind Betrieb und gehören zum Bild.
 ---
 
 Wie eine einzelne Fahrt Halt für Halt verläuft, zeigt die Seite
-[Laufweg einer Fahrt](/laufweg). Wer genau wissen will, wie gerechnet wird — mit allen
-Annahmen und ihren Grenzen —, findet das auf der Seite [Methodik](/methodik).
+[Laufweg einer Fahrt](/laufweg). Was passiert, wenn ein Zug gar nicht erst fährt — und
+warum Pünktlichkeitsquoten dadurch besser werden —, steht unter
+[Pünktlichkeit und Ausfälle](/puenktlichkeit). Wer genau wissen will, wie gerechnet wird
+— mit allen Annahmen und ihren Grenzen —, findet das auf der Seite [Methodik](/methodik).
 
 ---
 

@@ -81,3 +81,51 @@ unit_tests:
         - {betriebstag: "2026-08-11", von_stop_id: "A", nach_stop_id: "B", zuege: 2,
            laufzeit_delta_sek_summe: 300, laufzeit_messwerte: 1, laufzeit_delta_sek_je_zug: 300.0,
            ausgefallene_halte: 1, ausgelassene_halte: 0, halte_zeitumstellung: 0}
+
+  # Die sechs Zustände eines Halts lassen sich in echten Daten nicht auf Zuruf
+  # nebeneinander herstellen — ein ausgelassener Halt mitten im Lauf, ein verkürzter
+  # Laufweg, ein Ausfall, die Umstellungsstunde und eine fehlende Meldung gleichzeitig
+  # kommen in keiner Fixture zusammen vor. Genau dafür ein Unit-Test.
+  #
+  # Der Fall, auf den es ankommt, ist der Unterschied zwischen **ausgelassen** und
+  # **verkürzt**: beide sind `halt_ausgelassen`, aber ein übersprungener Halt mitten
+  # im Lauf ist ein anderer Vorgang als ein Laufweg, der vorne oder hinten gekappt
+  # wurde. Eine Verwechslung fiele nirgends auf — die Summe stimmt in beiden Fällen.
+  - name: mart_puenktlichkeit_trennt_die_sechs_zustaende
+    model: mart_puenktlichkeit
+    overrides:
+      macros:
+        is_incremental: false
+    given:
+      - input: ref('mart_zuglauf')
+        rows:
+          # Fahrt A deckt vier der sechs Zustände ab. Die Halte am Rand und in der
+          # Mitte sind **absichtlich ungleich verteilt** (zwei gekappte, ein
+          # ausgelassener): bei gleicher Zahl bliebe eine Verwechslung der beiden
+          # Bedingungen unbemerkt, weil sich dann nur die Etiketten tauschen und die
+          # Summen gleich bleiben. Gegengeprüft — mit vertauschter Bedingung schlägt
+          # dieser Test fehl.
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'a', halt_nr: 1, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'a', halt_nr: 2, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'a', halt_nr: 3, delay_an_sek: 100,  halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'a', halt_nr: 4, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'a', halt_nr: 5, delay_an_sek: 400,  halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'a', halt_nr: 6, delay_an_sek: null, halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'a', halt_nr: 7, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false}
+          # Fahrt B: vollständig ausgefallen.
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'b', halt_nr: 1, delay_an_sek: null, halt_ausgelassen: false, zug_ausgefallen: true,  zeitumstellung_mehrdeutig: false}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'b', halt_nr: 2, delay_an_sek: null, halt_ausgelassen: false, zug_ausgefallen: true,  zeitumstellung_mehrdeutig: false}
+          # Fahrt C: ein Halt in der Umstellungsstunde — nicht bestimmbar, nicht unpünktlich.
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'c', halt_nr: 1, delay_an_sek: null, halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'c', halt_nr: 2, delay_an_sek: null, halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: true}
+    expect:
+      # Der erste Halt jeder Fahrt zählt nie mit — dort kommt planmäßig nichts an.
+      # Von elf Zeilen bleiben acht: 2 verkürzt (Halt 2 vorne, Halt 7 hinten),
+      # 1 ausgelassen (Halt 4, mitten im Lauf), 2 gemessen, 1 ohne Meldung,
+      # 1 ausgefallen, 1 mehrdeutig.
+      rows:
+        - {schwelle_sek: 60,   halte_mit_ankunft: 8, halte_ausgefallen: 1, halte_verkuerzt: 2, halte_ausgelassen: 1, halte_mehrdeutig: 1, halte_ohne_meldung: 1, halte_gemessen: 2, halte_puenktlich: 0, fahrten: 3, fahrten_ausgefallen: 1, fahrten_verkuerzt: 1}
+        - {schwelle_sek: 180,  halte_mit_ankunft: 8, halte_ausgefallen: 1, halte_verkuerzt: 2, halte_ausgelassen: 1, halte_mehrdeutig: 1, halte_ohne_meldung: 1, halte_gemessen: 2, halte_puenktlich: 1, fahrten: 3, fahrten_ausgefallen: 1, fahrten_verkuerzt: 1}
+        - {schwelle_sek: 360,  halte_mit_ankunft: 8, halte_ausgefallen: 1, halte_verkuerzt: 2, halte_ausgelassen: 1, halte_mehrdeutig: 1, halte_ohne_meldung: 1, halte_gemessen: 2, halte_puenktlich: 1, fahrten: 3, fahrten_ausgefallen: 1, fahrten_verkuerzt: 1}
+        - {schwelle_sek: 900,  halte_mit_ankunft: 8, halte_ausgefallen: 1, halte_verkuerzt: 2, halte_ausgelassen: 1, halte_mehrdeutig: 1, halte_ohne_meldung: 1, halte_gemessen: 2, halte_puenktlich: 2, fahrten: 3, fahrten_ausgefallen: 1, fahrten_verkuerzt: 1}
+        - {schwelle_sek: 3600, halte_mit_ankunft: 8, halte_ausgefallen: 1, halte_verkuerzt: 2, halte_ausgelassen: 1, halte_mehrdeutig: 1, halte_ohne_meldung: 1, halte_gemessen: 2, halte_puenktlich: 2, fahrten: 3, fahrten_ausgefallen: 1, fahrten_verkuerzt: 1}

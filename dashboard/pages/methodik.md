@@ -1,7 +1,7 @@
 ---
 title: Methodik
 description: Wie die Kennzahlen gerechnet werden — und was sie bewusst nicht behaupten
-sidebar_position: 3
+sidebar_position: 4
 ---
 
 Eine Zahl ohne offengelegte Definition ist eine Behauptung. Diese Seite beschreibt jede
@@ -203,6 +203,67 @@ höchstens **fünf Minuten nach** dem prognostizierten Ereigniszeitpunkt eingetr
 Die Karenz fängt ab, dass die letzte Meldung leicht nach dem Ereignis eintrifft. Der Wert
 ist eine Annahme und beeinflusst jede nachgelagerte Kennzahl; er wird hier ausgewiesen und
 bei einer Änderung hier korrigiert.
+
+## Pünktlichkeit und Ausfälle
+
+Die Seite [Pünktlichkeit und Ausfälle](/puenktlichkeit) führt zwei Quoten nebeneinander,
+die sich **nur im Nenner** unterscheiden. Der Zähler ist bei beiden derselbe: Halte, an
+denen der Zug ankam und dabei weniger als die gewählte Schwelle zu spät war.
+
+- **„nur gefahrene Halte"** — Nenner sind die Halte, für die eine Ankunftsverspätung
+  vorliegt. Das ist die übliche Lesart und beantwortet: wie pünktlich waren die Züge, die
+  fuhren?
+- **„alle planmäßigen Halte"** — Nenner sind alle Halte, an denen planmäßig ein Zug
+  ankommen sollte, einschließlich der ausgefallenen, der ausgelassenen und derer ohne
+  Meldung. Das beantwortet: kam mein Zug, und kam er rechtzeitig?
+
+Die zweite Quote liegt nie über der ersten. Der Abstand ist keine Ungenauigkeit, sondern
+die Größe, um die es geht.
+
+**Pünktlich heißt: weniger als die Schwelle zu spät.** Zu früh gilt als pünktlich — ein
+Zug vor der Zeit ist kein Pünktlichkeitsproblem, sondern gehört zum Thema Fahrplanreserve.
+Ausgewiesen werden 1, 3, 6, 15 und 60 Minuten. Die branchenübliche Grenze liegt bei unter
+sechs Minuten; als einzige Zahl verdeckt sie, was Reisende trifft, deshalb steht hier die
+ganze Kurve.
+
+**Der erste Halt eines Laufs zählt nie mit.** Dort kommt planmäßig nichts an. Ihn
+mitzuzählen hieße, eine Lücke zu messen, wo der Fahrplan nichts vorsieht — und die Quote
+sänke allein dadurch, dass ein Tag mehr kurze Läufe enthält. Fällt eine Fahrt aus, die nur
+an ihrem ersten Halt beobachtet wurde, erscheint sie deshalb in der Zahl der ausgefallenen
+**Fahrten**, nicht in der Zahl der ausgefallenen **Halte**.
+
+### Wohin ein Halt gezählt wird
+
+Jeder planmäßige Halt landet in **genau einer** von sechs Schubladen. Wo mehrere Gründe
+zuträfen — ein Zug kann ausfallen und zugleich in der Umstellungsstunde liegen —, gilt
+diese Rangfolge:
+
+1. **Zug ausgefallen**
+2. **Laufweg gekappt** — ein ausgelassener Halt am Anfang oder Ende des Laufs. Der Zug
+   fuhr, aber nicht die ganze Strecke. Für Reisende an den entfallenen Bahnhöfen ist das
+   ein vollständiger Ausfall; in einer Ausfallquote je Zug taucht es meist nicht auf.
+3. **Halt ausgelassen** — übersprungen mitten im Lauf.
+4. **Zeitumstellung** — die Stunde gibt es doppelt, die Verspätung ist nicht eindeutig.
+5. **keine Meldung** — planmäßig da, nicht ausgefallen, nicht ausgelassen, nicht
+   mehrdeutig, und trotzdem keine Ist-Zeit. Nur hier bedeutet ein Anstieg ein Problem der
+   Erhebung statt des Betriebs.
+6. **gemessen** — es liegt eine Ankunftsverspätung vor.
+
+Die sechs ergeben zusammen exakt die Zahl der planmäßigen Halte. Anders als bei der
+[Abdeckung](/) auf der Startseite, wo die Gründe sich überschneiden dürfen und deshalb nie
+addiert werden, ist die Zuordnung hier eindeutig.
+
+### Was diese Quoten nicht können
+
+**Der Nenner ist der beobachtete Laufweg, nicht der Fahrplan.** Gezählt werden Halte, die
+in den Daten vorkommen. Ein Zug, der vollständig ausfiel und über den der Echtzeit-Feed
+danach gar nichts mehr meldete, ist in keiner der beiden Quoten enthalten — auch nicht in
+der ehrlicheren.
+
+Beide Quoten sind damit **obere Schranken**: sie können nur besser aussehen als die
+Wirklichkeit, nie schlechter. Zu schließen wäre das erst, wenn die Soll-Halte aus dem
+statischen Fahrplan danebengelegt werden; bis dahin ist die Lücke hier benannt statt
+stillschweigend eingerechnet.
 
 ## Was diese Zahlen nicht sind
 

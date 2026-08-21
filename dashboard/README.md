@@ -82,6 +82,19 @@ Zwei Dinge daran sind nicht beliebig:
 Der eigentliche Umbau — serverseitige Abfrage oder je Fahrt vorbereitete Seiten — bleibt
 offen und ist mit einem statischen Evidence-Build nicht zu haben.
 
+## Auch das Aggregat ist begrenzt
+
+`sources/bahnpuls/puenktlichkeit.sql` liefert die letzten **30 Betriebstage je Quelle**,
+und zwar von Anfang an. Bei rund 300 Linien und fünf Schwellen sind das 1.500 Zeilen je
+Tag, im Jahr über eine halbe Million — dieselbe Rechnung, die die Laufweg-Seite schon
+einmal unbenutzbar gemacht hat. Ein Monat trägt jede Aussage, die die Seite trifft.
+
+Beim Aggregieren über Schwellen ist eine Falle eingebaut: alle Zählspalten außer
+`halte_puenktlich` hängen **nicht** von der Schwelle ab und stehen deshalb fünfmal in der
+Tabelle. Wer sie ohne `where schwelle_sek = …` summiert, zählt jeden Halt fünffach — die
+Zahlen sähen nur größer aus, nichts würde fehlschlagen. Die Seitenabfragen filtern
+deshalb ausdrücklich auf eine Schwelle, wo die Schwelle keine Rolle spielt.
+
 ## Wenn ein Bahnhof zweimal im Laufweg steht
 
 Kopfmachen, Ringlauf, Wendefahrt: Ein Zug kann denselben Bahnhof zweimal anfahren. Die
