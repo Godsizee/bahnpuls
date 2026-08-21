@@ -1,7 +1,7 @@
 ---
 title: Methodik
 description: Wie die Kennzahlen gerechnet werden — und was sie bewusst nicht behaupten
-sidebar_position: 5
+sidebar_position: 6
 ---
 
 Eine Zahl ohne offengelegte Definition ist eine Behauptung. Diese Seite beschreibt jede
@@ -203,6 +203,39 @@ höchstens **fünf Minuten nach** dem prognostizierten Ereigniszeitpunkt eingetr
 Die Karenz fängt ab, dass die letzte Meldung leicht nach dem Ereignis eintrifft. Der Wert
 ist eine Annahme und beeinflusst jede nachgelagerte Kennzahl; er wird hier ausgewiesen und
 bei einer Änderung hier korrigiert.
+
+## Fahrplanreserve: derselbe Zug, zwei Befunde
+
+Fahrpläne enthalten Regelzuschläge — Fahrzeit- und Haltezeitreserve. Ein negativer
+Laufzeitanteil heißt deshalb nicht „Messfehler", sondern: der Zug hat Reserve gezogen.
+Die Seite [Fahrplanreserve](/puffer) wertet genau das aus.
+
+**Entscheidend ist, mit welcher Verspätung ein Zug in den Abschnitt einfährt.** Dieselbe
+Beobachtung bedeutet zwei gegensätzliche Dinge:
+
+- **Verspätet eingefahren und aufgeholt** — die Reserve hat gewirkt. Ein hoher Anteil ist
+  ein gutes Zeichen.
+- **Pünktlich eingefahren und trotzdem früher angekommen** — der Zug brauchte den
+  Zuschlag nicht. Ein hoher Anteil heißt, dass die Fahrzeit großzügiger bemessen ist als
+  nötig; der Zug steht dann am nächsten Halt und wartet.
+
+Eine gemeinsame Kennzahl „Anteil aufholender Züge" nähme für beide Fälle denselben Wert
+an. Beide werden deshalb getrennt gezählt und nie summiert.
+
+**Als pünktlich eingefahren gilt eine Eingangsverspätung von höchstens 60 Sekunden.**
+Das ist eine Annahme, sie entscheidet die Zuordnung, und sie steht hier, weil sie das tut.
+Die Eingangsverspätung wird nicht neu gemessen, sondern aus den vorhandenen Werten
+gerechnet: Ankunftsverspätung minus Laufzeitanteil ist genau die Abfahrtsverspätung am
+Vorhalt. Ist eines von beiden nicht bestimmbar, fällt die Durchfahrt aus der Auswertung —
+sie wird nicht als „pünktlich" gezählt.
+
+**Eine zu knapp bemessene Fahrzeit erkennt man am Zeitverlust, nicht am Aufholen.** Wo
+fast jeder Zug Zeit verliert, ist die angesetzte Fahrzeit zu kurz. Wo fast jeder Zug
+schneller ist als geplant, ist sie zu großzügig. Das klingt selbstverständlich, wird aber
+leicht verwechselt, weil beides als „Puffer" bezeichnet wird.
+
+Ausgewertet wird der **Laufzeitanteil** zwischen zwei Bahnhöfen. Die Haltezeitreserve im
+Bahnhof bleibt hier außen vor.
 
 ## Engpässe: Abschnitt, Tagesstunde, Richtung
 

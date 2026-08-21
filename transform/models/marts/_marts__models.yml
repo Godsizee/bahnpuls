@@ -396,3 +396,85 @@ models:
       - dbt_utils.unique_combination_of_columns:
           arguments:
             combination_of_columns: ['betriebstag', 'quelle', 'von_bezeichnung', 'nach_bezeichnung', 'stunde']
+
+  - name: mart_pufferbilanz
+    description: >
+      A2 (BPULS-034): Pufferabbau und Fahrplanqualität. Korn: Betriebstag × Quelle ×
+      Linie × Abschnitt (von → nach), Abschnitt über den Namen geschlüsselt.
+
+      **Der Kern ist die Trennung nach Eingangszustand.** Ein Zug, der schneller wird
+      als der Fahrplan vorsieht, bedeutet zwei gegensätzliche Dinge: verspätet
+      eingefahren und aufgeholt heißt, die Reserve hat gewirkt; pünktlich eingefahren
+      und trotzdem früher angekommen heißt, die Fahrzeit ist zu großzügig bemessen.
+      Beide werden getrennt gezählt und nie summiert.
+
+      Eine zu **knapp** bemessene Fahrzeit erkennt man dagegen an `verloren`, nicht an
+      `aufgeholt`.
+    columns:
+      - name: betriebstag
+        tests:
+          - not_null
+      - name: quelle
+        tests:
+          - not_null
+      - name: route_kurzname
+        description: Linie. NULL, wo keine Fahrplan-Version die Fahrt kennt.
+      - name: von_bezeichnung
+        tests:
+          - not_null
+      - name: nach_bezeichnung
+        tests:
+          - not_null
+      - name: abschnitte_bewertbar
+        description: >
+          Abschnittsdurchfahrten mit bestimmbarem Laufzeitanteil **und** bestimmbarem
+          Eingangszustand. Nur diese lassen sich einem der beiden Fälle zuordnen.
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 1
+      - name: aufgeholt
+        description: Laufzeitanteil negativ — der Zug wurde schneller als der Fahrplan vorsieht.
+        tests:
+          - not_null
+      - name: verloren
+        description: >
+          Laufzeitanteil positiv. Ein hoher Anteil hier ist das Kennzeichen einer zu
+          knapp bemessenen Fahrzeit.
+        tests:
+          - not_null
+      - name: unveraendert
+        tests:
+          - not_null
+      - name: verspaetet_eingefahren
+        description: Eingangsverspätung über der Pünktlichkeitsgrenze (Vorgabe 60 s, `a2_puenktlich_grenze_sek`).
+        tests:
+          - not_null
+      - name: puenktlich_eingefahren
+        tests:
+          - not_null
+      - name: reserve_genutzt
+        description: >
+          Verspätet eingefahren und Verspätung abgebaut — die Reserve hat gewirkt. Ein
+          hoher Anteil ist ein gutes Zeichen.
+        tests:
+          - not_null
+      - name: reserve_ungenutzt
+        description: >
+          Pünktlich eingefahren und trotzdem früher angekommen — der Zug brauchte den
+          Zuschlag nicht. Ein hoher Anteil heißt: Kapazität, die im Fahrplan verschenkt
+          wird.
+        tests:
+          - not_null
+      - name: bilanz_sek
+        description: >
+          Nettosumme der Laufzeitanteile. Positiv: hier geht Zeit verloren. Der Saldo
+          allein verschweigt, ob sich zwei große Effekte aufheben — deshalb stehen die
+          Einzelrichtungen daneben.
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: ['betriebstag', 'quelle', 'route_kurzname', 'von_bezeichnung', 'nach_bezeichnung']

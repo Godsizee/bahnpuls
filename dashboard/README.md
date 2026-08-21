@@ -97,6 +97,14 @@ verwendet mehrere gleichzeitig — über die ID zerfiele ein physischer Engpass 
 Zeilen mit je einem Bruchteil der Züge, und die Rangliste zeigte nicht den schlimmsten
 Abschnitt, sondern den mit dem einheitlichsten Namensraum.
 
+## Warum die Fahrplanreserve zwei Quellen hat
+
+`pufferbilanz.sql` (Abschnitte) ist wie die Engpass-Quelle auf die 200 meistbefahrenen
+Abschnitte begrenzt. `puffer_linien.sql` ist **nicht** daraus aggregiert, obwohl es
+naheläge: die Liniensicht würde eine Linie dann nur auf ihrem befahrensten Teil
+beurteilen — ausgerechnet die Nebenstrecke, auf der es klemmt, fiele heraus. Eine Zeile
+je Linie ist ohnehin klein genug, um ohne Begrenzung auszukommen.
+
 ## Auch das Aggregat ist begrenzt
 
 `sources/bahnpuls/puenktlichkeit.sql` liefert die letzten **30 Betriebstage je Quelle**,
