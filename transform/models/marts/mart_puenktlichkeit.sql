@@ -46,6 +46,15 @@
 -- ist damit eine **obere Schranke**: sie kann nur besser aussehen als die Wirklichkeit,
 -- nie schlechter. Zu schliessen ist das erst mit den Soll-Halten aus stop_times.txt,
 -- die der Static-Loader heute bewusst nicht auspackt.
+--
+-- **Gemessen am Produktionsstand (2026-08-21, drei Betriebstage, 52.263 Fahrten):
+-- halte_ausgefallen = 0.** Nicht annaehernd null, exakt null -- bei gleichzeitig 21.823
+-- ausgelassenen Halten, unabhaengig bestaetigt durch mart_datenqualitaet. Der Feed
+-- meldet also durchaus Stoerungen, aber ein vollstaendiger Ausfall kommt als
+-- trip-level-Meldung ohne stop_time_update, und die filtert stg_de_gtfsrt heraus
+-- (is_trip_level_only). Die Luecke ist damit nicht klein, sondern **vollstaendig**: kein
+-- einziger Ausfall der deutschen Quelle erreicht diese Kennzahl. Auf der Seite steht das
+-- als Warnkasten, nicht als Fussnote.
 
 {% set schwellen_sek = [60, 180, 360, 900, 3600] %}
 

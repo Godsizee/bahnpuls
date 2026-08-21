@@ -111,6 +111,31 @@ Die sechs Spalten schließen einander aus und ergeben zusammen genau die erste. 
 kann nicht zugleich ausgefallen und ausgelassen gezählt werden; wo mehrere Gründe
 zuträfen, gilt der schwerwiegendere.
 
+<Alert status=warning>
+
+**Die Spalte „Zug ausgefallen" steht bei den deutschen Daten auf null — und das ist keine
+gute Nachricht, sondern eine Lücke.** Über die bisher aufgezeichneten Betriebstage weist
+diese Auswertung **keinen einzigen** ausgefallenen Zug aus, bei über fünfzigtausend
+Fahrten. Dass in drei Tagen kein Zug ausgefallen wäre, ist auszuschließen.
+
+Der Grund liegt in der Form der Meldung. Ausgelassene Halte kommen im Feed am Zug selbst
+an und werden hier gezählt — mehr als zwanzigtausend. Ein **vollständiger** Ausfall wird
+dagegen als Meldung über die ganze Fahrt übermittelt, ohne die einzelnen Halte zu nennen.
+Solche Meldungen tragen keinen Halt, dem sich etwas zuordnen ließe, und fallen aus dieser
+Auswertung heraus.
+
+Für die Zahlen auf dieser Seite heißt das: **beide Quoten sind zu günstig.** Die
+Ausfälle, um die es hier eigentlich geht, fehlen im Nenner. Was der Abstand zwischen den
+beiden Linien zeigt, stammt derzeit aus ausgelassenen Halten, gekappten Laufwegen und
+fehlenden Meldungen — nicht aus Ausfällen. Der Weg dorthin führt über den statischen
+Fahrplan, aus dem sich die Soll-Halte einer ausgefallenen Fahrt nachschlagen lassen; das
+ist vorbereitet, aber noch nicht gebaut.
+
+Bei den schweizerischen Testfällen ist die Spalte gefüllt — dort liefert die Quelle den
+Ausfall je Halt.
+
+</Alert>
+
 Drei davon sind **Betrieb** und gehören zum Bild: der Zug fiel aus, sein Laufweg wurde
 gekappt, ein Halt wurde übersprungen. „Laufweg gekappt" heißt, dass der Zug fuhr, aber
 nicht die ganze Strecke — für Reisende an den entfallenen Bahnhöfen ist das ein
@@ -156,10 +181,12 @@ Zufall mit Nachkommastellen.
 <Alert status=info>
 
 **Zwei Grenzen dieser Seite, ausdrücklich.** Erstens: der Nenner ist der **beobachtete**
-Laufweg, nicht der Fahrplan. Ein Zug, der komplett ausfiel und über den der Feed gar nichts
-mehr meldete, fehlt auch hier — beide Quoten sind damit obere Schranken und können nur
-besser aussehen als die Wirklichkeit, nie schlechter. Zweitens: gezeigt werden die letzten
-30 aufgezeichneten Betriebstage.
+Laufweg, nicht der Fahrplan. Ein Zug, der komplett ausfiel und über den der Feed nur eine
+Meldung über die ganze Fahrt schickte, fehlt auch hier — beide Quoten sind damit obere
+Schranken und können nur besser aussehen als die Wirklichkeit, nie schlechter. Wie groß
+diese Lücke bei den deutschen Daten derzeit ist, steht im Kasten weiter oben: sie umfasst
+**sämtliche** Ausfälle. Zweitens: gezeigt werden die letzten 30 aufgezeichneten
+Betriebstage.
 
 Wie die Zahlen im Einzelnen zustande kommen, steht auf der Seite [Methodik](/methodik).
 

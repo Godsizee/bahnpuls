@@ -335,6 +335,13 @@ Wirklichkeit, nie schlechter. Zu schließen wäre das erst, wenn die Soll-Halte 
 statischen Fahrplan danebengelegt werden; bis dahin ist die Lücke hier benannt statt
 stillschweigend eingerechnet.
 
+**Bei den deutschen Daten ist diese Lücke derzeit vollständig.** Über die bisher
+aufgezeichneten Betriebstage weist die Auswertung bei mehr als fünfzigtausend Fahrten
+keinen einzigen Ausfall aus, während über zwanzigtausend ausgelassene Halte erfasst sind.
+Der Unterschied liegt in der Form der Meldung: ein ausgelassener Halt kommt am Zug an, ein
+vollständiger Ausfall dagegen als Meldung über die ganze Fahrt, ohne Halte. Die Null in
+der Spalte „Zug ausgefallen" ist deshalb keine Aussage über den Betrieb.
+
 ## Was diese Zahlen nicht sind
 
 Bahnpuls ist keine amtliche Statistik und steht in keiner Verbindung zu den

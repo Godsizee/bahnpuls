@@ -2,9 +2,11 @@
 -- zusammengefasst -- die Tagesachse faellt hier weg, sie ist auf dieser Seite keine
 -- Frage. Uebrig bleiben Abschnitt, Richtung und Stunde.
 --
--- **Begrenzt auf die 200 meistbefahrenen Abschnitte je Quelle.** In Produktion sind das
--- rund 14.000 Abschnitte je Tag, mit Stundenachse ueber 100.000 Zeilen taeglich; die
--- gehen bei Evidence in den Browser (BPULS-056).
+-- **Begrenzt auf die 200 meistbefahrenen Abschnitte je Quelle.** In Produktion sind es
+-- **19.951 bis 22.363 Abschnitte je Tag** (gemessen 2026-08-21 ueber drei Betriebstage,
+-- die vorherige Schaetzung von 14.000 lag um rund die Haelfte zu niedrig), mit
+-- Stundenachse entsprechend mehr; die gehen bei Evidence in den Browser (BPULS-056).
+-- Mit dieser Grenze bleiben davon 4.628 Zeilen und 53 KB uebrig.
 --
 -- Gewaehlt wird nach **Verkehrsmenge**, nicht nach Verspaetung -- obwohl die Seite nach
 -- Verspaetung sortiert. Andersherum waere der Ausschnitt zirkulaer: die Rangliste sucht
