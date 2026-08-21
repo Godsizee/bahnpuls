@@ -18,3 +18,12 @@ sources:
       - name: trips
         meta:
           external_location: "read_csv('{{ var('de_static_dir') }}/v=*/*/trips.txt', filename = true, union_by_name = true, all_varchar = true)"
+      - name: stop_times
+        description: >
+          Soll-Halte je Fahrt, vom Loader aus `stop_times.txt` des Archivs auf fünf
+          Spalten reduziert und als Parquet+ZSTD abgelegt (85 MB CSV je Version gegen
+          7 MB Parquet). Anders als bei Namen wird hier **nicht** über Versionen
+          vereinigt: der Laufweg einer Fahrt ist Fahrplaninhalt und ändert sich mit der
+          Version — es gilt die zum Betriebstag gültige (CLAUDE.md Regel 9).
+        meta:
+          external_location: "read_parquet('{{ var('de_static_dir') }}/v=*/*/stop_times.parquet', filename = true, union_by_name = true)"

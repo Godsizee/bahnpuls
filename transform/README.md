@@ -200,6 +200,42 @@ unplausiblen Verspätungswerte der DE-Fixture — alle drei mit `severity: warn`
 so gewollt: sie beschreiben Eigenschaften der Quelle, keine Modellfehler, und dürfen
 deshalb den Seitenbau nicht anhalten.
 
+## Ausfälle kommen ohne Halte — und waren deshalb unsichtbar
+
+Am Produktionsstand vom 2026-08-21 wies die Auswertung über drei Betriebstage und
+**52.263 Fahrten exakt null Ausfälle** aus, bei gleichzeitig 21.823 ausgelassenen Halten.
+Zwei Marts unabhängig. Der Grund ist die Form der Meldung: ein ausgelassener Halt kommt am
+Zug an, ein **vollständiger** Ausfall dagegen als Aussage über die ganze Fahrt, ohne
+`stop_time_update` — und `stg_de_gtfsrt` filtert die heraus, weil dort jede Zeile ein Halt
+sein muss.
+
+Der Weg zurück führt über den Soll-Fahrplan:
+
+```
+stg_de_fahrtmeldung   Meldungen ohne Halte (das Gegenstück zum Filter in stg_de_gtfsrt)
+stg_de_fahrplanhalt   Soll-Halte je Version und Feed, Zeiten in Sekunden
+int_de_ausfaelle      beides gejoint -> ein Halt-Ereignis je Soll-Halt
+int_de_stop_events    union, damit Downstream nichts davon merkt
+```
+
+**Regel 9 gilt hier scharf.** Der Laufweg einer Fahrt ist Fahrplaninhalt und ändert sich
+mit der Version; gejoint wird gegen die zum Betriebstag **gültige** Version — nicht gegen
+die neueste, nicht über alle vereinigt. Das ist der Unterschied zu `stg_de_static`: ein
+Stationsname ist eine Beschriftung und darf vereinigt werden, eine Halteabfolge nicht.
+Beide falschen Strategien sind gegengeprüft: der Unit-Test
+`int_de_ausfaelle_nimmt_die_zum_betriebstag_gueltige_version` schlägt bei jeder von beiden
+fehl.
+
+**Drei Fälle bleiben unauflösbar** und werden von `assert_de_ausfaelle_aufgeloest` als
+Warnung gemeldet statt still verschluckt: kein Fahrplan älter als der Betriebstag
+(betrifft jeden Tag vor der ersten Ladung), dieselbe `trip_id` in beiden Feeds derselben
+Version (welcher Laufweg gemeint ist, wäre geraten), oder die Version kennt die `trip_id`
+nicht.
+
+**Voraussetzung ist `stop_times.parquet` im Fahrplanverzeichnis.** Der Loader schreibt es
+seit BPULS-032 mit; ältere Versionen bekommen es über
+`statictool -fahrplan-nachtragen` aus ihrem mitgespeicherten Archiv.
+
 ## Dubletten in den Rohdaten sind unschädlich — aber nur hier
 
 Beim Redeploy startet Coolify den neuen Container, bevor er den alten stoppt. Am

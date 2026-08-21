@@ -34,6 +34,12 @@ import (
 // laufen, ohne eine vorhandene Version anzufassen (Regel 1).
 var ErrVersionVorhanden = errors.New("static: version bereits vorhanden")
 
+// ErrFahrplanUnvollstaendig meldet, dass die Version abgelegt wurde, aber ohne
+// die abgeleiteten Soll-Halte. Die Version ist damit **gueltig und vollstaendig
+// gesichert** -- das Archiv liegt unveraendert da --, nur die Auswertung der
+// Ausfaelle fehlt, bis `-fahrplan-nachtragen` laeuft.
+var ErrFahrplanUnvollstaendig = errors.New("static: soll-halte nicht erzeugt")
+
 // Feed ist ein herunterzuladendes Archiv.
 type Feed struct {
 	// Name wird zum Dateinamen und zum Unterverzeichnis, z. B. "rv".
@@ -51,10 +57,13 @@ func StandardFeeds() []Feed {
 	}
 }
 
-// StandardDateien sind die Mitglieder, die zusaetzlich zum Archiv entpackt
-// werden, damit dbt sie ohne Umweg lesen kann. stop_times.txt fehlt bewusst:
-// es ist um Groessenordnungen groesser und wird derzeit nicht gebraucht -- im
-// Archiv liegt es trotzdem, falls sich das aendert.
+// StandardDateien sind die Mitglieder, die zusaetzlich zum Archiv unveraendert
+// entpackt werden, damit dbt sie ohne Umweg lesen kann.
+//
+// stop_times.txt steht bewusst **nicht** in dieser Liste, obwohl es gebraucht
+// wird: 85,35 MB je Version als CSV waeren 4,4 GB im Jahr. Es wird stattdessen
+// auf fuenf Spalten reduziert nach Parquet+ZSTD umgeschrieben (7,04 MB je
+// Version), siehe FahrplanSchreiben in fahrplan.go.
 //
 // trips.txt ist dabei kein Vorrat: der Echtzeit-Feed liefert route_id **leer**
 // (gemessen 2026-08-20 an 2.346 Fahrten im Scope), aber trip_id gefuellt. Der
@@ -112,6 +121,7 @@ func Laden(ctx context.Context, client *http.Client, baseDir, version string, fe
 		}
 	}()
 
+	var fahrplanFehler []string
 	for _, feed := range feeds {
 		archiv := filepath.Join(tmp, feed.Name+"_free.zip")
 		if err := herunterladen(ctx, client, feed.URL, archiv); err != nil {
@@ -120,12 +130,30 @@ func Laden(ctx context.Context, client *http.Client, baseDir, version string, fe
 		if err := entpacken(archiv, filepath.Join(tmp, feed.Name), dateien); err != nil {
 			return "", fmt.Errorf("static: feed %s entpacken: %w", feed.Name, err)
 		}
+		// stop_times.txt wird nicht entpackt, sondern umgeschrieben: 85 MB CSV je
+		// Version gegen 7 MB Parquet. Ohne diese Datei bleibt ein vollstaendig
+		// ausgefallener Zug unsichtbar -- er kommt ohne stop_time_update, es gibt
+		// also keinen Halt, an dem der Ausfall haengen koennte (BPULS-032).
+		//
+		// **Bewusst nicht fatal.** Scheitert das Umschreiben -- geaendertes Format,
+		// fehlende Spalte, umbenanntes Mitglied --, wird die Version trotzdem
+		// veroeffentlicht. Der Grund steht oben im Paketkommentar: es gibt nur
+		// latest.zip, eine aeltere Veroeffentlichung ist nicht nachladbar. Ein
+		// harter Abbruch opferte das unwiederbringliche Archiv fuer eine Datei, die
+		// daraus jederzeit wieder herstellbar ist (`-fahrplan-nachtragen`). Der
+		// Fehler wird gemeldet und ist am fehlenden stop_times.parquet erkennbar.
+		if _, err := FahrplanSchreiben(archiv, filepath.Join(tmp, feed.Name, FahrplanDatei)); err != nil {
+			fahrplanFehler = append(fahrplanFehler, fmt.Sprintf("%s: %v", feed.Name, err))
+		}
 	}
 
 	if err := os.Rename(tmp, ziel); err != nil {
 		return "", fmt.Errorf("static: version veroeffentlichen: %w", err)
 	}
 	erfolgreich = true
+	if len(fahrplanFehler) > 0 {
+		return ziel, fmt.Errorf("%w: %s", ErrFahrplanUnvollstaendig, strings.Join(fahrplanFehler, "; "))
+	}
 	return ziel, nil
 }
 

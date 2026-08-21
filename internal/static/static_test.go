@@ -57,7 +57,7 @@ func TestLaden_LegtVersionAn(t *testing.T) {
 	archiv := testArchiv(t, map[string]string{
 		"stops.txt":      "stop_id,stop_name\n1,Mannheim Hbf\n",
 		"routes.txt":     "route_id,route_short_name\nR1,RE 70\n",
-		"stop_times.txt": "riesig",
+		"stop_times.txt": "trip_id,stop_sequence,stop_id,arrival_time,departure_time\nT1,0,1,08:00:00,08:01:00\n",
 	})
 	srv, abrufe := testServer(t, archiv)
 	basis := t.TempDir()
@@ -85,9 +85,13 @@ func TestLaden_LegtVersionAn(t *testing.T) {
 	if !bytes.Contains(inhalt, []byte("Mannheim Hbf")) {
 		t.Errorf("stops.txt = %q, want Mannheim Hbf", inhalt)
 	}
-	// stop_times.txt wird bewusst nicht entpackt, steckt aber im Archiv.
+	// stop_times.txt wird bewusst nicht als CSV entpackt -- 85 MB je Version --,
+	// sondern auf fuenf Spalten reduziert nach Parquet umgeschrieben.
 	if _, err := os.Stat(filepath.Join(ziel, "rv", "stop_times.txt")); !errors.Is(err, os.ErrNotExist) {
-		t.Errorf("stop_times.txt wurde entpackt, want nicht entpackt (err=%v)", err)
+		t.Errorf("stop_times.txt wurde als CSV entpackt, want nur die Parquet-Fassung (err=%v)", err)
+	}
+	if _, err := os.Stat(filepath.Join(ziel, "rv", FahrplanDatei)); err != nil {
+		t.Errorf("%s fehlt: %v", FahrplanDatei, err)
 	}
 }
 
@@ -157,7 +161,10 @@ func TestLaden_ArchiveintragKannNichtAusbrechen(t *testing.T) {
 
 	ziel, err := Laden(context.Background(), srv.Client(), basis, "2026-08-20",
 		[]Feed{{Name: "rv", URL: srv.URL}}, StandardDateien())
-	if err != nil {
+	// Dieses Archiv hat keine stop_times.txt. Erwartet ist deshalb genau die
+	// Warnung -- und **nicht** ein Abbruch: das Archiv ist nicht nachladbar und
+	// muss auch dann gesichert werden, wenn die abgeleitete Datei scheitert.
+	if err != nil && !errors.Is(err, ErrFahrplanUnvollstaendig) {
 		t.Fatalf("Laden: %v", err)
 	}
 	if _, err := os.Stat(filepath.Join(basis, "..", "boeser")); err == nil {
@@ -182,7 +189,7 @@ func TestLaden_VersionIstLesbarFuerAndere(t *testing.T) {
 
 	ziel, err := Laden(context.Background(), srv.Client(), basis, "2026-08-20",
 		[]Feed{{Name: "rv", URL: srv.URL}}, StandardDateien())
-	if err != nil {
+	if err != nil && !errors.Is(err, ErrFahrplanUnvollstaendig) {
 		t.Fatalf("Laden: %v", err)
 	}
 

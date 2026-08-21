@@ -185,3 +185,38 @@ left join ankunft
 left join abfahrt
   on  halte.trip_key      = abfahrt.trip_key
   and halte.stop_sequence = abfahrt.stop_sequence
+
+union all by name
+
+-- Dritter Weg in dieselbe Menge: vollstaendig ausgefallene Fahrten, die im Feed
+-- **ohne** Halte gemeldet werden und deshalb weiter oben gar nicht vorkommen
+-- koennen. Sie werden in int_de_ausfaelle aus dem Soll-Fahrplan aufgeloest
+-- (BPULS-032).
+--
+-- Der union steht hier und nicht in fct_stop_events: die Nahtstelle traegt einen
+-- Zweig je **Quelle**, nicht je Meldungsform. Fuer Downstream ist ein aufgeloester
+-- Ausfall ein Halt-Ereignis wie jedes andere -- mit NULL-Verspaetungen und
+-- zug_ausgefallen = true.
+--
+-- Dubletten sind ausgeschlossen: int_de_ausfaelle nimmt nur Fahrten, zu denen es
+-- **keine** beobachteten Halte gibt.
+select
+    betriebstag,
+    trip_key,
+    stop_sequence,
+    stop_id,
+    stop_name,
+    soll_an,
+    soll_ab,
+    ist_an,
+    ist_ab,
+    delay_an_sek,
+    delay_ab_sek,
+    ist_endgueltig,
+    halt_ausgelassen,
+    zug_ausgefallen,
+    route_kurzname,
+    block_id,
+    quelle
+
+from {{ ref('int_de_ausfaelle') }}

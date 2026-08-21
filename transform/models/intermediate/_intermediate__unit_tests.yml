@@ -71,6 +71,11 @@ unit_tests:
       später gegen eine Aggregation über Rohzeilen tauscht, zählt sonst still doppelt.
     model: int_de_stop_events
     given:
+      # Leer: dieser Test prueft die Verdichtung beobachteter Halte. Aufgeloeste
+      # Ausfaelle kommen ueber einen eigenen Zweig herein (BPULS-032) und wuerden
+      # hier nur Rauschen beitragen -- die Eingabe muss dbt trotzdem kennen.
+      - input: ref('int_de_ausfaelle')
+        rows: []
       - input: ref('stg_de_static')
         rows:
           - {art: 'stop',  schluessel: 'A', bezeichnung: 'Bahnhof A'}
@@ -95,3 +100,47 @@ unit_tests:
       rows:
         - {trip_key: '2026-08-13_trip1', stop_sequence: 1, stop_name: 'Bahnhof A', route_kurzname: 'RE 5', delay_an_sek: null, delay_ab_sek: 120, ist_endgueltig: false}
         - {trip_key: '2026-08-13_trip1', stop_sequence: 2, stop_name: 'Bahnhof B', route_kurzname: 'RE 5', delay_an_sek: 180, delay_ab_sek: 240, ist_endgueltig: true}
+
+  # Regel 9 ist hier die eigentliche Fallgrube: der Laufweg einer Fahrt ist
+  # Fahrplaninhalt und aendert sich mit der Version. Gejoint werden muss gegen die
+  # zum Betriebstag **gueltige** Version -- nicht gegen die neueste (die kann den
+  # Laufweg laengst geaendert haben) und nicht ueber alle vereinigt (das mischte
+  # zwei Laufwege zu einem, der nie gefahren wurde).
+  #
+  # In echten Daten faellt eine falsche Wahl nicht auf: der Laufweg saehe
+  # vollstaendig und plausibel aus. Deshalb ein Unit-Test mit drei Versionen --
+  # eine aeltere, die gueltige, und eine, die erst **nach** dem Betriebstag
+  # veroeffentlicht wurde.
+  - name: int_de_ausfaelle_nimmt_die_zum_betriebstag_gueltige_version
+    model: int_de_ausfaelle
+    given:
+      - input: ref('stg_de_fahrtmeldung')
+        rows:
+          - {betriebstag: '2026-08-13', trip_key: '2026-08-13_t1', trip_id: 't1', zug_ausgefallen: true, snapshot_ts: '2026-08-14 02:00:00', quelle: 'de_gtfsrt'}
+      # Keine beobachteten Halte: sonst braeuchte die Fahrt keine Aufloesung.
+      - input: ref('stg_de_gtfsrt')
+        rows: []
+      - input: ref('stg_de_static')
+        rows:
+          - {art: 'stop',  schluessel: 'B', bezeichnung: 'Bahnhof B'}
+          - {art: 'linie', schluessel: 't1', bezeichnung: 'RE 1'}
+      - input: ref('stg_de_fahrplanhalt')
+        rows:
+          # Zu alt: gueltig bis zum 12.08., danach abgeloest.
+          - {static_version: '2026-08-06', feed: 'rv', trip_id: 't1', stop_sequence: 0, stop_id: 'ALT', soll_an_sek: null, soll_ab_sek: 28800}
+          - {static_version: '2026-08-06', feed: 'rv', trip_id: 't1', stop_sequence: 1, stop_id: 'ALT2', soll_an_sek: 30600, soll_ab_sek: null}
+          # Gueltig fuer den 13.08. Der letzte Halt liegt bei 25:00:00 -- eine
+          # gueltige GTFS-Zeit, die auf den naechsten Kalendertag faellt und
+          # trotzdem zu diesem Betriebstag gehoert (Regel 6).
+          - {static_version: '2026-08-13', feed: 'rv', trip_id: 't1', stop_sequence: 0, stop_id: 'A', soll_an_sek: null,  soll_ab_sek: 28800}
+          - {static_version: '2026-08-13', feed: 'rv', trip_id: 't1', stop_sequence: 1, stop_id: 'B', soll_an_sek: 30600, soll_ab_sek: 30720}
+          - {static_version: '2026-08-13', feed: 'rv', trip_id: 't1', stop_sequence: 2, stop_id: 'C', soll_an_sek: 90000, soll_ab_sek: null}
+          # Erst nach dem Betriebstag veroeffentlicht: darf nicht gewinnen, obwohl
+          # es die neueste Version ist.
+          - {static_version: '2026-08-20', feed: 'rv', trip_id: 't1', stop_sequence: 0, stop_id: 'NEU', soll_an_sek: null,  soll_ab_sek: 28800}
+          - {static_version: '2026-08-20', feed: 'rv', trip_id: 't1', stop_sequence: 1, stop_id: 'NEU2', soll_an_sek: 30600, soll_ab_sek: null}
+    expect:
+      rows:
+        - {stop_sequence: 0, stop_id: 'A', soll_an: null,                  soll_ab: '2026-08-13 08:00:00', zug_ausgefallen: true, delay_an_sek: null, ist_endgueltig: true, route_kurzname: 'RE 1'}
+        - {stop_sequence: 1, stop_id: 'B', soll_an: '2026-08-13 08:30:00', soll_ab: '2026-08-13 08:32:00', zug_ausgefallen: true, delay_an_sek: null, ist_endgueltig: true, route_kurzname: 'RE 1'}
+        - {stop_sequence: 2, stop_id: 'C', soll_an: '2026-08-14 01:00:00', soll_ab: null,                  zug_ausgefallen: true, delay_an_sek: null, ist_endgueltig: true, route_kurzname: 'RE 1'}

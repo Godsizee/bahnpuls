@@ -135,3 +135,39 @@ models:
           arguments:
             combination_of_columns: ['trip_key', 'stop_sequence']
 
+
+  - name: int_de_ausfaelle
+    description: >
+      Löst vollständige Ausfälle in Halt-Ereignisse auf (BPULS-032, A5). Ein
+      ausgefallener Zug meldet sich ohne `stop_time_update`; ohne den Soll-Laufweg
+      aus dem statischen Fahrplan gäbe es keinen Halt, an dem der Ausfall hängen
+      könnte — am Produktionsstand vom 2026-08-21 erreichte deshalb **kein
+      einziger** Ausfall die Kennzahlen.
+
+      Gejoint wird gegen die **zum Betriebstag gültige** Fahrplan-Version, nie gegen
+      die neueste und nie über alle vereinigt (Regel 9). Fahrten, deren `trip_id` in
+      derselben Version in beiden Feeds steht, bleiben unaufgelöst statt geraten;
+      `assert_de_ausfaelle_aufgeloest` meldet alle nicht aufgelösten Fälle als
+      Warnung.
+    columns:
+      - name: betriebstag
+        tests:
+          - not_null
+      - name: trip_key
+        tests:
+          - not_null
+      - name: stop_sequence
+        tests:
+          - not_null
+      - name: zug_ausgefallen
+        description: Immer wahr — dieses Modell erzeugt ausschließlich Ausfallzeilen.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [true]
+                quote: false
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: ['trip_key', 'stop_sequence']

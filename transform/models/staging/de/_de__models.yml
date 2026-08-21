@@ -65,3 +65,50 @@ models:
           - accepted_values:
               arguments:
                 values: ['de_gtfsrt']
+
+  - name: stg_de_fahrplanhalt
+    description: >
+      Soll-Halte aus dem statischen Fahrplan, je Version und Feed. Reine
+      Typisierung — welche Version für welchen Betriebstag gilt, entscheidet
+      `int_de_ausfaelle` (CLAUDE.md Regel 9).
+
+      Zeiten liegen als **Sekunden seit Betriebstagsbeginn** vor, nicht als Uhrzeit:
+      GTFS lässt Werte wie `25:30:00` ausdrücklich zu, und jeder Zeit-Typ verlöre
+      dabei die Zuordnung zum Betriebstag.
+    columns:
+      - name: static_version
+        tests:
+          - not_null
+      - name: feed
+        tests:
+          - not_null
+      - name: trip_id
+        tests:
+          - not_null
+      - name: stop_sequence
+        tests:
+          - not_null
+      - name: soll_an_sek
+        description: NULL am ersten Halt — dort ist planmäßig keine Ankunft vorgesehen.
+      - name: soll_ab_sek
+        description: NULL am letzten Halt.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: ['static_version', 'feed', 'trip_id', 'stop_sequence']
+
+  - name: stg_de_fahrtmeldung
+    description: >
+      Meldungen über eine ganze Fahrt ohne einzelne Halte — so kommt ein
+      vollständiger Ausfall im GTFS-RT-Feed an. Genaues Gegenstück zum Filter in
+      `stg_de_gtfsrt`: die beiden Mengen sind disjunkt und zusammen vollständig.
+    columns:
+      - name: betriebstag
+        tests:
+          - not_null
+      - name: trip_key
+        tests:
+          - not_null
+      - name: zug_ausgefallen
+        tests:
+          - not_null
