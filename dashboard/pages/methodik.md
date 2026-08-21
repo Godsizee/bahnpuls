@@ -304,22 +304,26 @@ an ihrem ersten Halt beobachtet wurde, erscheint sie deshalb in der Zahl der aus
 
 ### Wohin ein Halt gezählt wird
 
-Jeder planmäßige Halt landet in **genau einer** von sechs Schubladen. Wo mehrere Gründe
+Jeder planmäßige Halt landet in **genau einer** von sieben Schubladen. Wo mehrere Gründe
 zuträfen — ein Zug kann ausfallen und zugleich in der Umstellungsstunde liegen —, gilt
 diese Rangfolge:
 
-1. **Zug ausgefallen**
-2. **Laufweg gekappt** — ein ausgelassener Halt am Anfang oder Ende des Laufs. Der Zug
+1. **Ausfall gemeldet** — die Quelle bezeichnet die Fahrt ausdrücklich als ausgefallen.
+2. **kein Halt bedient** — im beobachteten Lauf wurde kein einziger Halt bedient. Das ist
+   die Form, in der ein vollständiger Ausfall in den deutschen Daten ankommt, aber
+   **abgeleitet und nicht gemeldet**: die Spalte sagt, was beobachtet wurde, nicht, dass
+   der Zug nicht fuhr. Deshalb steht sie neben Nummer 1 und nicht darin.
+3. **Laufweg gekappt** — ein ausgelassener Halt am Anfang oder Ende des Laufs. Der Zug
    fuhr, aber nicht die ganze Strecke. Für Reisende an den entfallenen Bahnhöfen ist das
    ein vollständiger Ausfall; in einer Ausfallquote je Zug taucht es meist nicht auf.
-3. **Halt ausgelassen** — übersprungen mitten im Lauf.
-4. **Zeitumstellung** — die Stunde gibt es doppelt, die Verspätung ist nicht eindeutig.
-5. **keine Meldung** — planmäßig da, nicht ausgefallen, nicht ausgelassen, nicht
+4. **Halt ausgelassen** — übersprungen mitten im Lauf.
+5. **Zeitumstellung** — die Stunde gibt es doppelt, die Verspätung ist nicht eindeutig.
+6. **keine Meldung** — planmäßig da, nicht ausgefallen, nicht ausgelassen, nicht
    mehrdeutig, und trotzdem keine Ist-Zeit. Nur hier bedeutet ein Anstieg ein Problem der
    Erhebung statt des Betriebs.
-6. **gemessen** — es liegt eine Ankunftsverspätung vor.
+7. **gemessen** — es liegt eine Ankunftsverspätung vor.
 
-Die sechs ergeben zusammen exakt die Zahl der planmäßigen Halte. Anders als bei der
+Die sieben ergeben zusammen exakt die Zahl der planmäßigen Halte. Anders als bei der
 [Abdeckung](/) auf der Startseite, wo die Gründe sich überschneiden dürfen und deshalb nie
 addiert werden, ist die Zuordnung hier eindeutig.
 
@@ -335,7 +339,7 @@ Wirklichkeit, nie schlechter. Zu schließen wäre das erst, wenn die Soll-Halte 
 statischen Fahrplan danebengelegt werden; bis dahin ist die Lücke hier benannt statt
 stillschweigend eingerechnet.
 
-**Bei den deutschen Daten ist die Spalte „Zug ausgefallen" strukturell leer** — und das
+**Bei den deutschen Daten ist die Spalte „Ausfall gemeldet" strukturell leer** — und das
 ist keine Aussage über den Betrieb, sondern über die Form der Meldung. GTFS-Realtime lässt
 zwei Formen zu: eine Markierung an der ganzen Fahrt, oder das Streichen jedes einzelnen
 Halts. Die Spalte liest die erste; dieser Feed benutzt sie nicht. Eine Auszählung des
@@ -343,9 +347,10 @@ vollständigen bundesweiten Feeds am 21.08.2026 ergab bei **49.133 Fahrten keine
 Fahrt-Markierung, dagegen **12.747** gestrichene Halte und **582 Fahrten** (1,2 %), bei
 denen jeder Halt gestrichen war.
 
-**Die betroffenen Züge fehlen deshalb nicht im Nenner** — sie werden als „Halt
-ausgelassen" bzw. „Laufweg gekappt" gezählt und gehen in `quote_planmaessig` ein. Was
-fehlt, ist die Zuordnung zum Etikett „Ausfall", nicht die Fahrt. Eine Fahrt, über die der
+**Die betroffenen Züge fehlen deshalb nicht im Nenner** — sie stehen seit dem 21.08.2026
+in der eigenen Schublade „kein Halt bedient" und gehen in `quote_planmaessig` ein.
+Vorher wurden sie als „Halt ausgelassen" gezählt: dieselbe Zahl, nur ohne erkennbaren
+Grund. Eine Fahrt, über die der
 Feed gar nichts meldet, bleibt dagegen unsichtbar; wie häufig das ist, ist offen.
 
 ## Was diese Zahlen nicht sind

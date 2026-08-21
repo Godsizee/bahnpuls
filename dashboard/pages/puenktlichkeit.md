@@ -83,12 +83,14 @@ select
     sum(halte_mit_ankunft)  as planmaessig,
     sum(halte_gemessen)     as gemessen,
     sum(halte_ausgefallen)  as ausgefallen,
+    sum(halte_unbedienter_lauf) as unbedienter_lauf,
     sum(halte_verkuerzt)    as verkuerzt,
     sum(halte_ausgelassen)  as ausgelassen,
     sum(halte_mehrdeutig)   as mehrdeutig,
     sum(halte_ohne_meldung) as ohne_meldung,
     sum(fahrten)            as fahrten,
     sum(fahrten_ausgefallen) as fahrten_ausgefallen,
+    sum(fahrten_unbedienter_lauf) as fahrten_unbedienter_lauf,
     sum(fahrten_verkuerzt)   as fahrten_verkuerzt
 from bahnpuls.puenktlichkeit
 -- Eine einzige Schwelle: die Zustände hängen nicht von ihr ab und stünden sonst fünffach
@@ -100,47 +102,53 @@ where quelle = '${inputs.herkunft.value}'
 <DataTable data={zustaende} rows=1>
     <Column id=planmaessig title="planmäßige Halte" />
     <Column id=gemessen title="gemessen" />
-    <Column id=ausgefallen title="Zug ausgefallen" />
+    <Column id=ausgefallen title="Ausfall gemeldet" />
+    <Column id=unbedienter_lauf title="kein Halt bedient" />
     <Column id=verkuerzt title="Laufweg gekappt" />
     <Column id=ausgelassen title="Halt ausgelassen" />
     <Column id=mehrdeutig title="Zeitumstellung" />
     <Column id=ohne_meldung title="keine Meldung" />
 </DataTable>
 
-Die sechs Spalten schließen einander aus und ergeben zusammen genau die erste. Ein Halt
+Die sieben Spalten schließen einander aus und ergeben zusammen genau die erste. Ein Halt
 kann nicht zugleich ausgefallen und ausgelassen gezählt werden; wo mehrere Gründe
 zuträfen, gilt der schwerwiegendere.
 
 <Alert status=warning>
 
-**Die Spalte „Zug ausgefallen" steht bei den deutschen Daten auf null — und das heißt
-nicht, dass keine Züge ausfielen.** Es heißt, dass dieser Feed einen Ausfall anders
-ausdrückt, als diese Spalte ihn sucht.
+**Warum hier zwei Spalten für dasselbe stehen — und warum die erste bei den deutschen
+Daten leer bleibt.** „Ausfall gemeldet" zählt Züge, die die Quelle *ausdrücklich* als
+ausgefallen meldet. „Kein Halt bedient" zählt Läufe, in denen **kein einziger** Halt
+bedient wurde. Das eine ist ein Bericht, das andere eine Beobachtung — und die beiden
+Zahlen nebeneinander sind ehrlicher als eine gemeinsame.
 
-GTFS-Realtime lässt dafür zwei Formen zu: eine Markierung an der **ganzen Fahrt**, oder
-das Streichen **jedes einzelnen Halts**. Die Spalte liest die erste. Eine Auszählung des
+GTFS-Realtime lässt zwei Formen zu, einen Ausfall auszudrücken: eine Markierung an der
+**ganzen Fahrt**, oder das Streichen **jedes einzelnen Halts**. Eine Auszählung des
 vollständigen bundesweiten Feeds am 21.08.2026 ergab: von **49.133 Fahrten** trug **keine
 einzige** die Markierung an der Fahrt. Gestrichene Halte gab es dagegen reichlich —
-**12.747**, und bei **582 Fahrten** (1,2 %) war *jeder* Halt gestrichen. So sieht ein
-vollständiger Ausfall in diesem Feed aus.
+**12.747**, und bei **582 Fahrten** (1,2 %) war *jeder* Halt gestrichen. Dieser Feed
+benutzt also die zweite Form. Die erste Spalte steht deshalb strukturell auf null; das
+ist keine Aussage über den Betrieb.
 
-**Für die Zahlen auf dieser Seite heißt das:** diese Züge fehlen hier **nicht**. Sie
-stehen in den Spalten „Halt ausgelassen" und „Laufweg gekappt" und gehen damit in den
-Nenner der unteren Quote ein. Was fehlt, ist allein das Etikett. Wer wissen will, wie viel
-Ausfall in diesen Zahlen steckt, liest diese beiden Spalten — nicht die Null daneben.
+**Was „kein Halt bedient" nicht behauptet:** dass der Zug nicht fuhr. Die Spalte sagt,
+dass im *beobachteten* Lauf kein Halt bedient wurde. Wird eine Fahrt erst ab der Mitte
+beobachtet und ist der Rest gestrichen, sieht eine gekappte Fahrt genauso aus. Deshalb
+steht sie neben „Ausfall gemeldet" und nicht darin.
 
-Eine Lücke bleibt, aber eine kleinere: ein Zug, über den der Feed **gar nichts** meldet,
-taucht nirgends auf. Wie oft das vorkommt, ist offen.
+Eine Lücke bleibt: ein Zug, über den der Feed **gar nichts** meldet, taucht nirgends auf.
+Wie oft das vorkommt, ist offen.
 
-Bei den schweizerischen Testfällen ist die Spalte gefüllt — dort liefert die Quelle den
-Ausfall je Halt.
+Bei den schweizerischen Testfällen ist die erste Spalte gefüllt — dort liefert die Quelle
+den Ausfall ausdrücklich.
 
 </Alert>
 
-Drei davon sind **Betrieb** und gehören zum Bild: der Zug fiel aus, sein Laufweg wurde
-gekappt, ein Halt wurde übersprungen. „Laufweg gekappt" heißt, dass der Zug fuhr, aber
-nicht die ganze Strecke — für Reisende an den entfallenen Bahnhöfen ist das ein
-vollständiger Ausfall, in einer Ausfallquote je Zug taucht es meist nicht auf.
+Vier davon sind **Betrieb** und gehören zum Bild: der Ausfall wurde gemeldet, im ganzen
+Lauf wurde kein Halt bedient, der Laufweg wurde gekappt, ein einzelner Halt wurde
+übersprungen. „Laufweg gekappt" heißt, dass der Zug fuhr, aber nicht die ganze Strecke —
+für Reisende an den entfallenen Bahnhöfen ist das ein vollständiger Ausfall, in einer
+Ausfallquote je Zug taucht es meist nicht auf. Ein Lauf ohne jeden bedienten Halt hat
+dagegen keinen Rand, der gekappt sein könnte, und steht deshalb in einer eigenen Spalte.
 
 Zwei sind **Messung**: In der Nacht der Zeitumstellung gibt es eine Stunde doppelt, die
 Rechnung ist dann nicht eindeutig. Und „keine Meldung" heißt, dass der Zug planmäßig da
@@ -153,8 +161,9 @@ letzten Spalte bedeutet ein Anstieg ein Problem der Erhebung.
 select
     linie,
     sum(fahrten)             as fahrten,
-    sum(fahrten_ausgefallen) as ausgefallen,
-    sum(fahrten_verkuerzt)   as verkuerzt,
+    sum(fahrten_ausgefallen)      as ausgefallen,
+    sum(fahrten_unbedienter_lauf) as unbedient,
+    sum(fahrten_verkuerzt)        as verkuerzt,
     sum(halte_mit_ankunft)   as halte,
     100.0 * sum(halte_puenktlich) / nullif(sum(halte_gemessen), 0)    as quote_gemessen,
     100.0 * sum(halte_puenktlich) / nullif(sum(halte_mit_ankunft), 0) as quote_planmaessig
@@ -168,7 +177,8 @@ order by halte desc, linie
 <DataTable data={je_linie} rows=15 search=true>
     <Column id=linie title="Linie" />
     <Column id=fahrten title="Fahrten" />
-    <Column id=ausgefallen title="davon ausgefallen" />
+    <Column id=ausgefallen title="Ausfall gemeldet" />
+    <Column id=unbedient title="kein Halt bedient" />
     <Column id=verkuerzt title="davon gekappt" />
     <Column id=halte title="planmäßige Halte" />
     <Column id=quote_gemessen title="pünktlich, gefahrene (%)" fmt='#,##0.0' />

@@ -30,12 +30,14 @@ select
 
     puenktlichkeit.fahrten,
     puenktlichkeit.fahrten_ausgefallen,
+    puenktlichkeit.fahrten_unbedienter_lauf,
     puenktlichkeit.fahrten_verkuerzt,
 
     puenktlichkeit.halte_mit_ankunft,
     puenktlichkeit.halte_gemessen,
     puenktlichkeit.halte_puenktlich,
     puenktlichkeit.halte_ausgefallen,
+    puenktlichkeit.halte_unbedienter_lauf,
     puenktlichkeit.halte_verkuerzt,
     puenktlichkeit.halte_ausgelassen,
     puenktlichkeit.halte_mehrdeutig,

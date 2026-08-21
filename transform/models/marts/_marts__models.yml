@@ -271,10 +271,26 @@ models:
         description: Halte ausgefallener Züge. Nie als Verspätung 0 (CLAUDE.md Regel 8).
         tests:
           - not_null
+      - name: halte_unbedienter_lauf
+        description: >
+          Halte eines Laufs, in dem **kein einziger** Halt bedient wurde (BPULS-064).
+          In diesem Feed ist das die Form, in der ein vollständiger Ausfall ankommt —
+          er setzt `trip.schedule_relationship = CANCELED` nie, streicht aber die Halte
+          einzeln.
+
+          **Abgeleitet, nicht gemeldet.** Anders als `halte_ausgefallen` behauptet die
+          Spalte nicht, dass der Zug nicht fuhr, sondern dass im **beobachteten** Lauf
+          kein Halt bedient wurde. Eine Fahrt, die erst ab der Mitte beobachtet wurde
+          und deren Rest gestrichen war, sieht genauso aus; zu trennen wäre das über
+          den Soll-Laufweg.
+        tests:
+          - not_null
       - name: halte_verkuerzt
         description: >
           Ausgelassene Halte am Anfang oder Ende des Laufs — der Zug fährt, aber
           verkürzt. Für Reisende an diesen Bahnhöfen ein vollständiger Ausfall.
+          Setzt mindestens einen bedienten Halt voraus; ohne den greift
+          `halte_unbedienter_lauf`.
         tests:
           - not_null
       - name: halte_ausgelassen
@@ -303,6 +319,14 @@ models:
         description: >
           Vollständig ausgefallene Fahrten. Zählt auch dann, wenn die Fahrt nur an
           ihrem ersten Halt beobachtet wurde und deshalb keinen Ankunftshalt beisteuert.
+        tests:
+          - not_null
+      - name: fahrten_unbedienter_lauf
+        description: >
+          Fahrten, in denen kein Halt bedient wurde. Schließt `fahrten_ausgefallen`
+          aus (die Rangfolge greift zuerst) und `fahrten_verkuerzt` ebenfalls — die drei
+          dürfen deshalb nebeneinander gelesen, aber nicht als „Ausfälle insgesamt"
+          addiert werden, ohne dass man weiß, was man addiert.
         tests:
           - not_null
       - name: fahrten_verkuerzt

@@ -1,4 +1,4 @@
--- Die sechs Zustaende eines Halts schliessen einander aus und muessen zusammen exakt
+-- Die sieben Zustaende eines Halts schliessen einander aus und muessen zusammen exakt
 -- den Nenner ergeben. Faellt ein Halt durch alle Bedingungen -- etwa weil eine neue
 -- Quelle einen Zustand mitbringt, den die Rangfolge nicht kennt --, verschwindet er
 -- lautlos aus der Betrachtung, und genau das ist der Vorwurf, den diese Analyse
@@ -16,6 +16,7 @@ from {{ ref('mart_puenktlichkeit') }}
 
 where halte_mit_ankunft is distinct from (
           halte_ausgefallen
+        + halte_unbedienter_lauf
         + halte_verkuerzt
         + halte_ausgelassen
         + halte_mehrdeutig
