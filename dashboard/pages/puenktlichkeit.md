@@ -113,23 +113,24 @@ zuträfen, gilt der schwerwiegendere.
 
 <Alert status=warning>
 
-**Die Spalte „Zug ausgefallen" steht bei den deutschen Daten auf null — und das ist keine
-gute Nachricht, sondern eine Lücke.** Über die bisher aufgezeichneten Betriebstage weist
-diese Auswertung **keinen einzigen** ausgefallenen Zug aus, bei über fünfzigtausend
-Fahrten. Dass in drei Tagen kein Zug ausgefallen wäre, ist auszuschließen.
+**Die Spalte „Zug ausgefallen" steht bei den deutschen Daten auf null — und das heißt
+nicht, dass keine Züge ausfielen.** Es heißt, dass dieser Feed einen Ausfall anders
+ausdrückt, als diese Spalte ihn sucht.
 
-Der Grund liegt in der Form der Meldung. Ausgelassene Halte kommen im Feed am Zug selbst
-an und werden hier gezählt — mehr als zwanzigtausend. Ein **vollständiger** Ausfall wird
-dagegen als Meldung über die ganze Fahrt übermittelt, ohne die einzelnen Halte zu nennen.
-Solche Meldungen tragen keinen Halt, dem sich etwas zuordnen ließe, und fallen aus dieser
-Auswertung heraus.
+GTFS-Realtime lässt dafür zwei Formen zu: eine Markierung an der **ganzen Fahrt**, oder
+das Streichen **jedes einzelnen Halts**. Die Spalte liest die erste. Eine Auszählung des
+vollständigen bundesweiten Feeds am 21.08.2026 ergab: von **49.133 Fahrten** trug **keine
+einzige** die Markierung an der Fahrt. Gestrichene Halte gab es dagegen reichlich —
+**12.747**, und bei **582 Fahrten** (1,2 %) war *jeder* Halt gestrichen. So sieht ein
+vollständiger Ausfall in diesem Feed aus.
 
-Für die Zahlen auf dieser Seite heißt das: **beide Quoten sind zu günstig.** Die
-Ausfälle, um die es hier eigentlich geht, fehlen im Nenner. Was der Abstand zwischen den
-beiden Linien zeigt, stammt derzeit aus ausgelassenen Halten, gekappten Laufwegen und
-fehlenden Meldungen — nicht aus Ausfällen. Der Weg dorthin führt über den statischen
-Fahrplan, aus dem sich die Soll-Halte einer ausgefallenen Fahrt nachschlagen lassen; das
-ist vorbereitet, aber noch nicht gebaut.
+**Für die Zahlen auf dieser Seite heißt das:** diese Züge fehlen hier **nicht**. Sie
+stehen in den Spalten „Halt ausgelassen" und „Laufweg gekappt" und gehen damit in den
+Nenner der unteren Quote ein. Was fehlt, ist allein das Etikett. Wer wissen will, wie viel
+Ausfall in diesen Zahlen steckt, liest diese beiden Spalten — nicht die Null daneben.
+
+Eine Lücke bleibt, aber eine kleinere: ein Zug, über den der Feed **gar nichts** meldet,
+taucht nirgends auf. Wie oft das vorkommt, ist offen.
 
 Bei den schweizerischen Testfällen ist die Spalte gefüllt — dort liefert die Quelle den
 Ausfall je Halt.

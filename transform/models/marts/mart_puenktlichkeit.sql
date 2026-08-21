@@ -47,14 +47,24 @@
 -- nie schlechter. Zu schliessen ist das erst mit den Soll-Halten aus stop_times.txt,
 -- die der Static-Loader heute bewusst nicht auspackt.
 --
--- **Gemessen am Produktionsstand (2026-08-21, drei Betriebstage, 52.263 Fahrten):
--- halte_ausgefallen = 0.** Nicht annaehernd null, exakt null -- bei gleichzeitig 21.823
--- ausgelassenen Halten, unabhaengig bestaetigt durch mart_datenqualitaet. Der Feed
--- meldet also durchaus Stoerungen, aber ein vollstaendiger Ausfall kommt als
--- trip-level-Meldung ohne stop_time_update, und die filtert stg_de_gtfsrt heraus
--- (is_trip_level_only). Die Luecke ist damit nicht klein, sondern **vollstaendig**: kein
--- einziger Ausfall der deutschen Quelle erreicht diese Kennzahl. Auf der Seite steht das
--- als Warnkasten, nicht als Fussnote.
+-- **halte_ausgefallen ist fuer die deutsche Quelle strukturell 0** -- und die Ursache
+-- ist eine andere, als hier bis zum 2026-08-21 stand. GTFS-RT laesst zwei Formen zu:
+-- eine Markierung an der ganzen Fahrt (trip.schedule_relationship = CANCELED) oder das
+-- Streichen jedes einzelnen Halts (SKIPPED). zug_ausgefallen liest die erste; **dieser
+-- Feed benutzt sie nicht.** Auszaehlung des vollstaendigen bundesweiten Feeds am
+-- 2026-08-21: 49.133 Fahrten, davon **0 mit CANCELED** -- dagegen 12.747 gestrichene
+-- Halte und 582 Fahrten (1,2 %), bei denen *jeder* Halt gestrichen war. Unabhaengig
+-- bestaetigt durch drei Betriebstage Produktionsdaten (0 von 54.236 Fahrten).
+--
+-- **Folge fuer die Lesart:** diese Zuege fehlen **nicht** im Nenner. Sie landen als
+-- halte_ausgelassen bzw. halte_verkuerzt und gehen in quote_planmaessig ein; es fehlt
+-- allein das Etikett. Die frueher hier behauptete Aussage "beide Quoten sind zu guenstig,
+-- die Ausfaelle fehlen im Nenner" war damit falsch.
+--
+-- Die Aufloesung ueber den Soll-Fahrplan (int_de_ausfaelle, BPULS-032) ist deshalb fuer
+-- diesen Feed wirkungslos, nicht fehlerhaft: sie wartet auf eine Meldungsform, die nicht
+-- kommt. Ob "alle Halte gestrichen" als Ausfall gewertet werden soll, ist eine fachliche
+-- Entscheidung und steht als BPULS-064 offen.
 
 {% set schwellen_sek = [60, 180, 360, 900, 3600] %}
 

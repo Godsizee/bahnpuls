@@ -11,6 +11,13 @@
 -- Betriebstage, 52.263 Fahrten) wies die Auswertung **null** Ausfaelle aus, bei
 -- gleichzeitig 21.823 ausgelassenen Halten. Nicht annaehernd null -- exakt null.
 -- Ohne dieses Modell sieht A5 seinen eigenen Gegenstand nicht.
+--
+-- **Nachtrag 2026-08-21, nachgemessen:** dieser Feed setzt die trip-level-Markierung
+-- ueberhaupt nicht. Auszaehlung des vollstaendigen bundesweiten Feeds: 49.133 Fahrten,
+-- **0 mit CANCELED**; ein vollstaendiger Ausfall kommt hier als Fahrt, deren Halte
+-- allesamt SKIPPED sind (582 Fahrten, 1,2 %). Dieses Modell ist damit fuer die aktuelle
+-- Quelle **wirkungslos, nicht falsch** -- es traegt weiterhin jede Quelle, die die
+-- Markierung benutzt. Der offene Punkt ist BPULS-064.
 
 with source as (
 

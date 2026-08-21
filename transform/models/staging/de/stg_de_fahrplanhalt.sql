@@ -9,6 +9,13 @@
 -- haengen koennte. Gemessen am Produktionsstand vom 2026-08-21 erreichte dadurch
 -- **kein einziger** Ausfall die Kennzahlen (0 bei 52.263 Fahrten), waehrend 21.823
 -- ausgelassene Halte ankamen. Erst der Soll-Laufweg macht daraus wieder Halte.
+--
+-- **Nachtrag 2026-08-21, nachgemessen:** dieser Feed setzt die trip-level-Markierung
+-- ueberhaupt nicht. Auszaehlung des vollstaendigen bundesweiten Feeds: 49.133 Fahrten,
+-- **0 mit CANCELED**; ein vollstaendiger Ausfall kommt hier als Fahrt, deren Halte
+-- allesamt SKIPPED sind (582 Fahrten, 1,2 %). Dieses Modell ist damit fuer die aktuelle
+-- Quelle **wirkungslos, nicht falsch** -- es traegt weiterhin jede Quelle, die die
+-- Markierung benutzt. Der offene Punkt ist BPULS-064.
 
 {% set dateien = fahrplanhalt_dateien() %}
 

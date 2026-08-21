@@ -335,12 +335,18 @@ Wirklichkeit, nie schlechter. Zu schließen wäre das erst, wenn die Soll-Halte 
 statischen Fahrplan danebengelegt werden; bis dahin ist die Lücke hier benannt statt
 stillschweigend eingerechnet.
 
-**Bei den deutschen Daten ist diese Lücke derzeit vollständig.** Über die bisher
-aufgezeichneten Betriebstage weist die Auswertung bei mehr als fünfzigtausend Fahrten
-keinen einzigen Ausfall aus, während über zwanzigtausend ausgelassene Halte erfasst sind.
-Der Unterschied liegt in der Form der Meldung: ein ausgelassener Halt kommt am Zug an, ein
-vollständiger Ausfall dagegen als Meldung über die ganze Fahrt, ohne Halte. Die Null in
-der Spalte „Zug ausgefallen" ist deshalb keine Aussage über den Betrieb.
+**Bei den deutschen Daten ist die Spalte „Zug ausgefallen" strukturell leer** — und das
+ist keine Aussage über den Betrieb, sondern über die Form der Meldung. GTFS-Realtime lässt
+zwei Formen zu: eine Markierung an der ganzen Fahrt, oder das Streichen jedes einzelnen
+Halts. Die Spalte liest die erste; dieser Feed benutzt sie nicht. Eine Auszählung des
+vollständigen bundesweiten Feeds am 21.08.2026 ergab bei **49.133 Fahrten keine einzige**
+Fahrt-Markierung, dagegen **12.747** gestrichene Halte und **582 Fahrten** (1,2 %), bei
+denen jeder Halt gestrichen war.
+
+**Die betroffenen Züge fehlen deshalb nicht im Nenner** — sie werden als „Halt
+ausgelassen" bzw. „Laufweg gekappt" gezählt und gehen in `quote_planmaessig` ein. Was
+fehlt, ist die Zuordnung zum Etikett „Ausfall", nicht die Fahrt. Eine Fahrt, über die der
+Feed gar nichts meldet, bleibt dagegen unsichtbar; wie häufig das ist, ist offen.
 
 ## Was diese Zahlen nicht sind
 

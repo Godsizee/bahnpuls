@@ -200,16 +200,36 @@ unplausiblen Verspätungswerte der DE-Fixture — alle drei mit `severity: warn`
 so gewollt: sie beschreiben Eigenschaften der Quelle, keine Modellfehler, und dürfen
 deshalb den Seitenbau nicht anhalten.
 
-## Ausfälle kommen ohne Halte — und waren deshalb unsichtbar
+## Ausfälle kommen anders, als dieses Projekt zunächst annahm
 
 Am Produktionsstand vom 2026-08-21 wies die Auswertung über drei Betriebstage und
-**52.263 Fahrten exakt null Ausfälle** aus, bei gleichzeitig 21.823 ausgelassenen Halten.
-Zwei Marts unabhängig. Der Grund ist die Form der Meldung: ein ausgelassener Halt kommt am
-Zug an, ein **vollständiger** Ausfall dagegen als Aussage über die ganze Fahrt, ohne
-`stop_time_update` — und `stg_de_gtfsrt` filtert die heraus, weil dort jede Zeile ein Halt
-sein muss.
+**54.236 Fahrten exakt null Ausfälle** aus. Zwei Marts unabhängig.
 
-Der Weg zurück führt über den Soll-Fahrplan:
+> [!warning] Die erste Erklärung dafür war falsch (nachgemessen 2026-08-21)
+> Angenommen wurde: ein vollständiger Ausfall komme als Meldung über die ganze Fahrt ohne
+> `stop_time_update`, und `stg_de_gtfsrt` filtere die heraus. Daraufhin entstanden
+> `stg_de_fahrtmeldung`, `stg_de_fahrplanhalt`, `int_de_ausfaelle` und die
+> `stop_times`-Extraktion im Loader.
+>
+> **Die Auszählung des vollständigen bundesweiten Feeds am 2026-08-21 zeigt etwas
+> anderes:** von **49.133 Fahrten** trug **keine einzige** `trip.schedule_relationship =
+> CANCELED`. Alle standen auf `SCHEDULED`. Auf Halt-Ebene dagegen: **12.747 SKIPPED**, und
+> bei **582 Fahrten** (1,2 %) war *jeder* Halt SKIPPED. Nur **67** Fahrten kamen ohne
+> `stop_time_update` — und auch die alle `SCHEDULED`, also keine Ausfälle.
+>
+> **Dieser Feed drückt einen Ausfall über die Halte aus, nicht über die Fahrt.** GTFS-RT
+> lässt beides zu; `zug_ausgefallen` liest die Form, die hier nicht vorkommt.
+>
+> Zwei Folgen: Erstens sind die betroffenen Züge **nicht verloren** — sie stehen als
+> `halt_ausgelassen` in den Daten und gehen in `quote_planmaessig` ein. Die frühere
+> Aussage „beide Quoten sind zu günstig, die Ausfälle fehlen im Nenner" war falsch und ist
+> auf Seite und Methodik korrigiert. Zweitens ist die unten beschriebene Auflösung über den
+> Soll-Fahrplan für diese Quelle **wirkungslos, aber nicht fehlerhaft**: sie wartet auf
+> eine Meldungsform, die nicht kommt, und trägt jede Quelle, die sie benutzt. Ob „alle
+> Halte gestrichen" als Ausfall gewertet werden soll, ist eine fachliche Entscheidung —
+> **BPULS-064**.
+
+Der gebaute Weg, unverändert gültig für jede Quelle mit trip-level-Meldung:
 
 ```
 stg_de_fahrtmeldung   Meldungen ohne Halte (das Gegenstück zum Filter in stg_de_gtfsrt)

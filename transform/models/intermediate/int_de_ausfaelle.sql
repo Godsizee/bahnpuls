@@ -7,6 +7,13 @@
 -- koennte -- und ohne Halt taucht er in keiner Kennzahl auf. Am Produktionsstand
 -- vom 2026-08-21 waren das **alle** Ausfaelle: null gezaehlte bei 52.263 Fahrten.
 --
+-- **Nachtrag 2026-08-21, nachgemessen:** dieser Feed setzt die trip-level-Markierung
+-- ueberhaupt nicht. Auszaehlung des vollstaendigen bundesweiten Feeds: 49.133 Fahrten,
+-- **0 mit CANCELED**; ein vollstaendiger Ausfall kommt hier als Fahrt, deren Halte
+-- allesamt SKIPPED sind (582 Fahrten, 1,2 %). Dieses Modell ist damit fuer die aktuelle
+-- Quelle **wirkungslos, nicht falsch** -- es traegt weiterhin jede Quelle, die die
+-- Markierung benutzt. Der offene Punkt ist BPULS-064.
+--
 -- Dieses Modell holt den Soll-Laufweg aus dem statischen Fahrplan und erzeugt je
 -- Soll-Halt eine Zeile, die dasselbe Schema traegt wie ein beobachteter Halt --
 -- mit NULL-Verspaetungen und `zug_ausgefallen = true`. Die Zeile behauptet damit
