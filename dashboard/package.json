@@ -9,7 +9,7 @@
     "sources": "evidence sources",
     "sources:strict": "evidence sources --strict",
     "preview": "evidence preview",
-    "serve": "sirv build --host 0.0.0.0 --port 3000 --single --quiet"
+    "serve": "sirv build --host 0.0.0.0 --port 3000 --single --dev --quiet"
   },
   "engines": {
     "npm": ">=7.0.0",

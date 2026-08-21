@@ -135,3 +135,33 @@ Build läuft im Container zur Laufzeit über `deploy/dashboard-entrypoint.sh`: e
 gegen die Rohdaten des Volumes, dann `npm run sources`, dann `npm run build`, dann `sirv`.
 Stündlicher Rebuild als Coolify Scheduled Task. Einzelheiten in
 `Referenz/Bahnpuls_Betrieb_und_Deployment.md`.
+
+### `sirv` braucht `--dev`, sonst altert die Seite in den Zustand „ohne Daten"
+
+`npm run serve` ruft `sirv build … --single --dev --quiet`. Das `--dev` sieht nach einem
+Entwicklungsschalter aus und ist in Wahrheit die Bedingung dafür, dass der stündliche
+Rebuild überhaupt etwas bewirkt.
+
+Ohne `--dev` liest `sirv` das Verzeichnis **genau einmal beim Start** und baut daraus eine
+feste Tabelle aus Pfad, Größe und Zeitstempel (`build.js`: `if (!opts.dev) totalist(dir,
+…)`, danach `lookup = viaCache`). Danach gilt: was beim Start nicht da war, existiert für
+den Server nicht. Der Rebuild schreibt seine Parquet-Dateien aber unter **neue**
+Hash-Verzeichnisse — der Hash hängt an den Daten —, also unter Pfade, die in dieser Tabelle
+fehlen. `manifest.json` wird dagegen am selben Pfad ersetzt und weiter ausgeliefert, nur
+mit der beim Start gemerkten `Content-Length`.
+
+Das Ergebnis ist die unangenehmste Form von kaputt: **die Seite antwortet mit 200, trägt
+den richtigen Titel, und jede einzelne Datenquelle liefert 404.** Im Browser „No sources
+found", von außen unauffällig. Genau so stand sie am 2026-08-21 zwischen dem
+16:20-Rebuild und dem Fund.
+
+Nachgemessen statt vermutet, mit derselben `sirv`-Version aus `node_modules`:
+
+| | vor dem Start angelegt | nach dem Start angelegt |
+|---|---|---|
+| ohne `--dev` | 200 | **404** |
+| mit `--dev` | 200 | 200 |
+
+Der Preis ist ein `stat` je Anfrage statt einer Tabelle im Speicher — bei dieser Seite
+nicht messbar. Die Alternative wäre, den Server nach jedem Rebuild neu zu starten; genau
+das wollte `dashboard-rebuild.sh` vermeiden.
