@@ -70,6 +70,9 @@ aufhebbar.
     Gebiet — die bundesweite Sammelvariante ist gestrichen, Q12 ist seit 2026-08-19
     entschieden. „VRN" ist der **Verkehrsverbund Rhein-Neckar**, nicht die
     Rhein-Neckar-Verkehr GmbH (RNV); RNV ist ein Unternehmen im Gebiet, kein Gebiet.
+    Ebensowenig gemeint ist der **RNN** (Rhein-Nahe-Nahverkehrsverbund, Raum Bad
+    Kreuznach) — ein Nachbarverbund, der bei gtfs.de mit dem VRN in **einem** Feed
+    gebündelt ist und deshalb leicht mit hineingelesen wird.
     Keine eigenmächtige Ausweitung, auch nicht „nur zum Messen".
 
 ## Architektur-Leitplanken

@@ -27,8 +27,8 @@ Prognose-Schnappschüssen auf je ein Halt-Ereignis verdichtet und um abgeleitete
 Kennzahlen ergänzt.
 
 Der Stream ist kein einzelner Datensatz, sondern ein **Sammelstrom aus den Feeds
-mehrerer Herausgeber**, und die haben nicht alle dieselbe Lizenz. Für das Gebiet, das
-dieses Projekt aufzeichnet, sind das nach Angabe von gtfs.de diese:
+mehrerer Herausgeber**, und die haben nicht alle dieselbe Lizenz. Diese berühren das
+Gebiet, das dieses Projekt aufzeichnet, nach Angabe von gtfs.de:
 
 | Enthaltener Feed | Lizenz | Abdeckung |
 |---|---|---|
@@ -39,10 +39,16 @@ dieses Projekt aufzeichnet, sind das nach Angabe von gtfs.de diese:
 | SIRI Baden-Württemberg | CC BY-SA | Nahverkehr in Baden-Württemberg |
 | Verkehrsverbund Rhein-Neckar / Rhein-Nahe-Nahverkehrsverbund | [DL-DE→BY-2.0](https://www.govdata.de/dl-de/by-2-0) | Nahverkehr im Bereich VRN / RNN |
 
-Die letzte Zeile ist die, auf die es ankommt: der VRN-Feed steht unter der **Datenlizenz
+Die letzte Zeile ist die, auf die es ankommt: sie steht unter der **Datenlizenz
 Deutschland — Namensnennung 2.0**, nicht unter Creative Commons. Sie verlangt
 Namensnennung, aber **kein** Share-Alike. Beide Pflichten sind hier erfüllt, weil die
 strengere von beiden auf den ganzen abgeleiteten Bestand angewendet wird.
+
+Der Name dieser Zeile stammt von gtfs.de und bündelt **zwei Verkehrsverbünde**. Nur der
+erste davon gehört zum Gebiet dieses Projekts: **VRN** ist der Verkehrsverbund
+Rhein-Neckar, **RNN** der Rhein-Nahe-Nahverkehrsverbund im Raum Bad Kreuznach — ein
+Nachbarverbund, der hier nicht ausgewertet wird. Genannt wird er trotzdem, weil beide
+Verbünde denselben Feed speisen.
 
 ## Deutschland — Fahrplandaten
 
