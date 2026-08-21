@@ -513,3 +513,71 @@ models:
       - dbt_utils.unique_combination_of_columns:
           arguments:
             combination_of_columns: ['betriebstag', 'quelle', 'route_kurzname', 'von_bezeichnung', 'nach_bezeichnung']
+
+  - name: mart_erhebung
+    description: >
+      Die Lückenseite der Datenqualität (BPULS-024): nicht was gemeldet wurde, sondern
+      **ob** gemeldet wurde. Korn Kalendertag × Stunde × Quelle.
+
+      **Kalendertag, nicht Betriebstag** — und das ist keine Nachlässigkeit. Ein Poll ist
+      ein Vorgang der Erhebung, hat keinen Betriebstag, und die Zeilen eines einzigen
+      Polls verteilen sich regelmäßig auf zwei. Dieser Mart steht deshalb **neben**
+      `mart_datenqualitaet` und wird nie mit ihm verrechnet.
+
+      Die Stunden kommen aus einem Gerüst zwischen erster und letzter Beobachtung, nicht
+      aus den Daten: eine Stunde ganz ohne Poll erzeugt keine Zeile und wäre aus einer
+      gruppierten Tabelle verschwunden — ausgerechnet aus der, die sie zeigen soll.
+    columns:
+      - name: kalendertag
+        tests:
+          - not_null
+      - name: stunde
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 23
+      - name: quelle
+        tests:
+          - not_null
+      - name: polls_beobachtet
+        description: >
+          Polls, die mindestens eine Änderung gebracht haben. Ein Poll ganz ohne
+          Änderung hinterlässt keine Zeile (ADR-003) — praktisch folgenlos, aber die
+          Kennzahl heißt deshalb Abdeckung und nicht Verfügbarkeit.
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+      - name: polls_erwartet
+        description: 3600 / `de_poll_intervall_sek`, also 120 bei 30 s (ADR-011).
+        tests:
+          - not_null
+      - name: abdeckung
+        description: >
+          `polls_beobachtet / polls_erwartet`. **Nicht gedeckelt** — während eines
+          Redeploys pollen zwei Container gleichzeitig, und ein auf 100 % gedeckelter
+          Wert verbärge genau den Vorgang, der ihn erzeugt hat.
+        tests:
+          - not_null
+      - name: groesste_luecke_sek
+        description: >
+          Größter Abstand zwischen zwei Polls, der **in** dieser Stunde endete — eine
+          Lücke hält sich nicht an Stundengrenzen. NULL für eine Stunde ganz ohne Poll:
+          dort endete keine Lücke, sie lief hindurch, und `polls_beobachtet = 0` sagt es
+          deutlicher.
+      - name: feed_alter_schnitt_sek
+        description: Mittleres Alter der Daten beim Abruf. Gemessen rund 19 s.
+      - name: stunde_vollstaendig
+        description: >
+          Ob über das Ende der Stunde hinaus beobachtet wurde. Nur eine abgeschlossene
+          Stunde darf als Befund gelesen werden — sonst wäre die laufende Stunde jedes
+          Mal einer, und ein stündlicher Befund wird nicht mehr gelesen.
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: ['kalendertag', 'stunde', 'quelle']

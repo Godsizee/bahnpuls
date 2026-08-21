@@ -360,6 +360,27 @@ Vorher wurden sie als „Halt ausgelassen" gezählt: dieselbe Zahl, nur ohne erk
 Grund. Eine Fahrt, über die der
 Feed gar nichts meldet, bleibt dagegen unsichtbar; wie häufig das ist, ist offen.
 
+## Die Erhebung selbst
+
+Alle Zahlen oben beschreiben, **was** gemeldet wurde. Ob durchgehend gemeldet wurde, steht
+dort nicht — ein ausgefallener Abruf hinterlässt keine Zeile, sondern eine Lücke zwischen
+zwei Zeitpunkten. Deshalb wird die Erhebung getrennt geführt und auf der
+[Startseite](/) ausgewiesen.
+
+**Gezählt wird nach Kalendertag und Wanduhrstunde, nicht nach Betriebstag.** Ein Abruf ist
+ein Vorgang der Sammlung; er hat keinen Betriebstag, und die Zeilen eines einzigen Abrufs
+verteilen sich regelmäßig auf zwei. Die beiden Größen werden deshalb nie miteinander
+verrechnet.
+
+**Die Stunden stammen aus einem lückenlosen Gerüst**, nicht aus den Daten. Eine Stunde
+ganz ohne Abruf erzeugt keine Zeile und wäre aus einer gruppierten Tabelle verschwunden —
+ausgerechnet aus der, die sie zeigen soll.
+
+**Die Abdeckung ist eine untere Schranke:** gezählt werden Abrufe, die eine Änderung
+gebracht haben. Ein Abruf ohne jede Änderung hinterlässt nichts. Und sie kann über 100 %
+liegen, weil beim Ausrollen kurz zwei Sammler gleichzeitig laufen; der Wert wird nicht
+gedeckelt, weil ein gedeckelter Wert wie eine normale Stunde aussähe.
+
 ## Was diese Zahlen nicht sind
 
 Bahnpuls ist keine amtliche Statistik und steht in keiner Verbindung zu den

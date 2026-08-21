@@ -27,6 +27,11 @@ vars:
   # Verzeichnis der versionierten statischen Fahrplaene (BPULS-023). Produktiv das
   # Persistent Volume, lokal das Entwicklungsverzeichnis.
   de_static_dir: "../data/static"
+  # Poll-Intervall des Collectors in Sekunden (ADR-011: bleibt bei 30). Nur die
+  # Erwartung fuer die Poll-Abdeckung haengt daran -- der Collector liest es nicht von
+  # hier, er hat sein eigenes Flag. Wird das Intervall geaendert, muss dieser Wert
+  # mitgezogen werden, sonst rechnet mart_erhebung gegen eine falsche Erwartung.
+  de_poll_intervall_sek: 30
 
 models:
   bahnpuls:

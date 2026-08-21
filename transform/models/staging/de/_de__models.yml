@@ -66,6 +66,25 @@ models:
               arguments:
                 values: ['de_gtfsrt']
 
+  - name: stg_de_erhebung
+    description: >
+      Die Erhebung selbst, nicht ihr Inhalt (BPULS-024): je Rohzeile der Zeitpunkt des
+      Polls und der Zeitstempel des Feeds, beide in `Europe/Berlin`.
+
+      Liest **direkt aus der Quelle**, nicht aus `stg_de_gtfsrt` — das dortige Modell
+      filtert `is_trip_level_only` heraus, und ein Poll, der nur solche Meldungen
+      brachte, zählte hier sonst fälschlich als Ausfall.
+    columns:
+      - name: fetched_at
+        description: Wanduhrzeit des Polls, nie ein Betriebstag.
+        tests:
+          - not_null
+      - name: snapshot_ts
+        description: Zeitstempel im Feed-Header. Die Differenz ist das Alter der Daten.
+      - name: quelle
+        tests:
+          - not_null
+
   - name: stg_de_fahrplanhalt
     description: >
       Soll-Halte aus dem statischen Fahrplan, je Version und Feed. Reine

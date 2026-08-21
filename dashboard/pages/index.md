@@ -190,6 +190,60 @@ drei sind Betrieb und gehören zum Bild.
     <Column id=ausgelassene_halte title="ausgelassen" />
 </DataTable>
 
+### Und hat der Sammler durchgehalten?
+
+Die Tabelle oben zeigt, was in den Daten steht. Sie kann nicht zeigen, was **nicht** darin
+steht: ein Poll, der ausfällt, hinterlässt keine Zeile, die man zählen könnte — er
+hinterlässt eine Lücke zwischen zwei Zeitpunkten. Deshalb steht die Erhebung hier separat.
+
+```sql erhebung_tage
+select
+    kalendertag,
+    case quelle when 'de_gtfsrt' then 'Deutschland' else quelle end as herkunft,
+    sum(polls_beobachtet) filter (where stunde_vollstaendig)        as polls,
+    count(*) filter (where stunde_vollstaendig)                     as stunden,
+    100.0 * sum(polls_beobachtet) filter (where stunde_vollstaendig)
+          / nullif(sum(polls_erwartet) filter (where stunde_vollstaendig), 0) as abdeckung,
+    count(*) filter (where stunde_vollstaendig and polls_beobachtet = 0)      as stunden_ohne_poll,
+    max(groesste_luecke_sek)                                        as groesste_luecke,
+    avg(feed_alter_schnitt_sek)                                     as feed_alter
+from bahnpuls.erhebung
+group by kalendertag, quelle
+order by kalendertag desc
+```
+
+<DataTable data={erhebung_tage} rows=10>
+    <Column id=kalendertag title="Tag" />
+    <Column id=herkunft title="Herkunft" />
+    <Column id=stunden title="volle Stunden" />
+    <Column id=polls title="Abrufe" fmt="#,##0" />
+    <Column id=abdeckung title="Abdeckung %" fmt="#,##0.0" />
+    <Column id=stunden_ohne_poll title="Stunden ohne Abruf" />
+    <Column id=groesste_luecke title="größte Lücke (s)" fmt="#,##0" />
+    <Column id=feed_alter title="Alter der Daten (s)" fmt="#,##0" />
+</DataTable>
+
+Erwartet werden **120 Abrufe je Stunde**, einer alle 30 Sekunden. Gezählt sind nur
+abgeschlossene Stunden — die laufende ist naturgemäß unvollständig und wäre sonst jeden
+Tag ein Befund.
+
+Drei Einschränkungen, damit die Spalten nicht mehr versprechen, als sie halten:
+
+- **„Abdeckung" ist eine untere Schranke.** Gezählt werden Abrufe, die eine Änderung
+  gebracht haben. Ein Abruf, bei dem sich nichts geändert hat, hinterlässt nichts und
+  fehlt hier — praktisch kommt das nicht vor, selbst die ruhigste Nachtstunde bringt
+  Änderungen, aber versprochen ist es nicht.
+- **Über 100 % ist möglich.** Beim Ausrollen einer neuen Fassung laufen kurz zwei
+  Sammler gleichzeitig. Der Wert wird bewusst nicht gedeckelt: ein gedeckelter Wert sähe
+  aus wie eine normale Stunde und verbärge genau den Vorgang, der ihn erzeugt hat.
+- **„Größte Lücke" ist der längste Abstand zwischen zwei Abrufen** an diesem Tag. Bei 30
+  Sekunden Takt ist alles darüber ein Aussetzer — meist ein Zeitüberschreitung beim
+  Abruf, die den nächsten Versuch verzögert.
+
+Warum das hier steht und nicht in einem Betriebsprotokoll: eine Lücke in der Erhebung
+sieht in jeder Auswertung darüber aus wie ruhiger Betrieb. Wer die Zahlen dieser Seite
+liest, soll sehen können, ob sie auf lückenloser Beobachtung beruhen.
+
 ---
 
 Wie eine einzelne Fahrt Halt für Halt verläuft, zeigt die Seite

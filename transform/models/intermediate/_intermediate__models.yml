@@ -136,6 +136,36 @@ models:
             combination_of_columns: ['trip_key', 'stop_sequence']
 
 
+  - name: int_de_erhebung
+    description: >
+      Ein Poll je Zeile, mit dem Abstand zum vorigen (BPULS-024). Der Abstand ist die
+      eigentliche Kennzahl: Polls zu zählen sagt, wie oft es geklappt hat — der Abstand
+      sagt, wie lange nicht.
+
+      Von der Dublettenfrage nicht betroffen: gezählt werden Zeitpunkte, nicht Zeilen.
+      Beim Redeploy verdoppeln sich Rohzeilen, Poll-Zeitpunkte nicht — und zwei
+      Container, die wirklich getrennt pollen, sind zwei Polls und werden auch als zwei
+      gezählt.
+    columns:
+      - name: quelle
+        tests:
+          - not_null
+      - name: fetched_at
+        tests:
+          - not_null
+      - name: feed_alter_sek
+        description: >
+          `fetched_at − snapshot_ts`. Gemessen rund 19 s; steigt der Wert, liefert die
+          Quelle veraltete Daten, ohne dass ein Poll fehlt.
+      - name: abstand_sek
+        description: >
+          Sekunden seit dem vorigen Poll. NULL beim allerersten — davor gab es nichts,
+          und 0 wäre gelogen.
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: ['quelle', 'fetched_at']
+
   - name: int_de_soll_laufweg
     description: >
       Hält den beobachteten Laufweg gegen den planmäßigen — nur für Fahrten, in denen
