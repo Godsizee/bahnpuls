@@ -236,6 +236,37 @@ nicht.
 seit BPULS-032 mit; ältere Versionen bekommen es über
 `statictool -fahrplan-nachtragen` aus ihrem mitgespeicherten Archiv.
 
+**Fehlt die Datei in *allen* Versionen, läuft dbt trotzdem durch — seit BPULS-062.**
+Die Extraktion ist bewusst best-effort: schlüge sie fatal fehl, opferte man das
+unwiederbringliche Archiv für eine Datei, die daraus jederzeit herstellbar ist. Damit ist
+ein Stand ohne eine einzige `stop_times.parquet` ein möglicher Zustand — und
+`stg_de_fahrplanhalt` liest per Glob. Ein Glob ohne Treffer ist in DuckDB ein **Fehler**,
+kein leeres Ergebnis (geprüft mit 1.5.5; `error_on_no_files` kennt `read_parquet` dort
+nicht), und dieser Fehler nähme den ganzen Lauf mit: auch Pünktlichkeit, Engpässe und
+Pufferbilanz, die mit Ausfällen nichts zu tun haben.
+
+`fahrplanhalt_dateien()` zählt deshalb vorher per `glob()` — das liefert bei null Treffern
+eine leere Menge statt eines Fehlers — und das Modell schaltet auf einen leeren, aber
+typgleichen Zweig um. **Leer heißt hier nicht still:** der Lauf trägt eine `WARNING` mit
+dem Befehl, der es behebt, und `assert_de_ausfaelle_aufgeloest` meldet dann *jeden*
+ausgefallenen Zug als unaufgelöst. Eine leere View, die niemand bemerkt, wäre genau der
+Blindfleck, den BPULS-032 gerade geschlossen hat.
+
+Gegenprobe (der Baum wird aus der vorhandenen Fixture abgeleitet, nicht dupliziert —
+duplizierte Fixtures veralten):
+
+```bash
+OHNE=/tmp/de_static_ohne_fahrplan
+rm -rf "$OHNE" && cp -r tests/fixtures/de_static "$OHNE"
+rm -f "$OHNE"/v=*/*/stop_times.parquet
+dbt build --vars "{\"ch_istdaten_glob\": \"tests/fixtures/ch/*_istdaten.csv\", \"de_gtfsrt_glob\": \"tests/fixtures/de/*.parquet\", \"de_static_dir\": \"$OHNE\"}"
+```
+
+Erwartung: `PASS=176 WARN=4 ERROR=0` — die vierte Warnung ist
+`assert_de_ausfaelle_aufgeloest`. Lässt man `fahrplanhalt_dateien()` stattdessen fest `1`
+zurückgeben, endet derselbe Lauf mit `ERROR=1` und übersprungenem Downstream; genau daran
+hängt der Nutzen der Prüfung.
+
 ## Dubletten in den Rohdaten sind unschädlich — aber nur hier
 
 Beim Redeploy startet Coolify den neuen Container, bevor er den alten stoppt. Am

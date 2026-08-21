@@ -10,6 +10,42 @@
 -- **kein einziger** Ausfall die Kennzahlen (0 bei 52.263 Fahrten), waehrend 21.823
 -- ausgelassene Halte ankamen. Erst der Soll-Laufweg macht daraus wieder Halte.
 
+{% set dateien = fahrplanhalt_dateien() %}
+
+{% if dateien == 0 %}
+
+{#-
+    Kein einziger Soll-Fahrplan auf dem Volume. Das ist ein moeglicher Zustand und
+    kein Programmierfehler: die Extraktion aus dem Archiv ist bewusst best-effort
+    (ErrFahrplanUnvollstaendig), damit ein Fehlschlag dort nie das unwiederbringliche
+    Archiv kostet -- und vor der ersten Ladung mit dem neuen Loader gibt es die Datei
+    ueberhaupt nicht.
+
+    Der Glob wuerde hier abbrechen und **den ganzen dbt-Lauf** mitnehmen, also auch
+    Puenktlichkeit, Engpaesse und Pufferbilanz, die mit Ausfaellen nichts zu tun
+    haben. Stattdessen bleibt die View leer -- aber nicht still: die Warnung unten
+    steht im Lauf, und `assert_de_ausfaelle_aufgeloest` meldet dann **jeden**
+    ausgefallenen Zug als unaufgeloest. Eine leere View, die niemand bemerkt, waere
+    genau der Blindfleck, den BPULS-032 gerade geschlossen hat.
+-#}
+{% do exceptions.warn(
+    "stg_de_fahrplanhalt: keine stop_times.parquet unter " ~ var('de_static_dir') ~
+    "/v=*/ gefunden. Ausfaelle bleiben unaufgeloest (A5 zeigt zu wenige). "
+    ~ "Behebung: 'statictool -fahrplan-nachtragen -static-dir " ~ var('de_static_dir') ~ "'"
+) %}
+
+select
+    cast(null as date)    as static_version,
+    cast(null as varchar) as feed,
+    cast(null as varchar) as trip_id,
+    cast(null as bigint)  as stop_sequence,
+    cast(null as varchar) as stop_id,
+    cast(null as bigint)  as soll_an_sek,
+    cast(null as bigint)  as soll_ab_sek
+where false
+
+{% else %}
+
 with roh as (
 
     select
@@ -46,3 +82,5 @@ select
     {{ gtfs_zeit_in_sekunden('departure_time') }} as soll_ab_sek
 
 from roh
+
+{% endif %}
