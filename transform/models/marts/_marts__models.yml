@@ -331,3 +331,68 @@ models:
       - dbt_utils.unique_combination_of_columns:
           arguments:
             combination_of_columns: ['betriebstag', 'quelle', 'route_kurzname', 'schwelle_sek']
+
+  - name: mart_engpassknoten
+    description: >
+      A4 (BPULS-033): A1 über die Zeit aggregiert. Korn: Betriebstag × Quelle ×
+      Abschnitt (von → nach) × Tagesstunde.
+
+      **Der Abschnitt wird über den Namen geschlüsselt, nicht über die stop_id** — die
+      Namensräume rotieren zwischen Fahrplan-Versionen, über die ID zerfiele ein
+      physischer Engpass in mehrere Zeilen mit je einem Bruchteil der Züge, und die
+      Rangliste wäre still falsch. Wo kein Name bekannt ist, bleibt die ID stehen;
+      `bezeichnung_vollstaendig` sagt, ob das der Fall war.
+
+      **Immer je Zug lesen, nie als Rohsumme.** Über Stunden oder Tage hinweg aus
+      Summe und Zähler neu rechnen, nicht die je-Zug-Spalten mitteln.
+    columns:
+      - name: betriebstag
+        tests:
+          - not_null
+      - name: quelle
+        tests:
+          - not_null
+      - name: von_bezeichnung
+        description: Name der Betriebsstelle am Abschnittsanfang, ersatzweise deren ID.
+        tests:
+          - not_null
+      - name: nach_bezeichnung
+        description: Name der Betriebsstelle am Abschnittsende, ersatzweise deren ID.
+        tests:
+          - not_null
+      - name: stunde
+        description: >
+          Wanduhrstunde der planmäßigen Ankunft am Zielhalt. NULL, wo keine Soll-Ankunft
+          bestimmbar war — diese Zeilen fallen aus der Heatmap, nicht aus der Summe.
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 23
+      - name: abschnitt_paar
+        description: >
+          Richtungsunabhängiger Schlüssel des Abschnitts. Beide Fahrtrichtungen tragen
+          denselben Wert, damit sich die Asymmetrie eines Abschnitts in einer Abfrage
+          gegenüberstellen lässt.
+        tests:
+          - not_null
+      - name: richtung_hin
+        description: Unterscheidet die beiden Fahrtrichtungen innerhalb von `abschnitt_paar`.
+        tests:
+          - not_null
+      - name: zuege
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 1
+      - name: laufzeit_messwerte
+        tests:
+          - not_null
+      - name: haltezeit_messwerte
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: ['betriebstag', 'quelle', 'von_bezeichnung', 'nach_bezeichnung', 'stunde']

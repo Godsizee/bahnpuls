@@ -82,6 +82,21 @@ Zwei Dinge daran sind nicht beliebig:
 Der eigentliche Umbau — serverseitige Abfrage oder je Fahrt vorbereitete Seiten — bleibt
 offen und ist mit einem statischen Evidence-Build nicht zu haben.
 
+## Warum die Engpass-Seite nach Verkehrsmenge auswählt und nach Verspätung sortiert
+
+`sources/bahnpuls/engpassknoten.sql` liefert die **200 meistbefahrenen** Abschnitte der
+letzten 30 Betriebstage, die Seite sortiert sie dann nach neu entstandener Verspätung je
+Zug. Andersherum — nach Verspätung auswählen — wäre der Ausschnitt **zirkulär**: die
+Rangliste suchte in einer Menge, die schon nach demselben Kriterium vorsortiert ist, und
+jede Zahl darin sähe schlimmer aus, als sie ist. Der Preis ist ein Engpass auf einer wenig
+befahrenen Strecke, der nicht auftaucht; er steht auf der Seite.
+
+Die Abschnitte werden im Mart über den **Bahnhofsnamen** geschlüsselt, nicht über die
+`stop_id`. Die Namensräume rotieren zwischen Fahrplan-Versionen und der Echtzeit-Feed
+verwendet mehrere gleichzeitig — über die ID zerfiele ein physischer Engpass in mehrere
+Zeilen mit je einem Bruchteil der Züge, und die Rangliste zeigte nicht den schlimmsten
+Abschnitt, sondern den mit dem einheitlichsten Namensraum.
+
 ## Auch das Aggregat ist begrenzt
 
 `sources/bahnpuls/puenktlichkeit.sql` liefert die letzten **30 Betriebstage je Quelle**,

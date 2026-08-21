@@ -1,7 +1,7 @@
 ---
 title: Methodik
 description: Wie die Kennzahlen gerechnet werden — und was sie bewusst nicht behaupten
-sidebar_position: 4
+sidebar_position: 5
 ---
 
 Eine Zahl ohne offengelegte Definition ist eine Behauptung. Diese Seite beschreibt jede
@@ -203,6 +203,43 @@ höchstens **fünf Minuten nach** dem prognostizierten Ereigniszeitpunkt eingetr
 Die Karenz fängt ab, dass die letzte Meldung leicht nach dem Ereignis eintrifft. Der Wert
 ist eine Annahme und beeinflusst jede nachgelagerte Kennzahl; er wird hier ausgewiesen und
 bei einer Änderung hier korrigiert.
+
+## Engpässe: Abschnitt, Tagesstunde, Richtung
+
+Die Seite [Engpässe im Netz](/engpaesse) legt viele Fahrten übereinander und fragt, wo
+im Netz wiederholt Verspätung entsteht. Gerechnet wird auf denselben Beiträgen wie beim
+Laufweg, nur über die Zeit aggregiert.
+
+**Immer je Zug, nie als Summe.** Eine Summe rankt zwangsläufig den dichtest befahrenen
+Abschnitt nach oben — der hat mehr Züge, nicht mehr Probleme. Der Nenner ist dabei die
+Zahl der Fahrten, für die der Beitrag **bestimmbar** war; sie steht als eigene Spalte
+daneben, damit sichtbar bleibt, auf wie viel Beobachtung ein Mittelwert beruht.
+
+**Die Tagesstunde ist die Wanduhrzeit der planmäßigen Ankunft** am Ende des Abschnitts.
+Ein Nachtzug mit Ankunft 01:30 steht bei Stunde 1 und gehört trotzdem zum Betriebstag
+davor. Für die Frage, wann im Tagesverlauf eine Strecke klemmt, ist das die richtige
+Zuordnung; für die Zuordnung zum Betriebstag wäre sie falsch, und beides wird hier
+getrennt gehalten.
+
+**Abschnitte werden über den Bahnhofsnamen zusammengefasst, nicht über die
+Haltestellen-ID.** Die IDs wechseln zwischen den Fahrplan-Veröffentlichungen, und der
+Echtzeit-Feed verwendet mehrere Namensräume gleichzeitig. Über die ID zusammengefasst
+zerfiele ein einzelner Engpass in mehrere Einträge mit je einem Bruchteil der Züge — die
+Rangliste zeigte dann nicht den schlimmsten Abschnitt, sondern den mit dem einheitlichsten
+Namensraum. Wo kein Name bekannt ist, steht die ID, und die Zusammenfassung bleibt
+unvollständig; die Tabelle weist das aus.
+
+**Die Richtungen werden getrennt geführt.** Ein Abschnitt, auf dem es in eine Richtung
+schlechter läuft als in die andere, ist ein anderer Befund als einer, der insgesamt
+langsam ist. Was der Unterschied bedeutet, sagen diese Daten nicht — er ist ein Hinweis,
+keine Diagnose.
+
+**Was diese Seite nicht zeigt:** Abschnitte außerhalb der 200 meistbefahrenen. Ausgewählt
+wird nach Verkehrsmenge, nicht nach Verspätung — andernfalls suchte die Rangliste in einer
+Menge, die bereits nach demselben Kriterium vorsortiert wurde, und jede Zahl darin sähe
+schlimmer aus, als sie ist. Ein Engpass auf einer wenig befahrenen Strecke bleibt dadurch
+unsichtbar. Ebenfalls nicht getrennt wird nach Verkehrsart; sie wäre aus dem Liniennamen
+zu raten, und dafür sind zu wenige Halte benannt.
 
 ## Pünktlichkeit und Ausfälle
 
