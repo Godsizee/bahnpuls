@@ -194,7 +194,7 @@ dbt build --vars '{"ch_istdaten_glob": "tests/fixtures/ch/*_istdaten.csv", "de_g
 Ohne `de_static_dir` bricht `stg_de_static` ab — es sucht dann unter `../data/static/`
 nach einem Fahrplanarchiv, das lokal niemand hat.
 
-Erwartung: `PASS=211 WARN=4 ERROR=0` von 215 (Stand 2026-08-22, nachgemessen). Alle vier
+Erwartung: `PASS=212 WARN=4 ERROR=0` von 216 (Stand 2026-08-22, nachgemessen). Alle vier
 Warnungen tragen `severity: warn` und sind gewollt — sie beschreiben Eigenschaften der
 Quelle, keine Modellfehler, und dürfen deshalb den Seitenbau nicht anhalten:
 
@@ -208,6 +208,13 @@ Quelle, keine Modellfehler, und dürfen deshalb den Seitenbau nicht anhalten:
 Produktiv sind es sechs: dort schlägt `accepted_range` auf **beide** Verspätungsspalten an
 und `assert_de_soll_zeit_im_fenster` kommt dazu. Beides braucht Datenmengen, die eine
 Fixture nicht nachstellt.
+
+`assert_de_namensquote_bricht_nicht_ein` sieht sich lokal **keinen einzigen Tag** an: er
+verlangt mindestens 1.000 Halte je Betriebstag, und so groß ist keine Fixture. Grün heißt
+hier also „nichts angesehen", nicht „nichts gefunden" — der Beleg, dass er trifft, ist
+deshalb die Gegenprobe am Produktionsstand (2026-08-22): über die vier ausgelieferten
+Betriebstage meldet er genau den 22.08. (`namensquote` 0,1295 gegen 0,3125 am besten
+Vortag), ohne diesen Tag und über die Tage davor bleibt er leer.
 
 ### Die DE-Fixture trägt jeden Fall, den ein Test behauptet zu finden
 
