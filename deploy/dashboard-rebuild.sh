@@ -52,13 +52,31 @@ echo "rebuild: seite neu gebaut"
 # meldete stuendlich das Gegenteil der Wahrheit -- die Quellen wurden die ganze Zeit
 # ausgeliefert. Ein Waechter, der aus dem falschen Grund rot ist, macht den naechsten
 # echten Befund unsichtbar (BPULS-065).
+# Beide Pruefungen laufen, auch wenn die erste schon anschlaegt: sie beantworten
+# verschiedene Fragen ("wird ausgeliefert?" gegen "passt zusammen?"), und ein Abbruch nach
+# der ersten wuerde den zweiten Befund bis zum naechsten Lauf verstecken.
+befunde=0
+
 PRUEFER=/app/deploy/dashboard-quellen-pruefen.js
 if [ ! -f "$PRUEFER" ]; then
 	echo "rebuild: BEFUND -- $PRUEFER fehlt im Image, die Quellen sind ungeprueft"
-	exit 1
+	befunde=$((befunde + 1))
+elif ! node "$PRUEFER"; then
+	echo "rebuild: BEFUND -- die Seite liefert ihre Datenquellen nicht aus"
+	befunde=$((befunde + 1))
 fi
 
-if ! node "$PRUEFER"; then
-	echo "rebuild: BEFUND -- die Seite liefert ihre Datenquellen nicht aus"
-	exit 1
+# Zweite Frage: liefert die Seite ueberhaupt Zahlen aus dem, was da ist? Eine Spalte, die
+# im Mart und in der Seite steht, aber nicht in der Quellabfrage, laesst `build:strict`
+# unberuehrt und faellt erst im Browser des Lesers als fehlende Bindung auf -- von aussen
+# wieder als HTTP 200 mit richtiger Groesse (BPULS-067).
+SEITENPRUEFER=/app/deploy/dashboard-seitenabfragen-pruefen.py
+if [ ! -f "$SEITENPRUEFER" ]; then
+	echo "rebuild: BEFUND -- $SEITENPRUEFER fehlt im Image, die Seitenabfragen sind ungeprueft"
+	befunde=$((befunde + 1))
+elif ! /opt/venv/bin/python "$SEITENPRUEFER"; then
+	echo "rebuild: BEFUND -- eine Seitenabfrage passt nicht zu den ausgelieferten Quellen"
+	befunde=$((befunde + 1))
 fi
+
+[ "$befunde" -eq 0 ] || exit 1

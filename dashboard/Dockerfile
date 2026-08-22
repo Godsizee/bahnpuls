@@ -28,7 +28,7 @@ RUN cd /app/transform && /opt/venv/bin/dbt deps
 COPY --chown=node:node --from=webdeps /app/dashboard/node_modules ./dashboard/node_modules
 COPY --chown=node:node transform ./transform
 COPY --chown=node:node dashboard ./dashboard
-COPY --chown=node:node deploy/dashboard-entrypoint.sh deploy/dashboard-rebuild.sh deploy/dashboard-quellen-pruefen.js deploy/diagnose.py ./deploy/
+COPY --chown=node:node deploy/dashboard-entrypoint.sh deploy/dashboard-rebuild.sh deploy/dashboard-quellen-pruefen.js deploy/dashboard-seitenabfragen-pruefen.py deploy/diagnose.py ./deploy/
 
 # Verzeichnis fuer die DuckDB-Datei; sie ist ein Build-Artefakt im Container-Dateisystem
 # und hat auf dem Volume nichts zu suchen.

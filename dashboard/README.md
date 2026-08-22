@@ -165,3 +165,38 @@ Nachgemessen statt vermutet, mit derselben `sirv`-Version aus `node_modules`:
 Der Preis ist ein `stat` je Anfrage statt einer Tabelle im Speicher — bei dieser Seite
 nicht messbar. Die Alternative wäre, den Server nach jedem Rebuild neu zu starten; genau
 das wollte `dashboard-rebuild.sh` vermeiden.
+
+### Zwei Prüfungen nach jedem Rebuild, weil „HTTP 200" nichts über den Inhalt sagt
+
+`deploy/dashboard-rebuild.sh` prüft am Ende zweierlei, und beide Prüfungen laufen, auch
+wenn die erste schon anschlägt — sie beantworten verschiedene Fragen, und ein Abbruch nach
+der ersten versteckt den zweiten Befund bis zum nächsten Lauf.
+
+| | `dashboard-quellen-pruefen.js` | `dashboard-seitenabfragen-pruefen.py` |
+|---|---|---|
+| Frage | Liefert der Server die Dateien aus, die das Manifest nennt? | Passen die Seitenabfragen zu dem, was in diesen Dateien steht? |
+| Prüft gegen | den laufenden Server auf `:3000` | die erzeugten Parquet-Dateien in DuckDB |
+| Fand | die sieben 404er-Quellen (BPULS-063) | eine Spalte, die die Quellabfrage nicht liefert (BPULS-067) |
+
+**Warum die zweite nötig ist:** `evidence build:strict` prüft keine Seitenabfrage gegen die
+Daten. Am 2026-08-22 stand `fahrten_unbedienter_lauf_nicht_pruefbar` im Mart und in
+`pages/puenktlichkeit.md`, fehlte aber in `sources/bahnpuls/puenktlichkeit.sql` — die zählt
+ihre Spalten einzeln auf. Der strikte Bau lief grün; aufgefallen wäre es erst im Browser
+des Lesers als fehlende Bindung. Gefunden hat es die Gegenprobe von Hand: die Seitenabfrage
+wörtlich gegen die erzeugte Parquet-Datei laufen lassen, statt den Bau anzusehen.
+
+Das Skript tut genau das für alle 31 Blöcke der fünf Seiten mit SQL. Es **bindet** nur
+(`create view`), führt also nichts aus — gesucht sind fehlende Spalten, nicht
+Zahlen. `${inputs.…}` wird durch eine Konstante ersetzt, `${abfrage}` durch eine temporäre
+View desselben Namens; je Seite eine eigene Verbindung, damit eine Abfrage, die eine Abfrage
+einer *anderen* Seite nennt, hier genauso scheitert wie im Browser. Laufzeit 0,9 s.
+
+Drei Dinge sind ausdrücklich eigene Befunde und nicht als Ergebnis der Prüfung zu lesen:
+das Fehlen des Skripts im Image (BPULS-065), eine im Manifest genannte, aber fehlende
+Datei, und **null gefundene SQL-Blöcke** — ändert Evidence die Schreibweise der Blöcke,
+meldete das Skript sonst stillschweigend „alle 0 binden".
+
+Gegengeprüft in beide Richtungen: gegen den Stand *vor* `2295b14` meldet es genau die eine
+fehlende Spalte, gegen den Stand danach alle 31 grün. Das Manifest ist dabei die Instanz,
+nicht das Verzeichnis — lokal liegt dort noch ein `mart_zuglauf/` aus einem älteren Bau,
+und ein Verzeichnislisting würde eine gelöschte Quelle als vorhanden ausweisen.
