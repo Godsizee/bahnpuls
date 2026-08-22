@@ -220,6 +220,11 @@ func FahrplanNachtragen(baseDir string, feeds []Feed) (map[string]int, error) {
 			continue
 		}
 		for _, feed := range feeds {
+			if feed.NurHalte {
+				// Von diesem Feed gibt es kein Archiv (siehe NahverkehrFeed) und
+				// keine Soll-Halte -- nachzutragen ist hier nichts.
+				continue
+			}
 			verzeichnis := filepath.Join(baseDir, e.Name(), feed.Name)
 			ziel := filepath.Join(verzeichnis, FahrplanDatei)
 			if _, err := os.Stat(ziel); err == nil {

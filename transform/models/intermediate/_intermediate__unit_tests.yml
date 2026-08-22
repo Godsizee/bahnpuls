@@ -73,8 +73,11 @@ unit_tests:
     given:
       # Leer: dieser Test prueft die Verdichtung beobachteter Halte. Aufgeloeste
       # Ausfaelle kommen ueber einen eigenen Zweig herein (BPULS-032) und wuerden
-      # hier nur Rauschen beitragen -- die Eingabe muss dbt trotzdem kennen.
+      # hier nur Rauschen beitragen -- die Eingabe muss dbt trotzdem kennen. Dasselbe
+      # gilt fuer den Fremdverkehrsfilter (BPULS-070): leer heisst "nichts auszusortieren".
       - input: ref('int_de_ausfaelle')
+        rows: []
+      - input: ref('int_de_gebietsfremd')
         rows: []
       - input: ref('stg_de_static')
         rows:
@@ -168,6 +171,8 @@ unit_tests:
     model: int_de_stop_events
     given:
       - input: ref('int_de_ausfaelle')
+        rows: []
+      - input: ref('int_de_gebietsfremd')
         rows: []
       - input: ref('stg_de_static')
         rows:

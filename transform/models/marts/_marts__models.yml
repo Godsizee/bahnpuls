@@ -189,6 +189,22 @@ models:
           - dbt_utils.accepted_range:
               arguments:
                 min_value: 1
+      - name: fahrten_gebietsfremd
+        description: >
+          Fahrten, die der Fremdverkehrsfilter aussortiert hat (BPULS-070) — sie stehen
+          in **keinem** anderen Mart. Sie sind über eine Nummernkollision in den
+          Scope-Filter geraten: der Nahverkehrsfeed nummeriert seine Halte in einem
+          eigenen Kreis, und eine Hannoveraner Bushaltestelle trägt zufällig die Nummer
+          eines Bahnhofs im Zielgebiet. Die Zahl steht hier, damit der Ausschluss
+          sichtbar ist — ein Ausschluss, der nirgends auftaucht, ist von einem
+          Datenverlust nicht zu unterscheiden. 0 heißt „keine aussortiert" **oder**
+          „keine Nahverkehrsliste auf dem Volume"; den zweiten Fall meldet
+          `stg_de_nahverkehrshalt` im Lauf.
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
       - name: abdeckung_an
         description: >
           Anteil der Halte mit planmäßiger Ankunft, für die eine Ankunftsverspätung

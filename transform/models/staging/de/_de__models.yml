@@ -131,3 +131,21 @@ models:
       - name: zug_ausgefallen
         tests:
           - not_null
+
+  - name: stg_de_nahverkehrshalt
+    description: >
+      Halte des Nahverkehrsfeeds, vereinigt über alle Versionen — **keine
+      Fahrplanquelle, sondern eine Negativliste** (BPULS-070). Sie beantwortet genau
+      eine Frage: kennt der Nahverkehr diese `stop_id` überhaupt? Fehlt die Datei auf
+      dem Volume, bleibt die View leer und der Lauf trägt eine Warnung; Fremdverkehr
+      zählt dann in allen Kennzahlen mit, aber nicht stillschweigend.
+    columns:
+      - name: stop_id
+        description: Haltenummer im Nummernkreis des Nahverkehrsfeeds.
+        tests:
+          - unique
+      - name: stop_name
+        description: >
+          Name zur Nachvollziehbarkeit eines Befundes („welche Haltestelle war das?").
+          Geht in keine Kennzahl ein — die Namen der beiden Nummernkreise dürfen nicht
+          vermischt werden.

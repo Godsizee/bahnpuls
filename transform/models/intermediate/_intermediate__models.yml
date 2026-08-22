@@ -1,6 +1,49 @@
 version: 2
 
 models:
+  - name: int_de_gebietsfremd
+    description: >
+      Je Fahrt die Entscheidung, ob sie überhaupt Bahnverkehr im Zielgebiet ist
+      (BPULS-070). Der Scope-Filter des Collectors ist eine `stop_id`-Liste aus dem
+      Bahnfahrplan; seit dem 2026-08-22 führt der Echtzeit-Feed auch Nahverkehr aus
+      dem ganzen Bundesgebiet, dessen Nummernkreis mit unserem kollidiert. Erst das
+      Verhältnis über **alle** Halte einer Fahrt trennt beides — eine einzelne Nummer
+      kann in beiden Nummernkreisen etwas bedeuten.
+    columns:
+      - name: betriebstag
+        tests:
+          - not_null
+      - name: trip_key
+        description: betriebstag + trip_id, hier je Fahrt genau einmal.
+        tests:
+          - not_null
+          - unique
+      - name: halte
+        description: Zahl der verschiedenen Halte der Fahrt, Nenner der Entscheidung.
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 1
+                inclusive: true
+      - name: halte_bahnfahrplan
+        description: davon im statischen Bahnfahrplan auflösbar.
+        tests:
+          - not_null
+      - name: halte_nur_nahverkehr
+        description: >
+          davon ausschließlich im Nahverkehrsfeed auflösbar. Halte, die **beide**
+          Nummernkreise kennen, zählen hier nicht — sie entscheiden nichts.
+        tests:
+          - not_null
+      - name: gebietsfremd
+        description: >
+          true, wenn mehr Halte nur im Nahverkehr aufgehen als im Bahnfahrplan. Bei
+          Gleichstand — insbesondere 0 zu 0 — bleibt die Fahrt drin: nicht prüfbar ist
+          nicht widerlegt (dieselbe Regel wie bei der Laufweg-Belegquote, BPULS-066).
+        tests:
+          - not_null
+
   - name: fct_stop_events
     description: >
       Zentrale Faktentabelle, ein Halt-Ereignis je Zeile (Schema in

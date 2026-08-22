@@ -194,7 +194,7 @@ dbt build --vars '{"ch_istdaten_glob": "tests/fixtures/ch/*_istdaten.csv", "de_g
 Ohne `de_static_dir` bricht `stg_de_static` ab — es sucht dann unter `../data/static/`
 nach einem Fahrplanarchiv, das lokal niemand hat.
 
-Erwartung: `PASS=212 WARN=4 ERROR=0` von 216 (Stand 2026-08-22, nachgemessen). Alle vier
+Erwartung: `PASS=225 WARN=4 ERROR=0` von 229 (Stand 2026-08-22, nachgemessen). Alle vier
 Warnungen tragen `severity: warn` und sind gewollt — sie beschreiben Eigenschaften der
 Quelle, keine Modellfehler, und dürfen deshalb den Seitenbau nicht anhalten:
 
@@ -208,6 +208,14 @@ Quelle, keine Modellfehler, und dürfen deshalb den Seitenbau nicht anhalten:
 Produktiv sind es sechs: dort schlägt `accepted_range` auf **beide** Verspätungsspalten an
 und `assert_de_soll_zeit_im_fenster` kommt dazu. Beides braucht Datenmengen, die eine
 Fixture nicht nachstellt.
+
+Der Fremdverkehrsfilter (BPULS-070) ist dagegen an der Fixture geprüft: Fahrt `1013` hält
+viermal — `A` kennt der Bahnfahrplan (der Zufallstreffer, der sie in den Scope gebracht
+hat), `N1` bis `N3` nur der Nahverkehrsfeed. Sie ist damit gebietsfremd (3 > 1) und steht
+in keinem Mart; `mart_datenqualitaet` weist sie als `fahrten_gebietsfremd = 1` aus.
+**Gegengeprüft in beide Richtungen:** nimmt man `tests/fixtures/de_static/v=2026-08-13/nv/stops.parquet`
+beiseite, taucht die Fahrt mit ihren vier Halten wieder auf, die Spalte steht auf 0 — und
+der Lauf trägt die Warnung von `stg_de_nahverkehrshalt`, dass die Liste fehlt.
 
 `assert_de_namensquote_bricht_nicht_ein` sieht sich lokal **keinen einzigen Tag** an: er
 verlangt mindestens 1.000 Halte je Betriebstag, und so groß ist keine Fixture. Grün heißt

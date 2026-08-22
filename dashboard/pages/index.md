@@ -164,7 +164,8 @@ select
     halte_ohne_ist_an + halte_ohne_ist_ab as keine_meldung,
     round(100 * namensquote, 1) as name_bekannt,
     ausgefallene_halte,
-    ausgelassene_halte
+    ausgelassene_halte,
+    fahrten_gebietsfremd
 from bahnpuls.mart_datenqualitaet
 order by betriebstag desc, quelle
 ```
@@ -188,7 +189,20 @@ drei sind Betrieb und gehören zum Bild.
     <Column id=name_bekannt title="Bahnhofsname bekannt %" fmt="#,##0.0" />
     <Column id=ausgefallene_halte title="Ausfälle" />
     <Column id=ausgelassene_halte title="ausgelassen" />
+    <Column id=fahrten_gebietsfremd title="aussortiert" />
 </DataTable>
+
+Die letzte Spalte zählt Fahrten, die **gar nicht hierher gehören** und deshalb aus allen
+Zahlen genommen wurden. Wie sie hereinkommen: gesammelt wird über eine Liste von
+Bahnhöfen im Gebiet, und zwar über deren Nummern. Der Datenanbieter vergibt diese Nummern
+je Datensatz neu — im Datensatz für Busse und Straßenbahnen trägt eine Haltestelle in
+Hannover zufällig dieselbe Nummer wie ein Bahnhof hier. Für die Sammlung sieht das aus
+wie ein Treffer.
+
+Erkennen lässt sich das nur an der ganzen Fahrt: gehen mehr ihrer Halte im Nahverkehr
+auf als im Bahnfahrplan, ist es keine Bahnfahrt im Gebiet. Steht hier eine 0, wurde
+entweder nichts aussortiert — oder die Vergleichsliste fehlt gerade; dann sagt das der
+Bauprotokoll-Eintrag, nicht diese Tabelle.
 
 ### Und hat der Sammler durchgehalten?
 

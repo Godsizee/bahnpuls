@@ -18,6 +18,19 @@ sources:
       - name: trips
         meta:
           external_location: "read_csv('{{ var('de_static_dir') }}/v=*/*/trips.txt', filename = true, union_by_name = true, all_varchar = true)"
+      - name: nv_stops
+        description: >
+          Halteliste des Nahverkehrsfeeds — **kein Fahrplaninhalt, sondern eine
+          Negativliste** (BPULS-070). Der Echtzeit-Feed führt seit dem 2026-08-22 auch
+          Nahverkehr aus dem ganzen Bundesgebiet, dessen `stop_id`-Nummernkreis mit dem
+          des Bahnfahrplans kollidiert: eine Hannoveraner Bushaltestelle trägt zufällig
+          die Nummer eines Bahnhofs im Zielgebiet. Aus einer ID allein ist das nicht zu
+          entscheiden, erst der Vergleich über die ganze Fahrt trennt es.
+          Der Loader behält von diesem Feed **nur diese zwei Spalten** und verwirft das
+          Archiv — 264 MB je Veröffentlichung wären das Doppelte der gesamten eigenen
+          Historie im Jahr.
+        meta:
+          external_location: "read_parquet('{{ var('de_static_dir') }}/v=*/nv/stops.parquet', filename = true, union_by_name = true)"
       - name: stop_times
         description: >
           Soll-Halte je Fahrt, vom Loader aus `stop_times.txt` des Archivs auf fünf

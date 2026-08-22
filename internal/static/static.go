@@ -45,15 +45,44 @@ type Feed struct {
 	// Name wird zum Dateinamen und zum Unterverzeichnis, z. B. "rv".
 	Name string
 	URL  string
+	// NurHalte laesst von diesem Feed ausschliesslich die Halteliste uebrig --
+	// weder das Archiv noch die uebrigen Mitglieder werden behalten. Siehe
+	// NahverkehrFeed.
+	NurHalte bool
 }
 
-// StandardFeeds sind die beiden schienenspezifischen Free-Feeds. Beide fuehren
-// in routes.txt durchgehend route_type = 2, eine weitere Verkehrsartfilterung
-// ist nicht noetig (Bahnpuls_Datenquellen.md).
+// StandardFeeds sind die beiden schienenspezifischen Free-Feeds plus die
+// Halteliste des Nahverkehrs. Die ersten beiden fuehren in routes.txt
+// durchgehend route_type = 2, eine weitere Verkehrsartfilterung ist dort nicht
+// noetig (Bahnpuls_Datenquellen.md).
 func StandardFeeds() []Feed {
 	return []Feed{
 		{Name: "rv", URL: "https://download.gtfs.de/germany/rv_free/latest.zip"},
 		{Name: "fv", URL: "https://download.gtfs.de/germany/fv_free/latest.zip"},
+		NahverkehrFeed(),
+	}
+}
+
+// NahverkehrFeed liefert den Nahverkehrs-Feed, von dem **nur** die Halteliste
+// behalten wird (BPULS-070).
+//
+// Er ist nicht Gegenstand des Projekts, sondern Unterscheidungsmerkmal: der
+// Echtzeit-Feed fuehrt seit dem 2026-08-22 Nahverkehr aus dem ganzen
+// Bundesgebiet, dessen stop_id-Nummernkreis mit dem des Bahnfahrplans
+// kollidiert. Ohne diese Liste ist eine Hannoveraner Bushaltestelle von einem
+// Bahnhof im Zielgebiet nicht zu unterscheiden.
+//
+// **Warum das Archiv hier nicht mitgesichert wird**, anders als bei rv und fv:
+// es sind 264 MB je Veroeffentlichung, also rund 13,7 GB im Jahr gegen 6,9 GB
+// fuer die gesamte eigene Historie. Die Begruendung der Archivregel greift hier
+// nicht -- unwiederbringlich ist der **Echtzeit**-Datensatz, und was von diesem
+// Feed gebraucht wird, sind zwei Spalten. Wird die Halteliste einmal gebraucht
+// und fehlt, kostet das die Trennschaerfe einer Woche, nicht Historie.
+func NahverkehrFeed() Feed {
+	return Feed{
+		Name:     "nv",
+		URL:      "https://download.gtfs.de/germany/nv_free/latest.zip",
+		NurHalte: true,
 	}
 }
 
@@ -126,6 +155,24 @@ func Laden(ctx context.Context, client *http.Client, baseDir, version string, fe
 		archiv := filepath.Join(tmp, feed.Name+"_free.zip")
 		if err := herunterladen(ctx, client, feed.URL, archiv); err != nil {
 			return "", fmt.Errorf("static: feed %s: %w", feed.Name, err)
+		}
+		if feed.NurHalte {
+			// Von diesem Feed bleibt genau die Halteliste uebrig, siehe
+			// NahverkehrFeed. Das Archiv wird sofort wieder geloescht -- ein
+			// Aufheben kostete das Doppelte der gesamten eigenen Historie.
+			//
+			// **Ebenso wenig fatal wie die Soll-Halte**: schlaegt es fehl, wird die
+			// Version trotzdem veroeffentlicht. Die Bahn-Feeds sind davon
+			// unberuehrt, und ohne die Liste faellt lediglich die Trennung von
+			// Fremdverkehr aus -- die dbt-Seite meldet das als eigenen Befund,
+			// statt stillschweigend alles durchzulassen.
+			if _, err := HalteSchreiben(archiv, filepath.Join(tmp, feed.Name, HalteDatei)); err != nil {
+				fahrplanFehler = append(fahrplanFehler, fmt.Sprintf("%s: %v", feed.Name, err))
+			}
+			if err := os.Remove(archiv); err != nil {
+				return "", fmt.Errorf("static: feed %s archiv verwerfen: %w", feed.Name, err)
+			}
+			continue
 		}
 		if err := entpacken(archiv, filepath.Join(tmp, feed.Name), dateien); err != nil {
 			return "", fmt.Errorf("static: feed %s entpacken: %w", feed.Name, err)

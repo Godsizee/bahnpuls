@@ -41,6 +41,19 @@ with snapshots as (
 
 ),
 
+-- Fahrten, die gar kein Bahnverkehr im Zielgebiet sind, sondern ueber eine
+-- Nummernkollision in den Scope-Filter geraten sind (BPULS-070). Sie werden hier
+-- ausgeschlossen und nicht entwertet: eine Hannoveraner Buslinie ist kein Halt ohne
+-- Messwert, sie gehoert nicht in diesen Datensatz. Gezaehlt werden sie trotzdem --
+-- mart_datenqualitaet weist sie aus, damit der Ausschluss sichtbar bleibt.
+fremde_fahrten as (
+
+    select betriebstag, trip_key
+    from {{ ref('int_de_gebietsfremd') }}
+    where gebietsfremd
+
+),
+
 -- Jeder Halt, der ueberhaupt je gemeldet wurde. Basis, damit auch Halte bestehen
 -- bleiben, fuer die kein Wert die Regel erfuellt -- die Zeile bleibt stehen und traegt
 -- NULL, statt aus dem Laufweg zu verschwinden (CLAUDE.md Regel 8, Fallstrick A1).
@@ -202,6 +215,11 @@ left join ankunft
 left join abfahrt
   on  halte.trip_key      = abfahrt.trip_key
   and halte.stop_sequence = abfahrt.stop_sequence
+where not exists (
+    select 1 from fremde_fahrten
+    where fremde_fahrten.betriebstag = halte.betriebstag
+      and fremde_fahrten.trip_key    = halte.trip_key
+)
 
 union all by name
 
@@ -236,4 +254,9 @@ select
     block_id,
     quelle
 
-from {{ ref('int_de_ausfaelle') }}
+from {{ ref('int_de_ausfaelle') }} as ausfaelle
+where not exists (
+    select 1 from fremde_fahrten
+    where fremde_fahrten.betriebstag = ausfaelle.betriebstag
+      and fremde_fahrten.trip_key    = ausfaelle.trip_key
+)

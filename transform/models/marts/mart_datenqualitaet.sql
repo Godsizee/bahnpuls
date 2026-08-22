@@ -40,6 +40,33 @@ with zuglauf as (
 
 ),
 
+-- Was der Fremdverkehrsfilter aussortiert hat (BPULS-070). Diese Fahrten stehen in
+-- keinem anderen Mart -- sie sind aus int_de_stop_events ausgeschlossen --, und genau
+-- deshalb gehoeren sie hierher: ein Ausschluss, der nirgends auftaucht, ist von einem
+-- Datenverlust nicht zu unterscheiden.
+--
+-- Nur die deutsche Quelle: die Kollision entsteht im gemeinsamen Nummernkreis des
+-- gtfs.de-Feeds, die CH-Quelle kennt sie nicht.
+aussortiert as (
+
+    select
+        betriebstag,
+        'de_gtfsrt' as quelle,
+        count(*)    as fahrten_gebietsfremd
+
+    from {{ ref('int_de_gebietsfremd') }}
+    where gebietsfremd
+
+    {% if is_incremental() %}
+    and betriebstag >= (
+        select coalesce(max(betriebstag), date '1900-01-01') from {{ this }}
+    )
+    {% endif %}
+
+    group by 1, 2
+
+),
+
 gezaehlt as (
 
     select
@@ -107,7 +134,15 @@ gezaehlt as (
 )
 
 select
-    *,
+    gezaehlt.*,
+
+    -- coalesce, nicht NULL: an einem Tag ohne Fremdverkehr ist die richtige Antwort
+    -- "keine", nicht "unbekannt". Fehlt dagegen die Nahverkehrs-Halteliste ganz, steht
+    -- hier ebenfalls 0 -- das ist derselbe Blindfleck wie bei der Ausfall-Null aus
+    -- BPULS-064, und er wird an seiner Stelle gemeldet: stg_de_nahverkehrshalt warnt
+    -- im Lauf, wenn die Liste fehlt.
+    coalesce(aussortiert.fahrten_gebietsfremd, 0) as fahrten_gebietsfremd,
+
     -- Die Abdeckungsquote, um die es geht. Nenner sind ausschliesslich die
     -- planmaessig vorhandenen Ereignisse -- sonst driftet die Quote mit dem Anteil
     -- der Start- und Endbahnhoefe, also mit der Laenge der Laufwege.
@@ -116,3 +151,6 @@ select
     halte_mit_name     / nullif(halte, 0)::double            as namensquote
 
 from gezaehlt
+left join aussortiert
+  on  aussortiert.betriebstag = gezaehlt.betriebstag
+  and aussortiert.quelle      = gezaehlt.quelle

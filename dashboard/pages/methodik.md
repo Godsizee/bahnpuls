@@ -178,6 +178,36 @@ selbst, also Zeiträume, in denen kein Abruf zustande kam. Die sind aus den Ist-
 nicht sichtbar; sie werden ergänzt, sobald die deutsche Quelle angeschlossen ist. Bis
 dahin gilt die Abdeckung ausdrücklich nur für das, was in der Quelle stand.
 
+## Was aussortiert wird — und warum es trotzdem gezählt steht
+
+Gesammelt wird über eine Liste von Bahnhöfen im Zielgebiet, und zwar über deren Nummern:
+taucht in einer Meldung eine dieser Nummern auf, wird die ganze Fahrt mitgeschrieben. Das
+ist die Voraussetzung dafür, dass auch ein Fernzug erfasst wird, der das Gebiet nur einmal
+berührt.
+
+Der Datenanbieter vergibt die Nummern aber **je Datensatz getrennt**. Im Datensatz für
+Busse und Straßenbahnen trägt eine Haltestelle in Hannover dieselbe Nummer wie ein Bahnhof
+hier — und seit dem 22.08.2026 liefert der Echtzeit-Datenstrom auch diesen Nahverkehr,
+bundesweit. Für die Sammlung sieht das aus wie ein Treffer im Zielgebiet.
+
+An einer einzelnen Nummer ist das nicht zu erkennen; sie kann in beiden Datensätzen etwas
+bedeuten. Entschieden wird deshalb über die **ganze Fahrt**: Gehen mehr ihrer Halte im
+Nahverkehrsdatensatz auf als im Bahnfahrplan, ist es keine Bahnfahrt im Gebiet, und die
+Fahrt fließt in keine Kennzahl ein.
+
+Zwei Festlegungen dazu, die nicht selbstverständlich sind:
+
+- **Bei Gleichstand bleibt die Fahrt drin**, insbesondere wenn kein Fahrplan sie kennt.
+  Nicht prüfbar ist nicht widerlegt — dieselbe Regel wie bei der Belegquote der Laufwege.
+- **Die aussortierten Fahrten werden gezählt und auf der Startseite ausgewiesen.** Ein
+  Ausschluss, der nirgends auftaucht, ist von einem Datenverlust nicht zu unterscheiden.
+
+Der Weg über die Namen wäre der naheliegende und wurde gemessen: Die Regel „mindestens
+zwei Halte namentlich im Gebiet" hätte zwar fast allen Fremdverkehr abgefangen, dabei aber
+**237 von 1.681 echten Bahnfahrten** verworfen — und 100 der Fremdfahrten tragen genau
+einen bekannten Halt, der im Gebiet liegt. Von einem Fernzug, der einmal hier hält, ist
+das nicht zu unterscheiden.
+
 ## Normierung je Zug
 
 Aggregierte Abschnittswerte werden **je Zug** ausgewiesen, nie als Rohsumme. Eine Summe
