@@ -194,11 +194,39 @@ dbt build --vars '{"ch_istdaten_glob": "tests/fixtures/ch/*_istdaten.csv", "de_g
 Ohne `de_static_dir` bricht `stg_de_static` ab — es sucht dann unter `../data/static/`
 nach einem Fahrplanarchiv, das lokal niemand hat.
 
-Erwartung: alle Tests grün bis auf drei Warnungen. `assert_keine_stille_zeitumstellung`
-meldet die Halte der Rücksprungnacht, die beiden `accepted_range`-Warnungen die
-unplausiblen Verspätungswerte der DE-Fixture — alle drei mit `severity: warn`, alle drei
-so gewollt: sie beschreiben Eigenschaften der Quelle, keine Modellfehler, und dürfen
-deshalb den Seitenbau nicht anhalten.
+Erwartung: `PASS=211 WARN=4 ERROR=0` von 215 (Stand 2026-08-22, nachgemessen). Alle vier
+Warnungen tragen `severity: warn` und sind gewollt — sie beschreiben Eigenschaften der
+Quelle, keine Modellfehler, und dürfen deshalb den Seitenbau nicht anhalten:
+
+| Warnung | Treffer | Was sie meldet |
+|---|---|---|
+| `assert_keine_stille_zeitumstellung` | 3 | die Halte der CH-Rücksprungnacht |
+| `dbt_utils_accepted_range … delay_ab_sek` | 1 | die −83.050-s-Abfahrt der DE-Fixture |
+| `assert_de_static_namen_eindeutig` | 1 | derselbe Schlüssel mit zwei Namen im Fahrplanarchiv |
+| `assert_de_soll_an_vor_soll_ab` | 1 | die verdrehte Soll-Zeit von Fahrt `1012` |
+
+Produktiv sind es sechs: dort schlägt `accepted_range` auf **beide** Verspätungsspalten an
+und `assert_de_soll_zeit_im_fenster` kommt dazu. Beides braucht Datenmengen, die eine
+Fixture nicht nachstellt.
+
+### Die DE-Fixture trägt jeden Fall, den ein Test behauptet zu finden
+
+`2026-08-13_snapshots.parquet` ist keine Stichprobe, sondern eine Sammlung konstruierter
+Fälle — eine Fahrtnummer je Fall, damit ein Fehlschlag sofort auf den Fall zeigt. `1010`
+und `1011` sind die beiden Formen des unbedienten Laufs (vollständig beobachtet gegen
+unterwegs aufgegriffen), `1008` und `1009` die unplausiblen Verspätungen.
+
+**`1012` ist die verdrehte Soll-Zeit** (BPULS-065). Halt `Q` wird in zwei Meldungen
+beschrieben: die erste nennt nur die Ankunft (Prognose 20:00, 300 s Verspätung → Soll
+19:55), die zweite fügt die Abfahrt hinzu, mit 420 s Verspätung auf eine Prognose, die nur
+60 s später liegt (→ Soll 19:54). Die zurückgerechnete Soll-Abfahrt liegt damit **60 s vor
+der Soll-Ankunft**, ohne dass an der Transformation etwas falsch wäre — genau der Fall, den
+der Test als Warnung zählt statt zu entwerten.
+
+Der Fall war bis dahin nur in Produktion aufgetreten (5 Halte am 2026-08-22); der Test war
+lokal grün, ohne dass seine Mechanik je geprüft worden wäre. **Gegengeprüft in beide
+Richtungen:** ohne die drei Zeilen `PASS=212 WARN=3`, mit ihnen `PASS=211 WARN=4`, und die
+gemeldete Zeile trägt `sekunden_verdreht = 60`.
 
 ## Ausfälle kommen anders, als dieses Projekt zunächst annahm
 
