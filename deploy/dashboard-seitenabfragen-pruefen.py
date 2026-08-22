@@ -15,6 +15,11 @@ Gebunden wird nur (`create view`), nicht ausgefuehrt: gesucht sind fehlende Spal
 Tippfehler, nicht Zahlen. Die Werte der Eingabefelder sind dafuer gleichgueltig und
 werden durch eine Konstante ersetzt.
 
+Dieselbe Frage gilt eine Ebene hoeher: `<Column id=…>` auf eine Spalte, die die Abfrage
+nicht liefert, ist **kein** Bindungsfehler -- im Browser bleibt die Spalte einfach leer.
+Deshalb werden auch `data={abfrage}` und die Spaltenattribute der Komponenten gegen die
+Spalten der genannten Abfrage gehalten (siehe `komponenten_pruefen`).
+
 Aufruf: /opt/venv/bin/python /app/deploy/dashboard-seitenabfragen-pruefen.py
         [manifest.json] [seitenverzeichnis]
 """
