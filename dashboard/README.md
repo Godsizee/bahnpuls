@@ -191,12 +191,27 @@ Zahlen. `${inputs.…}` wird durch eine Konstante ersetzt, `${abfrage}` durch ei
 View desselben Namens; je Seite eine eigene Verbindung, damit eine Abfrage, die eine Abfrage
 einer *anderen* Seite nennt, hier genauso scheitert wie im Browser. Laufzeit 0,9 s.
 
-Drei Dinge sind ausdrücklich eigene Befunde und nicht als Ergebnis der Prüfung zu lesen:
+**Eine Ebene höher gilt dasselbe.** Ein `<Column id=…>` auf eine Spalte, die die Abfrage
+nicht liefert, ist kein Bindungsfehler — im Browser bleibt einfach eine Spalte leer, ohne
+Meldung. Das Skript hält deshalb auch `data={abfrage}` und die Spaltenattribute (`id`, `x`,
+`y`, `series`, `value`, `label`) der Komponenten gegen die Spalten der genannten Abfrage;
+`<Column>` erbt die Abfrage der umschließenden `<DataTable>`. 116 solcher Angaben auf den
+fünf Seiten. `sort` steht bewusst **nicht** in der Liste: in Evidence schaltet es die
+Sortierung ein oder aus und benennt keine Spalte.
+
+Bindet eine Abfrage nicht, meldet das Skript ihre Komponenten **nicht** zusätzlich als
+„unbekannte Abfrage" — der Befund steht schon da, und eine zweite Meldung schickte die
+Suche an die falsche Stelle.
+
+Vier Dinge sind ausdrücklich eigene Befunde und nicht als Ergebnis der Prüfung zu lesen:
 das Fehlen des Skripts im Image (BPULS-065), eine im Manifest genannte, aber fehlende
-Datei, und **null gefundene SQL-Blöcke** — ändert Evidence die Schreibweise der Blöcke,
-meldete das Skript sonst stillschweigend „alle 0 binden".
+Datei, **null gefundene SQL-Blöcke** und **null gefundene Spaltenangaben**. Die letzte
+Falle ist beim Bau dieses Skripts einmal zugeschnappt: ein verunglückter Ausdruck im
+Tag-Muster ließ es kein einziges Markup finden, und der Lauf meldete grün.
 
 Gegengeprüft in beide Richtungen: gegen den Stand *vor* `2295b14` meldet es genau die eine
-fehlende Spalte, gegen den Stand danach alle 31 grün. Das Manifest ist dabei die Instanz,
-nicht das Verzeichnis — lokal liegt dort noch ein `mart_zuglauf/` aus einem älteren Bau,
-und ein Verzeichnislisting würde eine gelöschte Quelle als vorhanden ausweisen.
+fehlende Spalte, gegen den Stand danach alle 31 grün; ein absichtlich verdrehtes
+`<Column id=…>` und ein `data={…}` auf eine nicht existierende Abfrage werden einzeln
+benannt. Das Manifest ist dabei die Instanz, nicht das Verzeichnis — lokal liegt dort noch
+ein `mart_zuglauf/` aus einem älteren Bau, und ein Verzeichnislisting würde eine gelöschte
+Quelle als vorhanden ausweisen.

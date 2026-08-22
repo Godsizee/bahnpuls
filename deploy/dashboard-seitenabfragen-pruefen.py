@@ -36,6 +36,19 @@ EINGABE = re.compile(r"\$\{\s*inputs\.[^}]*\}")
 ABFRAGE = re.compile(r"\$\{\s*([A-Za-z_][A-Za-z0-9_]*)\s*\}")
 REST = re.compile(r"\$\{[^}]*\}")
 
+# Komponenten: oeffnendes Tag mit Attributen, oder schliessendes Tag.
+TAG = re.compile(r"</([A-Za-z][A-Za-z0-9]*)>|<([A-Z][A-Za-z0-9]*)\b([^>]*?)(/?)>", re.S)
+ATTR = re.compile(r"([A-Za-z][A-Za-z0-9_]*)\s*=\s*(\{[^}]*\}|\"[^\"]*\"|'[^']*'|[^\s>]+)")
+NUR_NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+
+# Attribute, deren Wert ein Spaltenname der zugehoerigen Abfrage ist. `sort` steht
+# bewusst nicht dabei: in Evidence schaltet es die Sortierung ein oder aus, es benennt
+# keine Spalte -- als Spaltenname geprueft waere es eine Falschmeldung.
+SPALTEN_ATTRIBUTE = {"x", "y", "series", "value", "label", "id"}
+
+# `<DropdownOption value="%" />` nennt einen Wert der Daten, keine Spalte.
+OHNE_SPALTEN = {"DropdownOption"}
+
 # Fuer die Bindung ist der Wert egal; 0 passt als Zahl und in Anfuehrungszeichen als Text.
 PLATZHALTER = "0"
 
@@ -91,6 +104,70 @@ def einsetzen(sql):
 	return sql, None
 
 
+def komponenten_pruefen(text, spalten, benannt, kennung_seite):
+	"""Haelt `data={abfrage}` und die Spaltenattribute der Komponenten gegeneinander.
+
+	Dieselbe Fehlerklasse eine Ebene ueber der Abfrage: `<Column id=…>` auf eine Spalte,
+	die die Abfrage nicht liefert, bleibt im Browser eine leere Spalte -- keine Meldung,
+	keine Bindungsfehler, nur eine Tabelle, in der etwas fehlt.
+
+	`<Column>` steht innerhalb von `<DataTable data={…}>` und erbt dessen Abfrage; der
+	Stapel bildet genau diese Verschachtelung ab.
+
+	Gibt die Zahl der geprueften Spaltenbezuege zurueck -- der Aufrufer muss merken, wenn
+	das keine sind.
+	"""
+	bezuege = 0
+	stapel = []
+	for treffer in TAG.finditer(text):
+		schliessend, name, roh, selbstschliessend = treffer.groups()
+		if schliessend:
+			while stapel and stapel.pop()[0] != schliessend:
+				pass
+			continue
+
+		attribute = dict(ATTR.findall(roh or ""))
+		geerbt = stapel[-1][1] if stapel else None
+		abfrage = geerbt
+
+		if "data" in attribute:
+			wert = attribute["data"].strip()
+			inhalt = wert[1:-1].strip() if wert.startswith("{") and wert.endswith("}") else wert
+			if not NUR_NAME.match(inhalt):
+				befunde.append(f"{kennung_seite} / <{name}>: data={wert} ist kein einfacher Abfragename, das Skript kennt die Form nicht")
+				abfrage = None
+			elif inhalt in spalten:
+				abfrage = inhalt
+			elif inhalt in benannt:
+				# Die Abfrage gibt es, sie hat nur nicht gebunden -- das steht schon als
+				# eigener Befund da. Sie hier zusaetzlich als unbekannt zu melden,
+				# schickte die Suche an die falsche Stelle.
+				abfrage = None
+			else:
+				befunde.append(f"{kennung_seite} / <{name}>: data={{{inhalt}}} nennt keine Abfrage dieser Seite")
+				abfrage = None
+
+		if not selbstschliessend:
+			stapel.append((name, abfrage))
+
+		if abfrage is None or name in OHNE_SPALTEN:
+			continue
+
+		for attribut, wert in attribute.items():
+			if attribut not in SPALTEN_ATTRIBUTE:
+				continue
+			bezuege += 1
+			wert = wert.strip().strip('"').strip("'")
+			if not NUR_NAME.match(wert):
+				# Ausdruck statt Spaltenname -- nicht stillschweigend uebergehen.
+				befunde.append(f"{kennung_seite} / <{name} {attribut}=…>: {wert} ist kein einfacher Spaltenname, das Skript kennt die Form nicht")
+				continue
+			if wert.lower() not in spalten[abfrage]:
+				befunde.append(f"{kennung_seite} / <{name} {attribut}={wert}>: die Abfrage {abfrage} liefert diese Spalte nicht")
+
+	return bezuege
+
+
 quellen = list(quellen_aus_manifest())
 if not quellen:
 	abbrechen("keine einzige der im Manifest genannten Quelldateien ist benutzbar")
@@ -100,8 +177,10 @@ if not seiten:
 	abbrechen(f"keine Seite unter {SEITEN}")
 
 geprueft = 0
+bezuege = 0
 for seite in seiten:
-	bloecke = BLOCK.findall(seite.read_text(encoding="utf-8"))
+	text = seite.read_text(encoding="utf-8")
+	bloecke = BLOCK.findall(text)
 	if not bloecke:
 		continue
 
@@ -114,6 +193,7 @@ for seite in seiten:
 		pfad = str(datei).replace("'", "''")
 		con.execute(f"""create view "{quelle}"."{abfrage}" as select * from read_parquet('{pfad}')""")
 
+	spalten = {}
 	for name, sql in bloecke:
 		geprueft += 1
 		kennung = f"{seite.name} / {name or '(ohne Namen)'}"
@@ -126,8 +206,17 @@ for seite in seiten:
 			# den Optimierer anwerfen und koennte an einem eingesetzten Platzhalter
 			# scheitern, statt an dem, wonach hier gesucht wird.
 			con.execute(f'create or replace temp view "{name or "__ohne_namen"}" as {sql}')
+			if name:
+				spalten[name] = {
+					z[0].lower() for z in con.execute(f'describe "{name}"').fetchall()
+				}
 		except Exception as fehler:  # noqa: BLE001 - jede Bindungsart ist ein Befund
 			befunde.append(f"{kennung}: {str(fehler).splitlines()[0]}")
+
+	# Die Bloecke aus dem Text nehmen, sonst liest der Tag-Scanner SQL als Markup
+	# (`<` und `>` kommen in Vergleichen vor).
+	benannt = {name for name, _ in bloecke if name}
+	bezuege += komponenten_pruefen(BLOCK.sub("", text), spalten, benannt, seite.name)
 	con.close()
 
 if geprueft == 0:
@@ -135,9 +224,22 @@ if geprueft == 0:
 	# faende dieses Skript nichts mehr und meldete stillschweigend "alle 0 binden".
 	abbrechen(f"keine einzige SQL-Abfrage in {len(seiten)} Seiten gefunden")
 
+if bezuege == 0:
+	# Dieselbe Falle eine Ebene hoeher, und sie ist beim Bau dieses Skripts einmal
+	# zugeschnappt: ein verunglueckter Ausdruck im Tag-Muster liess es kein einziges
+	# Markup finden, und der Lauf meldete gruen.
+	abbrechen(f"keine einzige Spaltenangabe in den Komponenten von {len(seiten)} Seiten gefunden")
+
 if befunde:
+	# Die Zusammenfassung nennt beide Ebenen, weil sie beide melden kann: eine Abfrage,
+	# die nicht bindet, ist etwas anderes als eine Komponente, die auf eine Spalte zeigt,
+	# die es nicht gibt -- und wer nur die letzte Zeile liest, soll nicht falsch suchen.
+	wort = "Befund" if len(befunde) == 1 else "Befunde"
 	abbrechen(
-		f"{len(befunde)} von {geprueft} Abfragen binden nicht gegen die ausgelieferten Quellen"
+		f"{len(befunde)} {wort} aus {geprueft} Abfragen und {bezuege} Spaltenangaben"
 	)
 
-print(f"seitenabfragen: alle {geprueft} binden gegen die {len(quellen)} ausgelieferten Quellen")
+print(
+	f"seitenabfragen: alle {geprueft} binden gegen die {len(quellen)} ausgelieferten "
+	f"Quellen, {bezuege} Spaltenangaben in den Komponenten stimmen"
+)
