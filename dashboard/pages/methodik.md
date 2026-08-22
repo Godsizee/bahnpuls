@@ -317,9 +317,21 @@ diese Rangfolge:
    Für einen Teil dieser Fahrten lässt sich der Zweifel ausräumen. Deckt der beobachtete
    Laufweg den **planmäßigen vollständig** ab, wurde nicht bloß ein gestrichenes Ende
    gesehen. Verglichen wird gegen die zum Betriebstag **gültige** Fahrplan-Version — nie
-   gegen die neueste, denn der Laufweg einer Fahrt ändert sich mit dem Fahrplan. Die
-   Tabelle je Linie auf der Seite [Pünktlichkeit](/puenktlichkeit) weist beide Zahlen
-   nebeneinander aus; die Differenz ist die Reichweite der Beobachtung.
+   gegen die neueste, denn der Laufweg einer Fahrt ändert sich mit dem Fahrplan.
+
+   Der Rest zerfällt in zwei Dinge, die nichts miteinander zu tun haben, und die Tabelle
+   je Linie auf der Seite [Pünktlichkeit](/puenktlichkeit) weist deshalb **drei** Zahlen
+   nebeneinander aus: belegt, widerlegt, und **nicht prüfbar**. Nicht prüfbar heißt, dass
+   die Kennung der Fahrt in keiner gültigen Fahrplan-Version vorkommt — dann gibt es
+   nichts, wogegen sich der Laufweg halten ließe.
+
+   Diese dritte Zahl stillschweigend zu den widerlegten zu schlagen, war bis zum
+   22.08.2026 der Fall und ist ein Fehler, den die Daten selbst gezeigt haben: weil der
+   Linienname aus derselben Quelle stammt wie der Soll-Laufweg, traf es ausschließlich
+   Fahrten **ohne Liniennummer**. Über drei Betriebstage war dort keine einzige von 182
+   Fahrten belegt, bei Fahrten mit Liniennummer dagegen 97,6 bis 100 %. Der Unterschied
+   zwischen zwei Betriebstagen (84,4 % gegen 61,3 % belegt) bestand vollständig aus der
+   Größe dieser Gruppe und sagte nichts über den Betrieb aus.
 3. **Laufweg gekappt** — ein ausgelassener Halt am Anfang oder Ende des Laufs. Der Zug
    fuhr, aber nicht die ganze Strecke. Für Reisende an den entfallenen Bahnhöfen ist das
    ein vollständiger Ausfall; in einer Ausfallquote je Zug taucht es meist nicht auf.

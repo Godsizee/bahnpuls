@@ -340,6 +340,19 @@ models:
           wegrechnet — sie ist die Reichweite der Beobachtung und gehört ausgewiesen.
         tests:
           - not_null
+      - name: fahrten_unbedienter_lauf_nicht_pruefbar
+        description: >
+          Teilmenge von `fahrten_unbedienter_lauf`, zu der **kein** Soll-Laufweg
+          vorliegt: die `trip_id` steht in keiner zum Betriebstag gültigen
+          Fahrplan-Version. Diese Fahrten sind weder belegt noch widerlegt.
+
+          Bis BPULS-066 zählten sie stillschweigend als „nicht belegt". Das war der
+          gesamte Unterschied zwischen zwei Betriebstagen (84,4 % gegen 61,3 % belegt),
+          und die Gruppe besteht ausschließlich aus Fahrten ohne Liniennummer — der
+          Linienname kommt aus derselben Quelle wie der Soll-Laufweg. Eine Aussage über
+          die Reichweite der Methode las sich damit als Befund über den Betrieb.
+        tests:
+          - not_null
       - name: fahrten_verkuerzt
         description: Fahrten mit mindestens einem ausgelassenen Halt am Laufwegsrand.
         tests:

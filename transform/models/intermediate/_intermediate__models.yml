@@ -179,8 +179,13 @@ models:
 
       Version und Feed kommen aus dem Makro `gueltige_fahrplanversion` (Regel 9),
       gemeinsam mit `int_de_ausfaelle`. Fahrten ohne eindeutige Zuordnung erscheinen
-      hier **gar nicht**; nachgelagert wirkt das als „nicht belegt", und genau so ist
-      es gemeint.
+      hier mit `laufweg_pruefbar = false` und `laufweg_vollstaendig = NULL` — seit
+      BPULS-066 mit einer Zeile, vorher gar nicht. Sie nachgelagert als „nicht belegt"
+      zu lesen war falsch: an den Daten traf das ausschließlich Fahrten ohne
+      Liniennummer (0 von 182 belegt über drei Betriebstage, gegen 97,6 bis 100 % bei
+      Fahrten mit Linie), weil Linienname und Soll-Laufweg aus derselben Quelle
+      stammen. Eine Aussage über die Reichweite der Methode sah damit aus wie eine
+      über den Betrieb.
     columns:
       - name: betriebstag
         tests:
@@ -190,23 +195,23 @@ models:
           - not_null
           - unique
       - name: static_version
-        description: Die zum Betriebstag gültige Version, nie die neueste (Regel 9).
-        tests:
-          - not_null
+        description: >
+          Die zum Betriebstag gültige Version, nie die neueste (Regel 9). NULL, wo
+          keine Version die `trip_id` kennt — dort ist auch `laufweg_pruefbar` false.
       - name: feed
-        tests:
-          - not_null
       - name: beobachtete_halte
         description: Anzahl der Halte, die überhaupt gemeldet wurden.
         tests:
           - not_null
       - name: soll_halte
-        description: Anzahl der Halte, die der gültige Fahrplan für diese Fahrt vorsieht.
+        description: >
+          Anzahl der Halte, die der gültige Fahrplan für diese Fahrt vorsieht — 0, wenn
+          es keinen gibt.
         tests:
           - not_null
           - dbt_utils.accepted_range:
               arguments:
-                min_value: 1
+                min_value: 0
       - name: soll_halte_beobachtet
         description: >
           Wie viele der Soll-Halte in den Ist-Daten vorkommen. Gezählt wird die
@@ -214,12 +219,18 @@ models:
           verschiedene Mengen wären sonst „vollständig".
         tests:
           - not_null
+      - name: laufweg_pruefbar
+        description: >
+          Ob überhaupt ein Soll-Laufweg dagegensteht. Ist er es nicht, sagt das nichts
+          über die Fahrt, sondern etwas über die Reichweite der Methode.
+        tests:
+          - not_null
       - name: laufweg_vollstaendig
         description: >
           `soll_halte_beobachtet = soll_halte`. Nur hier ist ausgeschlossen, dass bloß
-          das gestrichene Ende einer sonst gefahrenen Fahrt beobachtet wurde.
-        tests:
-          - not_null
+          das gestrichene Ende einer sonst gefahrenen Fahrt beobachtet wurde. **NULL**,
+          wo nichts zu prüfen war — nicht false: das wäre eine Behauptung über eine
+          Fahrt, über die nichts vorliegt.
 
   - name: int_de_ausfaelle
     description: >

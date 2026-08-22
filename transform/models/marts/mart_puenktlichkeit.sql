@@ -55,6 +55,14 @@
 -- gesehen haben. Die Differenz zwischen beiden Spalten ist keine Ungenauigkeit, die man
 -- wegrechnet -- sie ist die Reichweite der Beobachtung, und die gehoert ausgewiesen.
 --
+-- **Und diese Differenz zerfaellt in zwei Dinge, die nichts miteinander zu tun haben**
+-- (BPULS-066): eine Fahrt, deren Laufweg der Fahrplan **widerlegt**, und eine, zu der
+-- es gar keinen Fahrplan gibt. `fahrten_unbedienter_lauf_nicht_pruefbar` zaehlt die
+-- zweite Gruppe. Gemessen am 2026-08-22 war sie die vollstaendige Erklaerung fuer den
+-- Unterschied zwischen zwei Betriebstagen (84,4 % gegen 61,3 %), und sie besteht
+-- ausschliesslich aus Fahrten ohne Liniennummer -- der Linienname kommt aus derselben
+-- Quelle wie der Soll-Laufweg.
+--
 -- **Ueber Schwellen hinweg wird nie summiert.** Jede Zeile ist eine eigene Auswertung
 -- derselben Grundmenge, die zaehlbaren Spalten wiederholen sich deshalb fuenfmal. Wer
 -- sie ueber `schwelle_sek` aufaddiert, zaehlt jeden Halt fuenffach. Ein Test sichert ab,
@@ -186,9 +194,14 @@ fahrtzustand as (
         bool_or(eingeordnet.zustand = 'unbedienter_lauf')   as fahrt_unbedienter_lauf,
         bool_or(eingeordnet.zustand = 'verkuerzt')          as fahrt_verkuerzt,
 
-        -- coalesce auf false, nicht NULL: eine Fahrt, die sich nicht gegen den Fahrplan
-        -- pruefen liess, ist nicht bestaetigt. NULL waere hier eine dritte Lesart, die
-        -- niemand braucht -- gezaehlt wird ohnehin nur, was belegt ist.
+        -- Drei Faelle, nicht zwei (BPULS-066): belegt, widerlegt, und **nicht pruefbar**,
+        -- weil die trip_id in keiner zum Betriebstag gueltigen Fahrplan-Version steht.
+        -- Der dritte in den zweiten zu falten war die urspruengliche Festlegung und hat
+        -- sich an den Daten als falsch erwiesen: er traf ausschliesslich Fahrten ohne
+        -- Liniennummer -- dieselbe Ursache, dieselbe Gruppe --, und liess einen
+        -- Blindfleck wie eine Beobachtung aussehen.
+        coalesce(bool_or(soll_laufweg.laufweg_pruefbar), false)
+            as fahrt_laufweg_pruefbar,
         coalesce(bool_or(soll_laufweg.laufweg_vollstaendig), false)
             as fahrt_laufweg_vollstaendig
     from eingeordnet
@@ -255,6 +268,7 @@ select
     fahrten.fahrten_ausgefallen,
     fahrten.fahrten_unbedienter_lauf,
     fahrten.fahrten_unbedienter_lauf_bestaetigt,
+    fahrten.fahrten_unbedienter_lauf_nicht_pruefbar,
     fahrten.fahrten_verkuerzt,
 
     gezaehlt.halte_mit_ankunft,
@@ -291,6 +305,9 @@ join (
         count(*) filter (
             where fahrt_unbedienter_lauf and fahrt_laufweg_vollstaendig
         ) as fahrten_unbedienter_lauf_bestaetigt,
+        count(*) filter (
+            where fahrt_unbedienter_lauf and not fahrt_laufweg_pruefbar
+        ) as fahrten_unbedienter_lauf_nicht_pruefbar,
         count(*) filter (where fahrt_verkuerzt)        as fahrten_verkuerzt
     from fahrtzustand
     group by 1, 2, 3

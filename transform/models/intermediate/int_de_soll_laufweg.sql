@@ -63,9 +63,17 @@ kandidaten as (
 ),
 
 -- Regel 9 im Makro, gemeinsam mit int_de_ausfaelle. Fahrten ohne eindeutige Zuordnung
--- (kein aelterer Fahrplan, trip_id unbekannt, trip_id in beiden Feeds) fallen hier
--- **ganz heraus** -- dieses Modell enthaelt dann keine Zeile fuer sie. Nachgelagert wirkt
--- das wie "nicht belegt", und genau so soll es sein: belegt ist nur, was belegbar war.
+-- (kein aelterer Fahrplan, trip_id unbekannt, trip_id in beiden Feeds) haben hier keine
+-- Zeile -- der left join weiter unten macht daraus `laufweg_pruefbar = false`.
+--
+-- **Sie fielen bis zum 2026-08-22 ganz heraus, und das war falsch** (BPULS-066). Am
+-- Produktionsstand liegt die Belegquote fuer Fahrten **ohne** Liniennummer an jedem
+-- einzelnen Tag bei exakt 0 (0 von 182 ueber drei Betriebstage), fuer Fahrten mit Linie
+-- bei 97,6 bis 100 %. Beides hat dieselbe Ursache: steht die trip_id in keiner
+-- Fahrplan-Version, fehlt der Linienname **und** der Soll-Laufweg. Eine 0 aus diesem
+-- Grund sah aus wie ein Befund ueber den Betrieb und war eine Aussage ueber die
+-- Reichweite der Methode; der Tagesunterschied 84,4 % gegen 61,3 % war nichts als die
+-- unterschiedliche Groesse dieser Gruppe.
 zuordnung as (
 
     {{ gueltige_fahrplanversion('kandidaten') }}
@@ -92,7 +100,7 @@ abdeckung as (
         zuordnung.feed,
         kandidaten.beobachtete_halte,
 
-        count(*) as soll_halte,
+        count(fahrplan.stop_sequence) as soll_halte,
 
         -- Gezaehlt wird die **Deckung der Soll-Halte durch beobachtete**, nicht ein
         -- Vergleich zweier Anzahlen. Zwei gleich grosse, aber verschiedene Mengen
@@ -101,10 +109,13 @@ abdeckung as (
         count(*) filter (where beobachtete_positionen.stop_sequence is not null)
             as soll_halte_beobachtet
 
+    -- Left joins, damit **jede** Kandidatenfahrt eine Zeile bekommt: eine Fahrt, die
+    -- sich nicht gegen den Fahrplan halten laesst, ist etwas anderes als eine, die
+    -- daran scheitert, und der Unterschied muss zaehlbar sein.
     from kandidaten
-    join zuordnung
+    left join zuordnung
       on zuordnung.trip_key = kandidaten.trip_key
-    join {{ ref('stg_de_fahrplanhalt') }} as fahrplan
+    left join {{ ref('stg_de_fahrplanhalt') }} as fahrplan
       on  fahrplan.static_version = zuordnung.static_version
       and fahrplan.feed           = zuordnung.feed
       and fahrplan.trip_id        = kandidaten.trip_id
@@ -123,6 +134,12 @@ select
     beobachtete_halte,
     soll_halte,
     soll_halte_beobachtet,
-    soll_halte_beobachtet = soll_halte as laufweg_vollstaendig
+
+    -- Pruefbar ist eine Fahrt, sobald ein Soll-Laufweg dagegensteht. Ohne den ist
+    -- `laufweg_vollstaendig` keine Aussage ueber die Fahrt, sondern eine ueber uns --
+    -- deshalb NULL und nicht false.
+    soll_halte > 0 as laufweg_pruefbar,
+    case when soll_halte > 0
+         then soll_halte_beobachtet = soll_halte end as laufweg_vollstaendig
 
 from abdeckung

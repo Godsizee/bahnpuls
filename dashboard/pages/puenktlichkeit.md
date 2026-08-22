@@ -141,7 +141,8 @@ Linie weiter unten weist ihn getrennt aus. Deckt der beobachtete Laufweg den
 **planmäßigen vollständig** ab, wurde nicht nur ein gestrichenes Ende gesehen, sondern die
 ganze Fahrt. Der Abgleich läuft gegen die zum Betriebstag gültige Fahrplan-Version, nicht
 gegen die neueste. Was übrig bleibt, ist nicht Ungenauigkeit, sondern die Reichweite der
-Beobachtung.
+Beobachtung — und weil es dafür zwei ganz verschiedene Gründe gibt, steht dort eine dritte
+Spalte: geprüft und widerlegt ist etwas anderes als gar nicht prüfbar.
 
 Eine Lücke bleibt: ein Zug, über den der Feed **gar nichts** meldet, taucht nirgends auf.
 Wie oft das vorkommt, ist offen.
@@ -170,9 +171,10 @@ select
     linie,
     sum(fahrten)             as fahrten,
     sum(fahrten_ausgefallen)      as ausgefallen,
-    sum(fahrten_unbedienter_lauf)            as unbedient,
-    sum(fahrten_unbedienter_lauf_bestaetigt) as unbedient_belegt,
-    sum(fahrten_verkuerzt)                   as verkuerzt,
+    sum(fahrten_unbedienter_lauf)              as unbedient,
+    sum(fahrten_unbedienter_lauf_bestaetigt)   as unbedient_belegt,
+    sum(fahrten_unbedienter_lauf_nicht_pruefbar) as unbedient_ungeprueft,
+    sum(fahrten_verkuerzt)                     as verkuerzt,
     sum(halte_mit_ankunft)   as halte,
     100.0 * sum(halte_puenktlich) / nullif(sum(halte_gemessen), 0)    as quote_gemessen,
     100.0 * sum(halte_puenktlich) / nullif(sum(halte_mit_ankunft), 0) as quote_planmaessig
@@ -189,6 +191,7 @@ order by halte desc, linie
     <Column id=ausgefallen title="Ausfall gemeldet" />
     <Column id=unbedient title="kein Halt bedient" />
     <Column id=unbedient_belegt title="davon am Fahrplan belegt" />
+    <Column id=unbedient_ungeprueft title="davon nicht prüfbar" />
     <Column id=verkuerzt title="davon gekappt" />
     <Column id=halte title="planmäßige Halte" />
     <Column id=quote_gemessen title="pünktlich, gefahrene (%)" fmt='#,##0.0' />
@@ -200,10 +203,20 @@ kleiner Grundmenge schwankt eine Quote stark, und eine Rangliste über solche We
 Zufall mit Nachkommastellen.
 
 „Davon am Fahrplan belegt" heißt: der beobachtete Laufweg deckt den planmäßigen
-vollständig ab, es wurde also nicht bloß ein gestrichenes Ende gesehen. Steht die Spalte
-weit unter der linken, sagt das mehr über die Reichweite der Aufzeichnung als über den
-Betrieb — die Aufzeichnung läuft erst seit dem 19.08.2026, und für Betriebstage vor der
-ersten Fahrplan-Ladung lässt sich nichts belegen.
+vollständig ab, es wurde also nicht bloß ein gestrichenes Ende gesehen.
+
+„Davon nicht prüfbar" ist die Gegenprobe dazu und steht bewusst daneben: für diese Fahrten
+gibt es **überhaupt keinen** Soll-Laufweg, weil ihre Kennung in keiner zum Betriebstag
+gültigen Fahrplan-Version vorkommt. Sie sind weder belegt noch widerlegt. Bis zum
+22.08.2026 zählten sie stillschweigend als „nicht belegt" — und weil dieselbe Quelle auch
+den Liniennamen liefert, traf das ausschließlich Fahrten ohne Liniennummer: über drei
+Betriebstage war dort **keine einzige** von 182 belegt, bei Fahrten mit Liniennummer
+dagegen 97,6 bis 100 %. Der Unterschied zwischen zwei Betriebstagen (84,4 % gegen 61,3 %
+belegt) bestand vollständig daraus, wie groß diese Gruppe an dem Tag war — er sagte nichts
+über den Betrieb. Was die drei Spalten offen lassen, ist damit sichtbar statt eingerechnet.
+
+Für Betriebstage vor der ersten Fahrplan-Ladung lässt sich ohnehin nichts belegen; die
+Aufzeichnung läuft erst seit dem 19.08.2026.
 
 <Alert status=info>
 

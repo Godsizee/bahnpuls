@@ -18,8 +18,9 @@ with je_tag as (
     select
         betriebstag,
         quelle,
-        max(fahrten_unbedienter_lauf)            as unbedient,
-        max(fahrten_unbedienter_lauf_bestaetigt) as belegt
+        max(fahrten_unbedienter_lauf)              as unbedient,
+        max(fahrten_unbedienter_lauf_bestaetigt)   as belegt,
+        max(fahrten_unbedienter_lauf_nicht_pruefbar) as nicht_pruefbar
 
     from {{ ref('mart_puenktlichkeit') }}
     -- Eine Schwelle genuegt: die Fahrtzahlen haengen nicht an ihr und stuenden sonst
@@ -42,10 +43,15 @@ mit_fahrplan as (
 
 )
 
+-- `nicht_pruefbar` steht mit im Ergebnis, weil es die beiden Fehlerbilder trennt:
+-- liegt es bei der Zahl der unbedienten Laeufe, kennt der Fahrplan die trip_ids gar
+-- nicht (Namensraum-Rotation); liegt es bei null, gibt es Fahrplaene und der Abgleich
+-- trifft trotzdem nichts -- dann stimmt etwas mit dem Abgleich selbst nicht.
 select
     je_tag.betriebstag,
     je_tag.quelle,
-    sum(je_tag.unbedient) as unbediente_laeufe
+    sum(je_tag.unbedient)      as unbediente_laeufe,
+    sum(je_tag.nicht_pruefbar) as davon_nicht_pruefbar
 
 from je_tag
 join mit_fahrplan
