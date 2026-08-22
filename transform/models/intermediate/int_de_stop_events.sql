@@ -46,8 +46,25 @@ with snapshots as (
 -- NULL, statt aus dem Laufweg zu verschwinden (CLAUDE.md Regel 8, Fallstrick A1).
 halte as (
 
-    select distinct betriebstag, trip_key, trip_id, stop_sequence, stop_id, quelle
+    -- Der Schluessel eines Halts ist die Fahrplannummer `stop_sequence`; die stop_id
+    -- ist eine Beschriftung daran. Der Feed nennt sie nicht in jeder Meldung und
+    -- wechselt sie gelegentlich mitten in der Fahrt -- ein `select distinct` ueber
+    -- beide Spalten machte daraus **zwei** Halte, und zwar lautlos: die zweite Zeile
+    -- traegt dieselben Zeiten und sieht plausibel aus. Nachgelagert zaehlte jeder
+    -- solche Halt doppelt (BPULS-065).
+    --
+    -- `arg_max` uebergeht NULL-Werte und liefert die zuletzt genannte stop_id -- nach
+    -- derselben Regel, nach der weiter unten auch der Ist-Wert bestimmt wird.
+    select
+        betriebstag,
+        trip_key,
+        trip_id,
+        stop_sequence,
+        arg_max(stop_id, snapshot_ts) as stop_id,
+        quelle
+
     from snapshots
+    group by betriebstag, trip_key, trip_id, stop_sequence, quelle
 
 ),
 

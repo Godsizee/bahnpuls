@@ -14,6 +14,8 @@
 # dbt (transform/) — DuckDB-Datei ist ein Build-Artefakt, kein Rohdatum, aber
 # trotzdem nicht im Repo (waechst, ist aus data/ jederzeit neu baubar)
 /data/*.duckdb
+# Das Write-Ahead-Log daneben; es bleibt nach einem abgebrochenen Lauf liegen.
+/data/*.duckdb.wal
 /transform/target/
 /transform/dbt_packages/
 /transform/logs/

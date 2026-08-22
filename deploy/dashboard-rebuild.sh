@@ -45,7 +45,20 @@ echo "rebuild: seite neu gebaut"
 # Healthcheck fragt nur die Startseite ab. Bewusst **hier** und nicht im Healthcheck --
 # eine Seite mit altem Datenstand ist besser als ein neu gestarteter Container, aber der
 # Task soll rot werden.
-if ! node /app/deploy/dashboard-quellen-pruefen.js; then
+#
+# Das Fehlen der Pruefung ist ein **eigener** Befund und darf nicht als ihr Ergebnis
+# gelesen werden: vom 2026-08-21 bis zum 2026-08-22 lag die Datei nicht im Image (im
+# Dockerfile beim COPY vergessen), node brach mit MODULE_NOT_FOUND ab, und der Task
+# meldete stuendlich das Gegenteil der Wahrheit -- die Quellen wurden die ganze Zeit
+# ausgeliefert. Ein Waechter, der aus dem falschen Grund rot ist, macht den naechsten
+# echten Befund unsichtbar (BPULS-065).
+PRUEFER=/app/deploy/dashboard-quellen-pruefen.js
+if [ ! -f "$PRUEFER" ]; then
+	echo "rebuild: BEFUND -- $PRUEFER fehlt im Image, die Quellen sind ungeprueft"
+	exit 1
+fi
+
+if ! node "$PRUEFER"; then
 	echo "rebuild: BEFUND -- die Seite liefert ihre Datenquellen nicht aus"
 	exit 1
 fi

@@ -144,3 +144,47 @@ unit_tests:
         - {stop_sequence: 0, stop_id: 'A', soll_an: null,                  soll_ab: '2026-08-13 08:00:00', zug_ausgefallen: true, delay_an_sek: null, ist_endgueltig: true, route_kurzname: 'RE 1'}
         - {stop_sequence: 1, stop_id: 'B', soll_an: '2026-08-13 08:30:00', soll_ab: '2026-08-13 08:32:00', zug_ausgefallen: true, delay_an_sek: null, ist_endgueltig: true, route_kurzname: 'RE 1'}
         - {stop_sequence: 2, stop_id: 'C', soll_an: '2026-08-14 01:00:00', soll_ab: null,                  zug_ausgefallen: true, delay_an_sek: null, ist_endgueltig: true, route_kurzname: 'RE 1'}
+
+  - name: int_de_ein_halt_bleibt_ein_halt_wenn_die_stop_id_wandert
+    description: >
+      Der Feed nennt die stop_id nicht in jeder Meldung zu einem Halt, und er kann
+      sie im Lauf einer Fahrt auch wechseln. Beides ist eine Aussage über
+      **denselben** Halt — die Fahrplannummer `stop_sequence` ist der Schlüssel, die
+      stop_id nur eine Beschriftung daran.
+
+      Ein `select distinct` über beide Spalten macht daraus zwei Halte, und zwar
+      lautlos: die zweite Zeile trägt dieselben Zeiten und sieht vollkommen plausibel
+      aus. Nachgelagert zählt jeder Halt doppelt, und `int_de_soll_laufweg` hält einen
+      Laufweg gegen den Fahrplan, den es so nie gab.
+
+      Genau das ist am 2026-08-22 in Produktion eingetreten (BPULS-065): der
+      stündliche Rebuild brach ab 09:20 UTC mit 81 bis 401 Dubletten in
+      `int_de_stop_events` ab, und das Dashboard fror auf dem Datenstand von 08:20 ein.
+
+      Zwei Fahrten, damit beide Formen abgedeckt sind und sich nicht gegenseitig
+      erklären: bei `trip1` fehlt die stop_id in der späteren Meldung, bei `trip2`
+      ist sie eine andere. In beiden Fällen gilt die **zuletzt genannte** — dieselbe
+      Regel, nach der auch der Ist-Wert bestimmt wird.
+    model: int_de_stop_events
+    given:
+      - input: ref('int_de_ausfaelle')
+        rows: []
+      - input: ref('stg_de_static')
+        rows:
+          - {art: 'stop',  schluessel: 'A', bezeichnung: 'Bahnhof A'}
+          - {art: 'stop',  schluessel: 'B', bezeichnung: 'Bahnhof B'}
+          - {art: 'linie', schluessel: 'trip1', bezeichnung: 'RE 5'}
+          - {art: 'linie', schluessel: 'trip2', bezeichnung: 'RE 6'}
+      - input: ref('stg_de_gtfsrt')
+        rows:
+          # trip1: erst mit stop_id, danach ohne. stg_de_gtfsrt macht aus dem leeren
+          # Feld des Feeds ein NULL -- fuer distinct ist das ein eigener Wert.
+          - {betriebstag: '2026-08-13', trip_key: '2026-08-13_trip1', trip_id: 'trip1', stop_sequence: 1, stop_id: 'A',  soll_an: '2026-08-13 10:00:00', soll_ab: '2026-08-13 10:02:00', ist_an: '2026-08-13 10:01:00', ist_ab: '2026-08-13 10:03:00', delay_an_sek: 60, delay_ab_sek: 60, halt_ausgelassen: false, zug_ausgefallen: false, snapshot_ts: '2026-08-13 09:50:00', quelle: 'de_gtfsrt'}
+          - {betriebstag: '2026-08-13', trip_key: '2026-08-13_trip1', trip_id: 'trip1', stop_sequence: 1, stop_id: null, soll_an: '2026-08-13 10:00:00', soll_ab: '2026-08-13 10:02:00', ist_an: '2026-08-13 10:02:00', ist_ab: '2026-08-13 10:04:00', delay_an_sek: 120, delay_ab_sek: 120, halt_ausgelassen: false, zug_ausgefallen: false, snapshot_ts: '2026-08-13 09:58:00', quelle: 'de_gtfsrt'}
+          # trip2: die stop_id wechselt. Der spaetere Stand gilt.
+          - {betriebstag: '2026-08-13', trip_key: '2026-08-13_trip2', trip_id: 'trip2', stop_sequence: 1, stop_id: 'A',  soll_an: '2026-08-13 11:00:00', soll_ab: '2026-08-13 11:02:00', ist_an: '2026-08-13 11:00:00', ist_ab: '2026-08-13 11:02:00', delay_an_sek: 0,  delay_ab_sek: 0,  halt_ausgelassen: false, zug_ausgefallen: false, snapshot_ts: '2026-08-13 10:50:00', quelle: 'de_gtfsrt'}
+          - {betriebstag: '2026-08-13', trip_key: '2026-08-13_trip2', trip_id: 'trip2', stop_sequence: 1, stop_id: 'B',  soll_an: '2026-08-13 11:00:00', soll_ab: '2026-08-13 11:02:00', ist_an: '2026-08-13 11:03:00', ist_ab: '2026-08-13 11:05:00', delay_an_sek: 180, delay_ab_sek: 180, halt_ausgelassen: false, zug_ausgefallen: false, snapshot_ts: '2026-08-13 10:58:00', quelle: 'de_gtfsrt'}
+    expect:
+      rows:
+        - {trip_key: '2026-08-13_trip1', stop_sequence: 1, stop_id: 'A', stop_name: 'Bahnhof A', delay_an_sek: 120, delay_ab_sek: 120}
+        - {trip_key: '2026-08-13_trip2', stop_sequence: 1, stop_id: 'B', stop_name: 'Bahnhof B', delay_an_sek: 180, delay_ab_sek: 180}
