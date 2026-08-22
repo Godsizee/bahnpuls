@@ -203,6 +203,11 @@ Bindet eine Abfrage nicht, meldet das Skript ihre Komponenten **nicht** zusätzl
 „unbekannte Abfrage" — der Befund steht schon da, und eine zweite Meldung schickte die
 Suche an die falsche Stelle.
 
+**Exit 2 heißt „etwas gefunden", jeder andere Fehlschlag heißt „der Prüfer selbst ist
+gescheitert"** — und das Rebuild-Skript schreibt beide Fälle verschieden hin. Ohne diese
+Unterscheidung meldete ein fehlendes Modul oder ein Tippfehler im Prüfer denselben Satz wie
+eine falsche Seitenabfrage, und der Satz wäre gelogen. Genau daran hing BPULS-065.
+
 Vier Dinge sind ausdrücklich eigene Befunde und nicht als Ergebnis der Prüfung zu lesen:
 das Fehlen des Skripts im Image (BPULS-065), eine im Manifest genannte, aber fehlende
 Datei, **null gefundene SQL-Blöcke** und **null gefundene Spaltenangaben**. Die letzte

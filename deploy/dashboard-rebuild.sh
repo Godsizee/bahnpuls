@@ -70,13 +70,24 @@ fi
 # im Mart und in der Seite steht, aber nicht in der Quellabfrage, laesst `build:strict`
 # unberuehrt und faellt erst im Browser des Lesers als fehlende Bindung auf -- von aussen
 # wieder als HTTP 200 mit richtiger Groesse (BPULS-067).
+#
+# Exit 2 heisst "etwas gefunden", jeder andere Fehlschlag heisst "der Pruefer selbst ist
+# gescheitert". Ohne diese Unterscheidung meldete ein fehlendes Modul oder ein Tippfehler
+# im Skript denselben Satz wie eine falsche Seitenabfrage -- und der Satz waere gelogen.
 SEITENPRUEFER=/app/deploy/dashboard-seitenabfragen-pruefen.py
 if [ ! -f "$SEITENPRUEFER" ]; then
 	echo "rebuild: BEFUND -- $SEITENPRUEFER fehlt im Image, die Seitenabfragen sind ungeprueft"
 	befunde=$((befunde + 1))
-elif ! /opt/venv/bin/python "$SEITENPRUEFER"; then
-	echo "rebuild: BEFUND -- eine Seitenabfrage passt nicht zu den ausgelieferten Quellen"
-	befunde=$((befunde + 1))
+else
+	stand=0
+	/opt/venv/bin/python "$SEITENPRUEFER" || stand=$?
+	if [ "$stand" -eq 2 ]; then
+		echo "rebuild: BEFUND -- eine Seitenabfrage passt nicht zu den ausgelieferten Quellen"
+		befunde=$((befunde + 1))
+	elif [ "$stand" -ne 0 ]; then
+		echo "rebuild: BEFUND -- der Seitenabfragen-Pruefer ist selbst gescheitert (Exit $stand), die Abfragen sind ungeprueft"
+		befunde=$((befunde + 1))
+	fi
 fi
 
 [ "$befunde" -eq 0 ] || exit 1

@@ -61,11 +61,16 @@ def abbrechen(zusammenfassung):
 	Die Zusammenfassung darf die Einzelbefunde nie verdecken: eine im Manifest genannte,
 	aber fehlende Datei ist etwas anderes als ein leeres Manifest, und wer nur den letzten
 	Satz liest, sucht sonst an der falschen Stelle (BPULS-065).
+
+	**Exit 2 heisst Befund, jeder andere Fehlschlag heisst kaputter Pruefer.** Ohne diese
+	Unterscheidung waere ein fehlendes Modul oder ein Tippfehler in diesem Skript nicht
+	von einer falschen Seitenabfrage zu unterscheiden -- genau die Verwechslung, die den
+	Rebuild-Task 14 Stunden lang das Gegenteil der Wahrheit melden liess.
 	"""
 	for zeile in befunde:
 		print(f"seitenabfragen: {zeile}", file=sys.stderr)
 	print(f"seitenabfragen: BEFUND -- {zusammenfassung}", file=sys.stderr)
-	sys.exit(1)
+	sys.exit(2)
 
 
 def quellen_aus_manifest():
@@ -75,7 +80,12 @@ def quellen_aus_manifest():
 	wuerde eine geloeschte Quelle als vorhanden ausweisen -- der Fehler saehe dann aus wie
 	ein gesunder Bau.
 	"""
-	daten = json.loads(MANIFEST.read_text(encoding="utf-8"))
+	try:
+		daten = json.loads(MANIFEST.read_text(encoding="utf-8"))
+	except (OSError, ValueError) as fehler:
+		# Ein fehlendes oder unleserliches Manifest ist eine Aussage ueber den Bau, nicht
+		# ueber dieses Skript -- es gehoert als Befund gemeldet, nicht als Absturz.
+		abbrechen(f"das Manifest {MANIFEST} ist nicht lesbar: {fehler}")
 	wurzel = MANIFEST.parent.parent
 	for quelle, pfade in (daten.get("renderedFiles") or {}).items():
 		for p in pfade:
