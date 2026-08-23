@@ -16,22 +16,6 @@ viel Verspätung er zu jedem Zeitpunkt insgesamt mit sich trug.
 
 ## Fahrt auswählen
 
-```sql herkuenfte
-select
-    quelle,
-    case quelle
-        when 'de_gtfsrt'   then 'Deutschland — eigene Aufzeichnung'
-        when 'ch_istdaten' then 'Schweiz — konstruierte Testfälle'
-        else quelle
-    end                      as bezeichnung,
-    max(betriebstag)         as tag,
-    count(distinct trip_key) as fahrten
-from bahnpuls.zuglauf_auswahl
-group by quelle
--- absteigend, damit die echten deutschen Daten vorne stehen und nicht die Testfälle
-order by quelle desc
-```
-
 ```sql tage
 -- Der Betriebstag wird als **Text** ausgewählt, nicht als Datum: der Wert eines
 -- Dropdowns landet über eine Zeichenkette wieder in der Abfrage, und ein Datum wird
@@ -43,7 +27,6 @@ select
     max(betriebstag)                   as sortierung,
     count(distinct trip_key)           as fahrten
 from bahnpuls.zuglauf_auswahl
-where quelle = '${inputs.herkunft.value}'
 group by tag, beschriftung
 order by sortierung desc
 ```
@@ -54,8 +37,7 @@ order by sortierung desc
 -- einzige Fahrt trifft — die Seite stünde dann leer da, ohne dass erkennbar wäre, warum.
 select linie, count(distinct trip_key) as fahrten
 from bahnpuls.zuglauf_auswahl
-where quelle = '${inputs.herkunft.value}'
-  and strftime(betriebstag, '%Y-%m-%d') = '${inputs.tag.value}'
+where strftime(betriebstag, '%Y-%m-%d') = '${inputs.tag.value}'
 group by linie
 order by linie
 ```
@@ -65,8 +47,7 @@ with gefiltert as (
 
     select *
     from bahnpuls.zuglauf_auswahl
-    where quelle = '${inputs.herkunft.value}'
-      and strftime(betriebstag, '%Y-%m-%d') = '${inputs.tag.value}'
+    where strftime(betriebstag, '%Y-%m-%d') = '${inputs.tag.value}'
       and linie like '${inputs.linie.value}'
 
 ),
@@ -103,8 +84,6 @@ join gefiltert as ziel
 order by grenzen.ab_soll nulls last, bezeichnung
 ```
 
-<Dropdown data={herkuenfte} name=herkunft value=quelle label=bezeichnung title="Herkunft" />
-
 <Dropdown data={tage} name=tag value=tag label=beschriftung title="Betriebstag" />
 
 <Dropdown data={linien} name=linie value=linie title="Linie">
@@ -115,7 +94,7 @@ order by grenzen.ab_soll nulls last, bezeichnung
 
 <Alert status=info>
 
-**Zur Auswahl steht ein Ausschnitt, kein Gesamtbestand.** Angeboten werden je Herkunft
+**Zur Auswahl steht ein Ausschnitt, kein Gesamtbestand.** Angeboten werden
 die letzten drei aufgezeichneten Betriebstage, darin je Tag und Linie die ersten sechs
 Fahrten nach planmäßiger Abfahrt. Das liegt an der Technik, nicht an fehlenden Daten:
 Die Diagramme rechnen direkt im Browser, und ein vollständiger Betriebstag wären mehrere

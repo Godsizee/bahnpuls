@@ -4,38 +4,20 @@
 -- Soll und Ist fuer Ankunft und Abfahrt (Schema siehe Bahnpuls_Datenmodell.md).
 --
 -- Dieses Modell ist die OCP-Nahtstelle des Projekts: eine neue Quelle wird
--- ausschliesslich hier als weiterer union-Zweig angehaengt (naechster Zweig:
--- stg_de_gtfsrt, BPULS-030), Intermediate und Marts bleiben unberuehrt. Die
--- Spaltenliste ist deshalb bewusst explizit ausgeschrieben statt select * -- eine
--- Quelle, die eine Spalte umbenennt oder ergaenzt, soll hier laut auffallen.
+-- ausschliesslich hier als weiterer union-Zweig angehaengt, Intermediate und Marts
+-- bleiben unberuehrt. Die Spaltenliste ist deshalb bewusst explizit ausgeschrieben
+-- statt select * -- eine Quelle, die eine Spalte umbenennt oder ergaenzt, soll hier
+-- laut auffallen.
+--
+-- Aktuell haengt genau ein Zweig daran, das Modell ist also fachlich ein
+-- Pass-Through. Es existiert wegen dieser Naht, nicht als Vorratsabstraktion: der
+-- CH-Zweig hat hier gehangen und ist am 2026-08-23 entfernt worden (die Quelle war
+-- synthetisch und trug nichts zu einer Aussage ueber echten Betrieb bei).
+--
+-- Der Zweig haengt an int_de_stop_events statt an einem Staging-Modell, weil GTFS-RT
+-- Snapshots liefert und die Verdichtung auf ein Halt-Ereignis Zustandslogik ist --
+-- die gehoert nicht in den Staging-Layer.
 
-select
-    betriebstag,
-    trip_key,
-    stop_sequence,
-    stop_id,
-    stop_name,
-    soll_an,
-    soll_ab,
-    ist_an,
-    ist_ab,
-    delay_an_sek,
-    delay_ab_sek,
-    ist_endgueltig,
-    halt_ausgelassen,
-    zug_ausgefallen,
-    route_kurzname,
-    block_id,
-    quelle
-
-from {{ ref('stg_ch_istdaten') }}
-
-union all by name
-
--- Zweiter Zweig (BPULS-030). Er haengt an int_de_stop_events statt an einem
--- Staging-Modell, weil GTFS-RT Snapshots liefert und die Verdichtung auf ein
--- Halt-Ereignis Zustandslogik ist -- die gehoert nicht in den Staging-Layer. Die
--- Nahtstelle selbst bleibt unveraendert: eine Quelle, ein union-Zweig.
 select
     betriebstag,
     trip_key,

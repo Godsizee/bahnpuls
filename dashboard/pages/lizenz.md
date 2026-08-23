@@ -67,19 +67,6 @@ NeTEx-Datensatzes des [DELFI e. V.](https://www.delfi.de/), lizenziert unter
 [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). Bearbeitet: auf die
 Zuordnung von Haltestellen- und Liniennummern zu Namen reduziert.
 
-## Schweiz — opentransportdata.swiss
-
-Die als schweizerisch gekennzeichneten Zeilen im Dashboard sind derzeit **konstruierte
-Testfälle**, keine echten Betriebsdaten; das steht so auch auf der Seite
-[Methodik](/methodik). Echte Daten aus dieser Quelle sind vorbereitet, aber noch nicht
-eingespielt. Sobald sie es sind, gilt der Pflichttext der Nutzungsbedingungen wörtlich:
-
-> In Publikationen und Analysen, die auf ODMCH-Daten basieren, ist die URL
-> opentransportdata.swiss als Bezugsort der Rohdaten anzugeben.
-
-Diese Quelle steht unter eigenen „Nutzungsbedingungen Open Data", nicht unter einer
-Creative-Commons-Lizenz, und verlangt **kein** Share-Alike.
-
 ## Was das für die Zahlen auf dieser Seite heißt
 
 Aus einem Bestand unter CC BY-SA 4.0 entsteht durch Auswertung eine **abgeleitete
@@ -92,9 +79,9 @@ Datenbank**, und die erbt die Bedingungen. Konkret:
   [CC BY-SA 4.0](https://creativecommons.org/licenses/by-sa/4.0/) — die Share-Alike-Pflicht
   stammt aus dem Echtzeit-Stream und trägt sich durch. Das ist geplant, aber noch nicht
   geschehen.
-- **Ein gemischter Datensatz** aus deutschen und schweizerischen Daten weist beide
-  Herkünfte getrennt aus. Der schweizerische Anteil müsste nicht unter CC BY-SA stehen;
-  die beiden Pflichten zu verschmelzen wäre bequem und falsch.
+- **Kommt je eine Quelle mit anderer Lizenz dazu**, werden die Herkünfte getrennt
+  ausgewiesen statt verschmolzen. Ein Anteil, der nicht unter CC BY-SA stehen müsste,
+  darf nicht stillschweigend darunter geraten — bequem wäre das, richtig nicht.
 
 ## Der Code
 

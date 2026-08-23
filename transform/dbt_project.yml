@@ -15,9 +15,6 @@ clean-targets:
   - "dbt_packages"
 
 vars:
-  # Pfad/Glob zu den rohen CH-Ist-Daten-CSVs, siehe Bahnpuls_Datenquellen.md.
-  # Relativ zu transform/, wo dbt ausgefuehrt wird.
-  ch_istdaten_glob: "../data/ch/*_istdaten.csv"
   # Pfad/Glob zu den rohen GTFS-RT-Momentaufnahmen des Collectors. Produktiv zeigt er
   # auf das Persistent Volume (/data/raw), lokal auf das Entwicklungsverzeichnis.
   de_gtfsrt_glob: "../data/raw/**/*.parquet"

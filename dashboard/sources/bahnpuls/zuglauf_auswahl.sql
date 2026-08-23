@@ -28,9 +28,9 @@
 -- Seite traege, sind das die beiden Schrauben -- und dann bitte messen, nicht raten.
 with tage as (
 
-    -- Je Quelle die letzten drei Betriebstage. Nicht global die letzten drei: die
-    -- synthetischen CH-Fixtures reichen bis in den Oktober und wuerden die echten
-    -- deutschen Tage sonst vollstaendig verdecken.
+    -- Je Quelle die letzten drei Betriebstage, nicht global die letzten drei: die
+    -- Partition ist die Naht, an der eine zweite Quelle andockt, ohne dass ihre
+    -- Betriebstage die der ersten verdecken.
     select quelle, betriebstag
     from mart_zuglauf
     group by quelle, betriebstag

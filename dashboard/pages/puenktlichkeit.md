@@ -14,22 +14,6 @@ die Frage, die auf dem Bahnsteig zählt: **kam mein Zug, und kam er rechtzeitig?
 
 Diese Seite stellt beide Antworten nebeneinander.
 
-```sql herkuenfte
-select
-    quelle,
-    case quelle
-        when 'de_gtfsrt'   then 'Deutschland — eigene Aufzeichnung'
-        when 'ch_istdaten' then 'Schweiz — konstruierte Testfälle'
-        else quelle
-    end                      as bezeichnung,
-    count(distinct betriebstag) as tage
-from bahnpuls.puenktlichkeit
-group by quelle
-order by quelle desc
-```
-
-<Dropdown data={herkuenfte} name=herkunft value=quelle label=bezeichnung title="Herkunft" />
-
 ## Die Kurve, nicht die eine Zahl
 
 ```sql kurve
@@ -41,7 +25,6 @@ select
     100.0 * sum(halte_puenktlich) / nullif(sum(halte_gemessen), 0)    as quote_gemessen,
     100.0 * sum(halte_puenktlich) / nullif(sum(halte_mit_ankunft), 0) as quote_planmaessig
 from bahnpuls.puenktlichkeit
-where quelle = '${inputs.herkunft.value}'
 group by schwelle_min
 order by schwelle_min
 ```
@@ -96,8 +79,7 @@ select
 from bahnpuls.puenktlichkeit
 -- Eine einzige Schwelle: die Zustände hängen nicht von ihr ab und stünden sonst fünffach
 -- in der Summe. Genau dieser Fehler wäre unauffällig — die Zahlen sähen nur größer aus.
-where quelle = '${inputs.herkunft.value}'
-  and schwelle_sek = 360
+where schwelle_sek = 360
 ```
 
 <DataTable data={zustaende} rows=1>
@@ -147,9 +129,6 @@ Spalte: geprüft und widerlegt ist etwas anderes als gar nicht prüfbar.
 Eine Lücke bleibt: ein Zug, über den der Feed **gar nichts** meldet, taucht nirgends auf.
 Wie oft das vorkommt, ist offen.
 
-Bei den schweizerischen Testfällen ist die erste Spalte gefüllt — dort liefert die Quelle
-den Ausfall ausdrücklich.
-
 </Alert>
 
 Vier davon sind **Betrieb** und gehören zum Bild: der Ausfall wurde gemeldet, im ganzen
@@ -179,8 +158,7 @@ select
     100.0 * sum(halte_puenktlich) / nullif(sum(halte_gemessen), 0)    as quote_gemessen,
     100.0 * sum(halte_puenktlich) / nullif(sum(halte_mit_ankunft), 0) as quote_planmaessig
 from bahnpuls.puenktlichkeit
-where quelle = '${inputs.herkunft.value}'
-  and schwelle_sek = 360
+where schwelle_sek = 360
 group by linie
 order by halte desc, linie
 ```

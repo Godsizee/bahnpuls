@@ -17,27 +17,27 @@ unit_tests:
       - input: ref('int_segment_delta')
         rows:
           # Rücksprungnacht: die lokale Stunde 02:00–02:59 existiert zweimal.
-          - {betriebstag: "2026-10-25", trip_key: "t1", quelle: "ch_istdaten", nach_stop_sequence: 1,
+          - {betriebstag: "2026-10-25", trip_key: "t1", quelle: "de_gtfsrt", nach_stop_sequence: 1,
              abschnitt_direkt: null, soll_an: null, soll_ab: "2026-10-25 01:30:00",
              delay_an_sek: null, delay_ab_sek: 60, laufzeit_delta_sek: null, haltezeit_delta_sek: null,
              halt_ausgelassen: false, zug_ausgefallen: false, ist_endgueltig: true}
-          - {betriebstag: "2026-10-25", trip_key: "t1", quelle: "ch_istdaten", nach_stop_sequence: 2,
+          - {betriebstag: "2026-10-25", trip_key: "t1", quelle: "de_gtfsrt", nach_stop_sequence: 2,
              abschnitt_direkt: true, soll_an: "2026-10-25 02:10:00", soll_ab: "2026-10-25 02:15:00",
              delay_an_sek: 300, delay_ab_sek: 240, laufzeit_delta_sek: 240, haltezeit_delta_sek: -60,
              halt_ausgelassen: false, zug_ausgefallen: false, ist_endgueltig: true}
-          - {betriebstag: "2026-10-25", trip_key: "t1", quelle: "ch_istdaten", nach_stop_sequence: 3,
+          - {betriebstag: "2026-10-25", trip_key: "t1", quelle: "de_gtfsrt", nach_stop_sequence: 3,
              abschnitt_direkt: true, soll_an: "2026-10-25 03:00:00", soll_ab: "2026-10-25 03:05:00",
              delay_an_sek: 120, delay_ab_sek: 100, laufzeit_delta_sek: -120, haltezeit_delta_sek: -20,
              halt_ausgelassen: false, zug_ausgefallen: false, ist_endgueltig: true}
           # Frühjahr: die lokale Stunde 02:00–02:59 existiert gar nicht. Gleiche
           # Behandlung, andere Ursache.
-          - {betriebstag: "2026-03-29", trip_key: "t2", quelle: "ch_istdaten", nach_stop_sequence: 1,
+          - {betriebstag: "2026-03-29", trip_key: "t2", quelle: "de_gtfsrt", nach_stop_sequence: 1,
              abschnitt_direkt: null, soll_an: null, soll_ab: "2026-03-29 02:40:00",
              delay_an_sek: null, delay_ab_sek: 90, laufzeit_delta_sek: null, haltezeit_delta_sek: null,
              halt_ausgelassen: false, zug_ausgefallen: false, ist_endgueltig: true}
           # Kontrolle: derselbe Betriebstag, aber außerhalb der Umstellungsstunde —
           # hier darf nichts entwertet werden.
-          - {betriebstag: "2026-03-29", trip_key: "t2", quelle: "ch_istdaten", nach_stop_sequence: 2,
+          - {betriebstag: "2026-03-29", trip_key: "t2", quelle: "de_gtfsrt", nach_stop_sequence: 2,
              abschnitt_direkt: true, soll_an: "2026-03-29 04:10:00", soll_ab: "2026-03-29 04:12:00",
              delay_an_sek: 150, delay_ab_sek: 140, laufzeit_delta_sek: 60, haltezeit_delta_sek: -10,
              halt_ausgelassen: false, zug_ausgefallen: false, ist_endgueltig: true}
@@ -66,11 +66,11 @@ unit_tests:
     given:
       - input: ref('mart_zuglauf')
         rows:
-          - {betriebstag: "2026-08-11", quelle: "ch_istdaten", trip_key: "a", halt_nr: 2,
+          - {betriebstag: "2026-08-11", quelle: "de_gtfsrt", trip_key: "a", halt_nr: 2,
              abschnitt_direkt: true, von_stop_id: "A", von_stop_name: "A", stop_id: "B", stop_name: "B",
              laufzeit_delta_sek: 300, haltezeit_delta_sek: 60,
              zug_ausgefallen: false, halt_ausgelassen: false, zeitumstellung_mehrdeutig: false}
-          - {betriebstag: "2026-08-11", quelle: "ch_istdaten", trip_key: "b", halt_nr: 2,
+          - {betriebstag: "2026-08-11", quelle: "de_gtfsrt", trip_key: "b", halt_nr: 2,
              abschnitt_direkt: true, von_stop_id: "A", von_stop_name: "A", stop_id: "B", stop_name: "B",
              laufzeit_delta_sek: null, haltezeit_delta_sek: null,
              zug_ausgefallen: true, halt_ausgelassen: false, zeitumstellung_mehrdeutig: false}

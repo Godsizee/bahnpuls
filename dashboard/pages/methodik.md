@@ -20,29 +20,28 @@ Unterscheidung zieht sich durch jede Kennzahl auf diesen Seiten.
 
 ## Datenstand
 
-Diese Seiten sind eine **Vorschau im Aufbau**. Sie zeigen zwei Quellen nebeneinander, und
-die beiden stehen auf sehr unterschiedlichem Grund — wer eine Zahl liest, muss wissen,
-welche davon er vor sich hat:
+Alle Zahlen auf diesen Seiten stammen aus **einer** Quelle: **GTFS-Realtime für VRN und
+RMV** (gtfs.de), aufgezeichnet in eigener Mitschrift seit dem 19.08.2026. Nichts hier ist
+konstruiert, geschätzt oder aus einer fremden Auswertung übernommen.
 
-- **Deutsche Echtzeitdaten: echt**, aus der eigenen Mitschrift seit dem 19.08.2026. Die
-  Sammlung läuft erst wenige Tage; für Aussagen über Linien oder Bahnhöfe ist das zu kurz.
-  Wo statt eines Bahnhofsnamens eine Nummer steht, kannte der Fahrplandatensatz diesen Halt
-  noch nicht — der Echtzeit-Feed selbst enthält keine Namen.
-- **Schweizer Daten: erfunden.** Sie prüfen die Rechenwege an konstruierten Fällen — ein
-  Zug über Mitternacht, ein ausgefallener Zug, eine Nacht mit Zeitumstellung — und
-  beschreiben **keinen realen Betrieb**. Keine Zahl aus dieser Quelle sagt etwas über
-  tatsächliche Züge aus.
+Zwei Einschränkungen gehören dazu, bevor irgendeine Zahl gelesen wird:
 
-Welche Zeile woher stammt, steht in jeder Tabelle ausgeschrieben.
+- **Die Sammlung ist jung.** Für Aussagen über eine einzelne Linie oder einen bestimmten
+  Bahnhof reichen wenige Tage nicht; man sieht Tage, keine Regelmäßigkeit.
+- **Wo statt eines Bahnhofsnamens eine Nummer steht**, kannte keine Fahrplan-Version
+  diesen Halt — der Echtzeit-Feed selbst enthält keine Namen.
 
-Woher die beiden Quellen kommen:
+Warum ausgerechnet die eigene Mitschrift und kein fertiges Archiv: nur so lässt sich
+später auch die **Prognosegüte** auswerten. Archivierte Prognosen gibt es sonst nirgends —
+sie werden laufend überschrieben und sind weg, sobald der Zug durch ist.
 
-- **Schweizer Ist-Daten-Archiv** (opentransportdata.swiss): fertig gejointe Soll- und
-  Ist-Zeiten je Halt, rückwirkend verfügbar. Dient dazu, die Auswertungen zu entwickeln,
-  ohne auf eigene Sammelhistorie zu warten.
-- **GTFS-Realtime für VRN und RMV** (gtfs.de): eigene Mitschrift seit dem 19.08.2026.
-  Nur damit lässt sich später auch die Prognosegüte auswerten — archivierte Prognosen
-  gibt es sonst nirgends.
+Bis zum 23.08.2026 stand daneben eine zweite, **synthetische** Quelle (konstruierte
+Schweizer Fälle), an der die Rechenwege entwickelt wurden, solange noch keine eigene
+Historie vorlag. Sie ist entfernt worden, sobald die eigene Aufzeichnung trug: erfundene
+Zahlen gehören nicht neben gemessene, auch nicht als gekennzeichnete Nebenspalte. Die
+Fälle, die sie geprüft hat — Fahrt über Mitternacht, Ausfall, ausgelassener Halt, Nacht
+der Zeitumstellung — prüfen jetzt Testdaten im deutschen Format, außerhalb des
+Dashboards.
 
 ## Was eine Zeile ist
 
@@ -223,12 +222,8 @@ Tagesmittelwerten gemittelt — sonst zählte ein Sonntag so viel wie ein Werkta
 
 ## Bestimmung des Ist-Werts
 
-**Schweizer Ist-Daten:** Als Ist-Zeit gilt ausschließlich ein Wert, den die Quelle als
-tatsächlich gemessen kennzeichnet. Prognostizierte oder geschätzte Zeiten werden nicht als
-Ist verwendet, auch wenn sie vorliegen.
-
-**Eigene GTFS-Realtime-Daten:** Die Quelle liefert fortlaufend
-Prognose-Schnappschüsse. Als Ist-Wert gilt der zeitlich letzte Schnappschuss, der
+Die Quelle liefert keine Ist-Zeiten, sondern fortlaufend
+**Prognose-Schnappschüsse**. Als Ist-Wert gilt der zeitlich letzte Schnappschuss, der
 höchstens **fünf Minuten nach** dem prognostizierten Ereigniszeitpunkt eingetroffen ist.
 Die Karenz fängt ab, dass die letzte Meldung leicht nach dem Ereignis eintrifft. Der Wert
 ist eine Annahme und beeinflusst jede nachgelagerte Kennzahl; er wird hier ausgewiesen und
@@ -436,8 +431,6 @@ wo im Netz Verspätung entsteht, und nicht, wer sie zu verantworten hat.
 - Deutsche Echtzeitdaten: [gtfs.de](https://gtfs.de), lizenziert unter CC BY-SA 4.0.
 - Deutsche Fahrplandaten: [gtfs.de](https://gtfs.de) auf Grundlage des NeTEx-Datensatzes
   des DELFI e. V., lizenziert unter CC BY 4.0.
-- Schweizer Ist-Daten: [opentransportdata.swiss](https://opentransportdata.swiss) als
-  Bezugsort der Rohdaten.
 
 Vollständige Attribution, die Bedingungen für eine Weiterverwendung und die Lizenz des
 Codes stehen auf der Seite [Lizenz und Quellen](/lizenz).

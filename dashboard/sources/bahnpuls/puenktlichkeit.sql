@@ -14,8 +14,8 @@ with tage as (
     select quelle, betriebstag
     from mart_puenktlichkeit
     group by quelle, betriebstag
-    -- Je Quelle, nicht global: die synthetischen CH-Fixtures reichen bis in den Oktober
-    -- und wuerden die echten deutschen Tage sonst verdecken.
+    -- Je Quelle, nicht global: die Partition ist die Naht, an der eine zweite Quelle
+    -- andockt, ohne dass ihre Betriebstage die der ersten verdecken.
     qualify dense_rank() over (partition by quelle order by betriebstag desc) <= 30
 
 )

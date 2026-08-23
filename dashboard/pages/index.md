@@ -38,54 +38,26 @@ hinterher sagen, was tatsächlich passiert ist. Aufbewahrt wird das sonst nirgen
 
 ```sql datenstand
 select
-    quelle,
-    case quelle when 'de_gtfsrt' then 'Deutschland — echte Aufzeichnung'
-                when 'ch_istdaten' then 'Schweiz — Testdaten zur Prüfung der Rechenwege'
-                else quelle end                  as herkunft,
-    count(*)                                     as tage,
-    sum(fahrten)                                 as fahrten,
-    sum(halte)                                   as halte,
-    min(betriebstag)                             as von,
-    max(betriebstag)                             as bis
+    count(*)         as tage,
+    sum(fahrten)     as fahrten,
+    sum(halte)       as halte,
+    min(betriebstag) as von,
+    max(betriebstag) as bis
 from bahnpuls.mart_datenqualitaet
-group by quelle
-order by quelle desc
 ```
 
-```sql echt
-select * from ${datenstand} where quelle = 'de_gtfsrt'
-```
+<Alert status=info>
 
-<Alert status=warning>
-
-**Diese Seite ist im Aufbau, und zwei sehr verschiedene Dinge stehen nebeneinander.**
-
-Die deutschen Zahlen sind **echt**. Sie stammen aus der eigenen Aufzeichnung, die seit dem
-19. August 2026 läuft — also erst seit wenigen Tagen. Für Aussagen über eine bestimmte
-Linie oder einen bestimmten Bahnhof ist das zu wenig; man sieht ein paar Tage, keine
-Regelmäßigkeit.
-
-Die schweizerischen Zahlen sind **erfunden**. Sie sind ein Prüfstand: konstruierte Fälle,
-an denen sich nachweisen lässt, dass die Rechnung stimmt — ein Zug über Mitternacht, ein
-ausgefallener Zug, eine Nacht mit Zeitumstellung. Sie beschreiben **keinen realen
-Betrieb**.
-
-In jeder Tabelle steht dabei, woher eine Zeile stammt.
+**Die Aufzeichnung ist jung.** Sie läuft seit dem 19. August 2026 — für Aussagen über eine
+einzelne Linie oder einen bestimmten Bahnhof ist das noch zu kurz; man sieht ein paar Tage,
+keine Regelmäßigkeit. Was hier steht, ist trotzdem gemessen und nicht geschätzt: jede Zahl
+stammt aus der eigenen Mitschrift des Echtzeit-Feeds.
 
 </Alert>
 
-<BigValue data={echt} value=fahrten title="Aufgezeichnete Fahrten" />
-<BigValue data={echt} value=halte title="Davon einzelne Halte" />
-<BigValue data={echt} value=bis title="Aufgezeichnet bis" />
-
-<DataTable data={datenstand} rows=5>
-    <Column id=herkunft title="Woher die Zahlen stammen" />
-    <Column id=tage title="Tage" />
-    <Column id=fahrten title="Fahrten" />
-    <Column id=halte title="Halte" />
-    <Column id=von title="von" />
-    <Column id=bis title="bis" />
-</DataTable>
+<BigValue data={datenstand} value=fahrten title="Aufgezeichnete Fahrten" />
+<BigValue data={datenstand} value=halte title="Davon einzelne Halte" />
+<BigValue data={datenstand} value=bis title="Aufgezeichnet bis" />
 
 ## Wo entsteht die Verspätung?
 
@@ -157,7 +129,6 @@ weit das gediehen ist, steht unten in der Spalte „Bahnhofsname bekannt".
 ```sql abdeckung
 select
     betriebstag,
-    case quelle when 'de_gtfsrt' then 'Deutschland' else 'Schweiz (Testdaten)' end as herkunft,
     halte,
     round(100 * abdeckung_an, 1) as gemessen_an,
     round(100 * abdeckung_ab, 1) as gemessen_ab,
@@ -167,7 +138,7 @@ select
     ausgelassene_halte,
     fahrten_gebietsfremd
 from bahnpuls.mart_datenqualitaet
-order by betriebstag desc, quelle
+order by betriebstag desc
 ```
 
 Keine Auswertung ist besser als ihre Datengrundlage. Deshalb steht hier offen, für wie
@@ -181,7 +152,6 @@ drei sind Betrieb und gehören zum Bild.
 
 <DataTable data={abdeckung} rows=10>
     <Column id=betriebstag title="Tag" />
-    <Column id=herkunft title="Herkunft" />
     <Column id=halte title="Halte" />
     <Column id=gemessen_an title="Ankunft gemessen %" fmt="#,##0.0" />
     <Column id=gemessen_ab title="Abfahrt gemessen %" fmt="#,##0.0" />
@@ -213,7 +183,6 @@ hinterlässt eine Lücke zwischen zwei Zeitpunkten. Deshalb steht die Erhebung h
 ```sql erhebung_tage
 select
     kalendertag,
-    case quelle when 'de_gtfsrt' then 'Deutschland' else quelle end as herkunft,
     sum(polls_beobachtet) filter (where stunde_vollstaendig)        as polls,
     count(*) filter (where stunde_vollstaendig)                     as stunden,
     100.0 * sum(polls_beobachtet) filter (where stunde_vollstaendig)
@@ -222,13 +191,12 @@ select
     max(groesste_luecke_sek)                                        as groesste_luecke,
     avg(feed_alter_schnitt_sek)                                     as feed_alter
 from bahnpuls.erhebung
-group by kalendertag, quelle
+group by kalendertag
 order by kalendertag desc
 ```
 
 <DataTable data={erhebung_tage} rows=10>
     <Column id=kalendertag title="Tag" />
-    <Column id=herkunft title="Herkunft" />
     <Column id=stunden title="volle Stunden" />
     <Column id=polls title="Abrufe" fmt="#,##0" />
     <Column id=abdeckung title="Abdeckung %" fmt="#,##0.0" />
@@ -267,6 +235,9 @@ großzügige Zuschläge enthält, zeigt [Fahrplanreserve](/puffer). Was passiert
 erst fährt — und warum Pünktlichkeitsquoten dadurch besser werden —, steht unter
 [Pünktlichkeit und Ausfälle](/puenktlichkeit). Wer genau wissen will, wie gerechnet wird
 — mit allen Annahmen und ihren Grenzen —, findet das auf der Seite [Methodik](/methodik).
+
+Warum jemand, der sieben Jahre Züge gefahren hat, das ausrechnet, steht unter
+[Über das Projekt](/ueber).
 
 ---
 

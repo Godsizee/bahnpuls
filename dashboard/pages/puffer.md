@@ -14,21 +14,6 @@ Anschlussverzögerung bis zum Endbahnhof durchschlagen.
 Diese Seite fragt, wo das gelingt, wo die Reserve fehlt und wo sie ungenutzt liegen
 bleibt.
 
-```sql herkuenfte
-select
-    quelle,
-    case quelle
-        when 'de_gtfsrt'   then 'Deutschland — eigene Aufzeichnung'
-        when 'ch_istdaten' then 'Schweiz — konstruierte Testfälle'
-        else quelle
-    end as bezeichnung
-from bahnpuls.pufferbilanz
-group by quelle
-order by quelle desc
-```
-
-<Dropdown data={herkuenfte} name=herkunft value=quelle label=bezeichnung title="Herkunft" />
-
 <Slider
     name=mindestfahrten
     title="Mindestzahl bewertbarer Durchfahrten"
@@ -57,8 +42,7 @@ select
     100.0 * reserve_genutzt / nullif(verspaetet_eingefahren, 0)    as genutzt_anteil,
     100.0 * reserve_ungenutzt / nullif(puenktlich_eingefahren, 0)  as ungenutzt_anteil
 from bahnpuls.pufferbilanz
-where quelle = '${inputs.herkunft.value}'
-  and bewertbar >= ${inputs.mindestfahrten.value}
+where bewertbar >= ${inputs.mindestfahrten.value}
 ```
 
 ## Wo die Fahrzeit zu knapp bemessen ist
@@ -153,8 +137,7 @@ select
     verspaetet_eingefahren,
     round(bilanz_sek / 60.0, 1) as bilanz_min
 from bahnpuls.puffer_linien
-where quelle = '${inputs.herkunft.value}'
-  and bewertbar >= ${inputs.mindestfahrten.value}
+where bewertbar >= ${inputs.mindestfahrten.value}
   and verspaetet_eingefahren > 0
 order by linie
 ```

@@ -19,30 +19,36 @@ export DBT_PROFILES_DIR="$(pwd)"
 ../.venv/Scripts/dbt build
 ```
 
-Erwartet CH-Ist-Daten-CSVs unter `../data/ch/*_istdaten.csv` (Pfad/Glob als dbt-Var
-`ch_istdaten_glob` in `dbt_project.yml`, per `--vars` überschreibbar). Die DuckDB-Datei
-landet unter `../data/bahnpuls.duckdb` — Build-Artefakt, nicht in Git.
+Die DuckDB-Datei landet unter `../data/bahnpuls.duckdb` — Build-Artefakt, nicht in Git.
 
-## Stand BPULS-011
+Der Lauf braucht die dbt-Vars `de_gtfsrt_glob` und `de_static_dir`; ohne sie sucht er
+unter `../data/raw` bzw. `../data/static` nach Dateien, die lokal niemand hat. Der
+fertige Befehl steht unten unter „Lauf gegen die Fixtures".
 
-`stg_ch_istdaten` normalisiert das CH-Ist-Daten-Archiv (Spur A) auf das
-`fct_stop_events`-Schema und ist gegen eine synthetische Fixture getestet (echte
-CSV-Datei bisher nicht erreichbar — `data.opentransportdata.swiss` blockt automatisierte
-Zugriffe aus dieser Umgebung mit HTTP 403, siehe Backlog BPULS-011). Zwei Annahmen sind
-**noch nicht an einer echten Datei verifiziert**:
+## Die entfernte CH-Quelle (2026-08-23)
 
-- Zeitformat: `ANKUNFTSZEIT`/`ABFAHRTSZEIT` als `DD.MM.YYYY HH:MM`, `AN_PROGNOSE`/
-  `AB_PROGNOSE` als `DD.MM.YYYY HH:MM:SS`.
-- Boolean-Spalten (`FAELLT_AUS_TF` u. a.) als literale Strings `true`/`false`.
+Bis zum 23.08.2026 hing an `fct_stop_events` ein zweiter Zweig: `stg_ch_istdaten`, das
+Schweizer Ist-Daten-Archiv als **Spur A** — die Möglichkeit, Auswertungen zu entwickeln,
+bevor eigene Sammelhistorie vorlag. Eingespielt wurden dort nie echte Daten (das Portal
+blockt automatisierte Zugriffe mit HTTP 403), nur synthetische Fixtures.
 
-Falls beides nicht stimmt, schlägt `dbt run` beim ersten echten Lauf laut fehl (bewusst
-`strptime`/`::boolean`, nicht `try_`-Varianten) — kein stiller Datenfehler, siehe
-Modell-Kommentare in `models/staging/ch/stg_ch_istdaten.sql`.
+Entfernt worden ist sie, sobald die eigene Aufzeichnung trug. Der Grund ist nicht
+technisch: erfundene Zahlen standen im Dashboard neben gemessenen, und auf der Startseite
+flossen sie sogar unbemerkt in dieselben Kennzahlen ein — die Blöcke dort hatten nie einen
+Quellenfilter.
 
-`stop_sequence` existiert in der CH-Quelle nicht und wird über die Soll-Zeit hergeleitet
-(`row_number()` je `trip_key`). `halt_ausgelassen` ist für CH immer `false` — die Quelle
-liefert keinen Flag für einen einzelnen ausgelassenen Halt, `DURCHFAHRT_TF` bedeutet
-planmäßige Durchfahrt und ist keine Anomalie (siehe Modell-Kommentar).
+**Was das für die Testabdeckung hieß und wie sie ersetzt ist:** Die CH-Fixtures deckten
+Fahrt über Mitternacht, Ausfall, ausgelassenen Halt und die Rücksprungnacht ab. Die ersten
+drei deckte die DE-Fixture bereits mit ab (Fahrt `1007` fährt 23:50 → 25:10, `1004` fällt
+aus, `1003` lässt einen Halt aus). Die Rücksprungnacht nicht — dafür ist
+`tests/fixtures/de/2026-10-25_snapshots.parquet` samt Fahrplanversion
+`v=2026-10-22` neu entstanden.
+
+Zwei Tests sind mit der Quelle ersatzlos entfallen, weil sie ausdrücklich **nur** für sie
+galten und nach dem Ausbau null Zeilen geprüft hätten — grün, aber ohne Aussage:
+`assert_fct_stop_sequence_lueckenlos` (GTFS-RT sichert Lückenlosigkeit nicht zu, das trägt
+`abschnitt_direkt`) und `assert_soll_zeit_im_betriebstag_fenster` (für GTFS-RT gilt
+`assert_de_soll_zeit_im_fenster` als Warnung).
 
 ## Stand BPULS-012
 
@@ -75,24 +81,32 @@ weiterhin plausible Zahlen liefern und jeden Wasserfall still verschieben würde
 Vorhalt derselben Fahrt) und `assert_segment_delta_erster_halt_ohne_vorhalt`. Dazu
 `assert_fct_stop_sequence_lueckenlos` als Pflichttest aus dem Datenmodell.
 
-Verifiziert wie BPULS-011 gegen **synthetische Fixtures** (echte CH-Datei weiterhin
-nicht beschaffbar), siehe Abschnitt „Fixtures" unten.
+Verifiziert gegen die Fixtures unter `tests/fixtures/`, siehe Abschnitt „Fixtures" unten.
 
 ## Fixtures und Testlauf
 
-Die synthetischen CH-Dateien liegen unter `tests/fixtures/ch/` — im Repo, weil sie
-Testdaten sind und keine Rohdaten. `data/ch/` bleibt echten Rohdaten vorbehalten, damit
-sich Synthetisches und Echtes dort nie vermischen:
+Die Fixtures liegen unter `tests/fixtures/` — im Repo, weil sie Testdaten sind und keine
+Rohdaten. `data/raw/` bleibt echten Rohdaten vorbehalten, damit sich Konstruiertes und
+Gemessenes dort nie vermischen. Der Aufruf steht unten unter „Lauf gegen die Fixtures".
 
-```bash
-dbt build --vars '{"ch_istdaten_glob": "tests/fixtures/ch/*_istdaten.csv"}'
-```
+`de/2026-08-13_snapshots.parquet` deckt ab: mehrere Snapshots je Halt (Dedup), einen
+ausgelassenen Halt (`1003`), einen Ausfall (`1004`), eine Fahrt mit Sequenzlücke (`1002`,
+Halte 5 und 7 — `abschnitt_direkt`), eine Nachtfahrt über Mitternacht (`1007`, 23:50 →
+25:10, Betriebstag bleibt der Vortag), eine unplausible Abfahrt (`1008`, −83.050 s), einen
+Pufferabbau (`1009`), zwei durchweg ausgelassene Fahrten (`1010`, `1011`), eine verdrehte
+Soll-Zeit (`1012`) und eine gebietsfremde Fahrt über Nahverkehrshalte (`1013`).
 
-`2026-08-11_istdaten.csv` deckt ab: Pufferabbau (negatives Laufzeit-Delta), einen Halt
-mit `AB_PROGNOSE_STATUS` ≠ `REAL` (Haltezeitanteil `NULL` statt 0), einen Endhalt ohne
-Abfahrt, eine Nachtfahrt über Mitternacht (Betriebstag bleibt der Vortag), einen
-ausgefallenen Zug und eine Buszeile (muss herausgefiltert werden).
-`2026-10-25_istdaten.csv` ist die **Rücksprungnacht** — siehe BPULS-013.
+`de/2026-10-25_snapshots.parquet` ist die **Rücksprungnacht** (Fahrt `1020`, Fahrplan
+`v=2026-10-22`): Halt `S2` liegt mit 02:30/02:32 in der Stunde, die es in dieser Nacht
+zweimal gibt, `S3` mit 03:20 sauber dahinter. Beide müssen entwertet werden — `S2`, weil
+seine eigene Zeit mehrdeutig ist, `S3`, weil sein **Laufzeitanteil** gegen `S2` rechnet.
+Der Folgehalt behält dabei seine eigene Ankunftsverspätung; nur der Abschnittswert fällt
+weg. Genau dieser zweite Teil ist der Fall, den ein Blick auf `S2` allein nicht findet.
+
+Die Soll-Zeiten der Fixture sind **rückwärts** gebaut: GTFS-RT liefert keine Soll-Zeit,
+`stg_de_gtfsrt` rechnet sie als `time - delay`. Wer die Snapshot-Zeitstempel frei wählt,
+bekommt andere Soll-Zeiten als die im Fahrplan — in der Umstellungsnacht mit einem
+Stundenversatz, der genau den Testfall zerstört, den die Fixture herstellen soll.
 
 ## Stand BPULS-013
 
@@ -121,11 +135,11 @@ der tägliche Lauf an einer Nacht im Jahr nicht scheitern darf. `Europe/Zurich` 
 still verfälschen könnten (ausgelassener Halt mitten im Laufweg, Ausfall, `lag()` über
 Fahrtgrenzen hinweg), stehen als dbt-Unit-Tests in
 `models/intermediate/_intermediate__unit_tests.yml` — sie brauchen exakt konstruierte
-Eingaben, die in echten Daten nicht verlässlich vorkommen. Für `stg_ch_istdaten` sind
-Unit-Tests **nicht möglich**: dbt muss für eine gemockte Eingabe die Spalten der
-Relation introspizieren, und die Quelle ist über `external_location` nur ein
-`read_csv`-Ausdruck, keine Relation. Diese Ebene wird deshalb über die Fixture-Dateien
-abgedeckt.
+Eingaben, die in echten Daten nicht verlässlich vorkommen. Für ein Staging-Modell auf
+einer externen Datei sind Unit-Tests **nicht möglich**: dbt muss für eine gemockte Eingabe
+die Spalten der Relation introspizieren, und eine über `external_location` eingebundene
+Quelle ist nur ein Leseausdruck, keine Relation. Diese Ebene wird deshalb über die
+Fixture-Dateien abgedeckt.
 
 ## Stand BPULS-016
 
@@ -173,8 +187,8 @@ lädt **nie rückwärts**.
 Kommt eine Quelle mit älteren Betriebstagen dazu, als bereits in der Tabelle stehen,
 passiert deshalb *nichts*, und zwar lautlos: kein Fehler, kein leerer Lauf, die Modelle
 melden Erfolg. Beim Anschluss von `stg_de_gtfsrt` (BPULS-030) trat genau das auf — die
-CH-Fixture der Rücksprungnacht (2026-10-25) stand als `max(betriebstag)` in den Marts und
-schluckte den DE-Tag 2026-08-13 vollständig.
+Fixture der Rücksprungnacht (2026-10-25) stand als `max(betriebstag)` in den Marts und
+schluckte den Tag 2026-08-13 vollständig.
 
 **Regel:** nach dem Anschluss einer Quelle oder beim Nachladen historischer Tage einmal
 
@@ -188,19 +202,20 @@ Vorwärtsladen gewollt.
 ## Lauf gegen die Fixtures
 
 ```bash
-dbt build --vars '{"ch_istdaten_glob": "tests/fixtures/ch/*_istdaten.csv", "de_gtfsrt_glob": "tests/fixtures/de/*.parquet", "de_static_dir": "tests/fixtures/de_static"}'
+dbt build --vars '{"de_gtfsrt_glob": "tests/fixtures/de/*.parquet", "de_static_dir": "tests/fixtures/de_static"}'
 ```
 
 Ohne `de_static_dir` bricht `stg_de_static` ab — es sucht dann unter `../data/static/`
 nach einem Fahrplanarchiv, das lokal niemand hat.
 
-Erwartung: `PASS=225 WARN=4 ERROR=0` von 229 (Stand 2026-08-22, nachgemessen). Alle vier
-Warnungen tragen `severity: warn` und sind gewollt — sie beschreiben Eigenschaften der
-Quelle, keine Modellfehler, und dürfen deshalb den Seitenbau nicht anhalten:
+Erwartung: `PASS=214 WARN=4 ERROR=0` von 218 (Stand 2026-08-23, nachgemessen — vorher 229,
+elf Tests weniger nach dem Ausbau der CH-Quelle). Alle vier Warnungen tragen
+`severity: warn` und sind gewollt — sie beschreiben Eigenschaften der Quelle, keine
+Modellfehler, und dürfen deshalb den Seitenbau nicht anhalten:
 
 | Warnung | Treffer | Was sie meldet |
 |---|---|---|
-| `assert_keine_stille_zeitumstellung` | 3 | die Halte der CH-Rücksprungnacht |
+| `assert_keine_stille_zeitumstellung` | 2 | Ankunft und Abfahrt von Halt `S2` der Rücksprungnacht |
 | `dbt_utils_accepted_range … delay_ab_sek` | 1 | die −83.050-s-Abfahrt der DE-Fixture |
 | `assert_de_static_namen_eindeutig` | 1 | derselbe Schlüssel mit zwei Namen im Fahrplanarchiv |
 | `assert_de_soll_an_vor_soll_ab` | 1 | die verdrehte Soll-Zeit von Fahrt `1012` |
@@ -240,8 +255,9 @@ der Test als Warnung zählt statt zu entwerten.
 
 Der Fall war bis dahin nur in Produktion aufgetreten (5 Halte am 2026-08-22); der Test war
 lokal grün, ohne dass seine Mechanik je geprüft worden wäre. **Gegengeprüft in beide
-Richtungen:** ohne die drei Zeilen `PASS=212 WARN=3`, mit ihnen `PASS=211 WARN=4`, und die
-gemeldete Zeile trägt `sekunden_verdreht = 60`.
+Richtungen** (Zahlen vom 2026-08-22, vor dem Ausbau der CH-Quelle — die Differenz zählt,
+nicht der Absolutwert): ohne die drei Zeilen `PASS=212 WARN=3`, mit ihnen
+`PASS=211 WARN=4`, und die gemeldete Zeile trägt `sekunden_verdreht = 60`.
 
 ## Ausfälle kommen anders, als dieses Projekt zunächst annahm
 
@@ -319,13 +335,16 @@ Gegenprobe (der Baum wird aus der vorhandenen Fixture abgeleitet, nicht duplizie
 duplizierte Fixtures veralten):
 
 ```bash
-OHNE=/tmp/de_static_ohne_fahrplan
+# Relativ, nicht /tmp: dbt-duckdb laeuft hier als Windows-Prozess und loest einen
+# Git-Bash-Pfad wie /tmp/... nicht auf -- der Lauf scheitert dann an der fehlenden
+# stops.txt statt an der fehlenden stop_times.parquet, also am falschen Grund.
+OHNE=../data/de_static_ohne_fahrplan
 rm -rf "$OHNE" && cp -r tests/fixtures/de_static "$OHNE"
 rm -f "$OHNE"/v=*/*/stop_times.parquet
-dbt build --vars "{\"ch_istdaten_glob\": \"tests/fixtures/ch/*_istdaten.csv\", \"de_gtfsrt_glob\": \"tests/fixtures/de/*.parquet\", \"de_static_dir\": \"$OHNE\"}"
+dbt build --full-refresh --vars "{\"de_gtfsrt_glob\": \"tests/fixtures/de/*.parquet\", \"de_static_dir\": \"$OHNE\"}"
 ```
 
-Erwartung: `PASS=176 WARN=4 ERROR=0` — die vierte Warnung ist
+Erwartung: `PASS=213 WARN=5 ERROR=0` von 218 (Stand 2026-08-23) — die fünfte Warnung ist
 `assert_de_ausfaelle_aufgeloest`. Lässt man `fahrplanhalt_dateien()` stattdessen fest `1`
 zurückgeben, endet derselbe Lauf mit `ERROR=1` und übersprungenem Downstream; genau daran
 hängt der Nutzen der Prüfung.

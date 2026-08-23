@@ -18,7 +18,7 @@ liegt nicht im Repo, **dbt muss also vorher gelaufen sein**:
 ```bash
 cd transform
 export DBT_PROFILES_DIR="$(pwd)"
-../.venv/Scripts/dbt build --vars '{"ch_istdaten_glob": "tests/fixtures/ch/*_istdaten.csv", "de_gtfsrt_glob": "tests/fixtures/de/*.parquet", "de_static_dir": "tests/fixtures/de_static"}'
+../.venv/Scripts/dbt build --vars '{"de_gtfsrt_glob": "tests/fixtures/de/*.parquet", "de_static_dir": "tests/fixtures/de_static"}'
 
 cd ../dashboard
 npm install
@@ -124,9 +124,9 @@ Kopfmachen, Ringlauf, Wendefahrt: Ein Zug kann denselben Bahnhof zweimal anfahre
 Daten unterscheiden die beiden Halte über `halt_nr`, eine Diagrammachse über den Namen
 aber nicht — beide Schritte fielen auf dieselbe Kategorie und würden zusammengezählt.
 `pages/laufweg.md` hängt deshalb eine Nummer an den Namen, aber nur dort, wo er mehrdeutig
-ist. Der Fall steckt als Fixture in `transform/tests/fixtures/ch/2026-08-12_istdaten.csv`
-(Linie `S 1`, Bern–Thun–Spiez–Thun–Bern): ohne die Nummerierung werden aus acht
-Achsenkategorien sechs.
+ist. Der Fall steckt als Fahrt `1014` in `transform/tests/fixtures/de/2026-08-13_snapshots.parquet`
+(Mannheim–Heidelberg–Mannheim): ohne die Nummerierung werden aus drei Achsenkategorien
+zwei, und die beiden Mannheimer Halte fallen zu einem Balken zusammen.
 
 ## Deployment
 

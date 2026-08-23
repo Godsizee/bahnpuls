@@ -21,12 +21,11 @@ phase() {
 # Feste Partitionstiefe date=/hour= statt ** -- der rekursive Glob ist in DuckDB
 # versionsabhaengig, die Tiefe ist dagegen vom Writer festgelegt.
 DE_GLOB="${BAHNPULS_DE_GLOB:-/data/raw/date=*/hour=*/*.parquet}"
-CH_GLOB="${BAHNPULS_CH_GLOB:-tests/fixtures/ch/*_istdaten.csv}"
 # Alle Versionen, nicht die neueste: die stop_ids rotieren (Q6, BPULS-023).
 STATIC_DIR="${BAHNPULS_STATIC_DIR:-/data/static}"
-VARS="{\"ch_istdaten_glob\": \"$CH_GLOB\", \"de_gtfsrt_glob\": \"$DE_GLOB\", \"de_static_dir\": \"$STATIC_DIR\"}"
+VARS="{\"de_gtfsrt_glob\": \"$DE_GLOB\", \"de_static_dir\": \"$STATIC_DIR\"}"
 
-echo "dashboard: dbt build (de=$DE_GLOB ch=$CH_GLOB)"
+echo "dashboard: dbt build (de=$DE_GLOB)"
 cd /app/transform
 
 # --full-refresh, weil die beiden Quellen unterschiedlich alte Betriebstage liefern und

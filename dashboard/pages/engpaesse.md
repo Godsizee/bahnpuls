@@ -12,21 +12,6 @@ die neu entstandene Verspätung **je Zug**, nie als Summe. Eine Summe rankt zwan
 den dichtest befahrenen Abschnitt nach oben — der hat schlicht mehr Züge, nicht mehr
 Probleme.
 
-```sql herkuenfte
-select
-    quelle,
-    case quelle
-        when 'de_gtfsrt'   then 'Deutschland — eigene Aufzeichnung'
-        when 'ch_istdaten' then 'Schweiz — konstruierte Testfälle'
-        else quelle
-    end as bezeichnung
-from bahnpuls.engpassknoten
-group by quelle
-order by quelle desc
-```
-
-<Dropdown data={herkuenfte} name=herkunft value=quelle label=bezeichnung title="Herkunft" />
-
 ```sql abschnitte
 select
     von_bezeichnung || ' → ' || nach_bezeichnung as abschnitt,
@@ -45,7 +30,6 @@ select
     sum(ausgefallene_halte)  as ausgefallene_halte,
     sum(ausgelassene_halte)  as ausgelassene_halte
 from bahnpuls.engpassknoten
-where quelle = '${inputs.herkunft.value}'
 group by all
 ```
 
@@ -111,8 +95,7 @@ select
     sum(laufzeit_summe) / nullif(sum(laufzeit_messwerte), 0) / 60.0 as laufzeit_min,
     sum(zuege) as zuege
 from bahnpuls.engpassknoten
-where quelle = '${inputs.herkunft.value}'
-  and stunde is not null
+where stunde is not null
 group by all
 having sum(laufzeit_messwerte) > 0
 ```

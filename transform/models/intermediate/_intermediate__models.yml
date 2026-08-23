@@ -47,10 +47,10 @@ models:
   - name: fct_stop_events
     description: >
       Zentrale Faktentabelle, ein Halt-Ereignis je Zeile (Schema in
-      Bahnpuls_Datenmodell.md). Vereinigt alle Quellen-Staging-Modelle; aktuell nur
-      stg_ch_istdaten (Spur A), stg_de_gtfsrt folgt mit BPULS-030. Enthaelt Ausfaelle
-      und ausgelassene Halte bewusst mit -- gefiltert wird erst dort, wo es fachlich
-      noetig ist (CLAUDE.md Regel 8).
+      Bahnpuls_Datenmodell.md). Vereinigt alle Quellen; aktuell haengt genau ein
+      Zweig daran (int_de_stop_events), die Naht bleibt der Ort, an dem eine weitere
+      Quelle andockt. Enthaelt Ausfaelle und ausgelassene Halte bewusst mit --
+      gefiltert wird erst dort, wo es fachlich noetig ist (CLAUDE.md Regel 8).
     columns:
       - name: betriebstag
         description: Betriebstag, nicht Kalendertag (siehe Fallstricke im Datenmodell).
@@ -91,7 +91,7 @@ models:
           - not_null
           - accepted_values:
               arguments:
-                values: ['ch_istdaten', 'de_gtfsrt']
+                values: ['de_gtfsrt']
     tests:
       - dbt_utils.unique_combination_of_columns:
           arguments:

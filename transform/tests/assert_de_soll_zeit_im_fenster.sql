@@ -1,9 +1,13 @@
 {{ config(severity='warn') }}
 
--- Dasselbe Fenster wie assert_soll_zeit_im_betriebstag_fenster, fuer GTFS-RT aber als
+-- Soll-Zeit im Fenster des Betriebstags (00:00 bis +30 h -- er ist laenger als 24 h,
+-- Nachtfahrten und die Ruecksprungnacht muessen hineinpassen), fuer GTFS-RT aber als
 -- **Warnung**: dort ist die Soll-Zeit rekonstruiert (Prognose minus Verspaetung) und der
 -- Betriebstag stammt als start_date aus dem Feed. Laufen die beiden auseinander, ist das
 -- eine Aussage ueber die Quelle, nicht ueber die Transformation.
+--
+-- Die harte Variante gab es fuer die CH-Quelle, wo Zeit und Betriebstag aus derselben
+-- Zeile stammten; sie ist mit dieser Quelle am 2026-08-23 entfallen.
 --
 -- Warum nicht entwerten wie die unplausiblen Verspaetungen: dort war die Groessenordnung
 -- gemessen (-83.050 s, ein Zug 23 h zu frueh, unmoeglich). Hier ist sie es noch nicht, und
