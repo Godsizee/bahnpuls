@@ -20,6 +20,7 @@ gemountet ist:
 | `BAHNPULS_DATA_DIR` | `data/raw` | `/data/raw` |
 | `BAHNPULS_HEARTBEAT_PATH` | `data/heartbeat.json` | `/data/heartbeat.json` |
 
+| `BAHNPULS_STOP_FILTER` | *(leer = aus)* | siehe unten — erst nach Messung auf `on` |
 | `BAHNPULS_POLL_INTERVAL` | `30s` | unverändert |
 | `BAHNPULS_FETCH_TIMEOUT` | `25s` | unverändert |
 
@@ -29,6 +30,25 @@ nur deren Default, damit sich der Wert in Coolify ändern lässt, ohne das Image
 wird geloggt und ignoriert — der Collector startet trotzdem, statt in eine Restart-Schleife
 zu laufen (Regel 3). Der Fetch-Timeout deckt **das Lesen des Bodys** mit ab, nicht nur den
 Verbindungsaufbau: mit 15 s liefen im ersten 24 h-Lauf 1,96 % der Polls in einen Timeout.
+
+## `BAHNPULS_STOP_FILTER` — erst messen, dann verwerfen (BPULS-074)
+
+Eine Fahrt kommt in den Scope, sobald **ein** Halt im Gebiet liegt, und bringt dann ihren
+**ganzen** Laufweg mit. Ein ICE München–Frankfurt–Hamburg schleppt so München und Hamburg
+herein; gemessen am 2026-08-23 lagen **43,3 %** der Halte außerhalb.
+
+`BAHNPULS_STOP_FILTER=on` verwirft diese Halte. **Der Standard ist aus, und das ist
+Absicht:** der Collector prüft über `stop_id`, und die rotieren zwischen
+Fahrplanversionen fast vollständig (99,9 % gemessen). Ein Halt *im* Gebiet kann die
+Prüfung deshalb allein daran scheitern, dass seine aktuelle ID nicht in der Liste steht —
+und `TripInScope` braucht nur einen Treffer je Fahrt, aus ankommenden Fahrten folgt also
+nicht, dass alle ihre Gebietshalte abgedeckt sind.
+
+Solange die Variable nicht gesetzt ist, **zählt** der Collector nur: `outside_count` im
+Heartbeat, ausgegeben von `pruefung.sh` als `gebietsfremde Halte: N gezaehlt (nicht
+verworfen)`. Erst wenn diese Zahl über mehrere Stunden zum erwarteten Fernverkehrsanteil
+passt, wird `on` gesetzt. Was der Collector nicht schreibt, ist endgültig weg
+(CLAUDE.md Regel 3).
 
 Gesammelt wird **ausschließlich der Scope VRN + RMV** (ADR-008, ADR-010). Der zweite
 Scope-Filter für eine bundesweite Vergleichsmessung wurde am 2026-08-19 wieder ausgebaut —

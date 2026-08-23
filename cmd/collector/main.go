@@ -13,6 +13,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -163,6 +164,9 @@ func poll(ctx context.Context, client *http.Client, feedURL string, scopeFilter 
 	// aufgeteilter Trip stueckweise gefiltert, und ein Stueck ohne Halt im
 	// Gebiet fiele heraus -- deshalb steht die Zahl hier und nicht nur im
 	// Backlog.
+	dropOutside := stopFilterArmed()
+	hb.OutsideDropped = dropOutside
+
 	err = gtfsrt.WalkTripUpdates(raw, func(events []gtfsrt.StopEvent) error {
 		hb.EntityCount++
 		if !tripInScope(scopeFilter, events) {
@@ -170,6 +174,12 @@ func poll(ctx context.Context, client *http.Client, feedURL string, scopeFilter 
 		}
 		hb.InScopeCount++
 		for _, ev := range events {
+			if !stopInScope(scopeFilter, ev) {
+				hb.OutsideCount++
+				if dropOutside {
+					continue
+				}
+			}
 			if tracker.Changed(ev) {
 				hb.ChangedCount++
 				w.Add(writer.RowFromStopEvent(ev, feedTimestamp, now))
@@ -209,6 +219,37 @@ func tripInScope(filter *scope.Filter, events []gtfsrt.StopEvent) bool {
 		return true
 	}
 	return filter.TripInScope(ids)
+}
+
+// stopInScope decides for a single stop event whether it lies in the target
+// area (BPULS-074). Trip-level entries without a stop_id — a fully CANCELED
+// trip whose feed entry carries no stop_time_update — cannot be checked and
+// count as inside, for the same reason tripInScope keeps them: dropping them
+// would lose a cancellation for a trip that does run through the area.
+func stopInScope(filter *scope.Filter, ev gtfsrt.StopEvent) bool {
+	if ev.IsTripLevelOnly || ev.StopID == "" {
+		return true
+	}
+	return filter.HasStop(ev.StopID)
+}
+
+// stopFilterArmed reports whether stops outside the area are actually dropped
+// rather than only counted.
+//
+// The default is **off**, and that is the point: the counter has to be read
+// against real feed data before the drop is armed. stop_ids rotate almost
+// completely between timetable releases (99.9 % measured on 2026-08-23), so a
+// stop inside the area can fail the check merely because its current id is
+// missing from the list — and TripInScope needs only one matching stop per
+// trip, so trips arriving is no proof that all their stops are covered.
+// Dropping on that basis would cost history that cannot be refetched.
+func stopFilterArmed() bool {
+	switch strings.ToLower(strings.TrimSpace(os.Getenv("BAHNPULS_STOP_FILTER"))) {
+	case "on", "1", "true":
+		return true
+	default:
+		return false
+	}
 }
 
 func fetchFeedWithRetry(ctx context.Context, client *http.Client, url string) ([]byte, error) {

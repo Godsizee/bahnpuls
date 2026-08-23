@@ -263,3 +263,78 @@ func TestFetchFeedWithRetry_GivesUpAfterMaxAttempts(t *testing.T) {
 		t.Errorf("attempts = %d, want 3", attempts)
 	}
 }
+
+func TestStopInScope(t *testing.T) {
+	filter := testScopeFilter(t)
+
+	tests := []struct {
+		name  string
+		event gtfsrt.StopEvent
+		want  bool
+	}{
+		{
+			name:  "stop inside target area",
+			event: gtfsrt.StopEvent{StopID: "8000244"},
+			want:  true,
+		},
+		{
+			name:  "stop outside target area",
+			event: gtfsrt.StopEvent{StopID: "1"},
+			want:  false,
+		},
+		{
+			// Same reasoning as tripInScope: a cancellation carrying no
+			// stop_time_update cannot be checked, and dropping it would lose
+			// the cancellation of a trip that does run through the area.
+			name:  "trip-level-only marker counts as inside",
+			event: gtfsrt.StopEvent{TripID: "999", IsTripLevelOnly: true},
+			want:  true,
+		},
+		{
+			name:  "empty stop id counts as inside",
+			event: gtfsrt.StopEvent{TripID: "999"},
+			want:  true,
+		},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if got := stopInScope(filter, tt.event); got != tt.want {
+				t.Errorf("stopInScope() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}
+
+func TestStopFilterArmed(t *testing.T) {
+	tests := []struct {
+		name  string
+		value string
+		set   bool
+		want  bool
+	}{
+		// The default has to stay off: arming it costs history that cannot be
+		// refetched, so it must take an explicit decision (BPULS-074).
+		{name: "unset stays off", set: false, want: false},
+		{name: "empty stays off", value: "", set: true, want: false},
+		{name: "on arms the filter", value: "on", set: true, want: true},
+		{name: "1 arms the filter", value: "1", set: true, want: true},
+		{name: "true arms the filter", value: "TRUE", set: true, want: true},
+		{name: "surrounding space tolerated", value: "  on  ", set: true, want: true},
+		{name: "off stays off", value: "off", set: true, want: false},
+		{name: "anything unrecognised stays off", value: "vielleicht", set: true, want: false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			if tt.set {
+				t.Setenv("BAHNPULS_STOP_FILTER", tt.value)
+			} else {
+				os.Unsetenv("BAHNPULS_STOP_FILTER")
+			}
+			if got := stopFilterArmed(); got != tt.want {
+				t.Errorf("stopFilterArmed() = %v, want %v", got, tt.want)
+			}
+		})
+	}
+}

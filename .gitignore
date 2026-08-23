@@ -46,3 +46,10 @@ __pycache__/
 Thumbs.db
 .vscode/
 .idea/
+
+# Tarifplaene der Verbuende: urheberrechtlich geschuetzte Werke von VRN und RMV.
+# Sie sind die fachliche Grundlage der Gebietsliste (tools/gebietsliste-aus-
+# tarifplaenen.py), gehoeren aber nicht in ein oeffentliches Repo -- weder
+# rechtlich noch als 10 MB Ballast. Bezug: rmv.de und vrn.de.
+docs/tarifplaene/*.pdf
+docs/tarifplaene/*.txt

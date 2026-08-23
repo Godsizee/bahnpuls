@@ -26,6 +26,21 @@ type Heartbeat struct {
 	ChangedCount  int       `json:"changed_count"`
 	// TrackedKeys is the size of the dedup tracker (BPULS-028).
 	TrackedKeys int `json:"tracked_keys"`
+	// OutsideCount counts stop events whose stop_id is not in the target area
+	// (BPULS-074). A trip is kept as soon as one of its stops lies inside, so
+	// a through-running long-distance train drags its whole route in — Munich
+	// and Hamburg included. This counter reports how many stops that is.
+	//
+	// It is filled whether or not those stops are actually dropped: the drop
+	// is only armed by BAHNPULS_STOP_FILTER=on. Measuring first is not
+	// pedantry here — stop_ids rotate almost completely between timetable
+	// releases, so a stop inside the area can fail the check simply because
+	// its current id is missing from the list, and what the collector does not
+	// write is gone for good (CLAUDE.md Regel 3).
+	OutsideCount int `json:"outside_count"`
+	// OutsideDropped is true when those events were discarded rather than
+	// merely counted.
+	OutsideDropped bool `json:"outside_dropped"`
 	// ResidentKB is the process's resident set size. Without it, memory can
 	// only be read by opening a shell in the container — and a collector that
 	// has to run unattended for months must be measurable from the outside

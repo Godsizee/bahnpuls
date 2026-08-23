@@ -76,6 +76,22 @@ else
 	fi
 fi
 
+# --- Wie viele Halte liegen ausserhalb des Gebiets? ------------------------
+# Kein Schwellwert, sondern die Messgroesse, an der entschieden wird, ob der
+# Halt-Filter scharf geschaltet werden darf (BPULS-074). Eine Fahrt kommt schon
+# mit einem Halt im Gebiet herein und bringt ihren ganzen Laufweg mit; diese
+# Zahl sagt, wie viel davon draussen liegt. Solange "gezaehlt" dasteht, wird
+# nichts verworfen.
+ausserhalb=$(json_zahl outside_count)
+if [ -n "$ausserhalb" ]; then
+	verworfen=$(sed -n 's/.*"outside_dropped"[[:space:]]*:[[:space:]]*\([a-z]*\).*/\1/p' "$HB" | head -n 1)
+	if [ "$verworfen" = "true" ]; then
+		echo "gebietsfremde Halte: ${ausserhalb} verworfen"
+	else
+		echo "gebietsfremde Halte: ${ausserhalb} gezaehlt (nicht verworfen)"
+	fi
+fi
+
 # --- Speichertrend ---------------------------------------------------------
 # Kein Schwellwert, sondern eine Zahl fuer die Zeitreihe: der Dedup-Tracker ist
 # der einzige Teil des Speicherbedarfs, der von aussen sichtbar ist. Er sollte
