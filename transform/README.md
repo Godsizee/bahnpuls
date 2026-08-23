@@ -251,6 +251,26 @@ Aggregat, `Mannheim Hbf → Heidelberg Hbf` schon; `mart_datenqualitaet` weist d
 Detail- und Aggregatsicht dann auseinanderlaufen. Der Unit-Test
 `mart_verspaetungsentstehung_rechnet_nur_im_gebiet` meldet es noch davor.
 
+### Der erste Produktionslauf hat die Regel widerlegt, nicht die Fixture
+
+Am 2026-08-23 lief BPULS-075 gegen echte Daten, und
+`assert_marts_ohne_gebietsfremde_abschnitte` meldete **63 Bezeichnungen**. Die Regel hatte
+gelautet „stop_id **oder** Name" — gleichrangig. Damit standen `Klandorf` (Brandenburg,
+988 Züge) und `Pernink` (Tschechien, 476) in der Engpass-Rangliste: Ihre Nummer kommt
+zufällig in der Gebietsliste vor. Das ist dieselbe Kollision wie in BPULS-070, eine Ebene
+tiefer — und keine Fixture konnte sie zeigen, weil ihre IDs erfunden und damit disjunkt
+sind.
+
+Die Regel ist jetzt gestuft: **wo ein Name bekannt ist, entscheidet der Name**, die
+stop_id trägt nur die Halte, die keine Fahrplanversion benennt. Die Gegenrichtung kostet
+nichts — ein Gebietshalt mit rotierter ID trägt weiterhin seinen Namen, und die Liste ist
+aus denselben `stops.txt` gebaut, aus denen `stg_de_static` die Namen zieht. Der Fall
+steht als vierter Halt im Unit-Test `int_de_der_name_entscheidet_die_gebietszugehoerigkeit`;
+mit der alten Regel schlägt er fehl.
+
+Die Zahl, um die es ging, ist an Produktionsdaten bestätigt: `halte_gebietsfremd` liegt am
+19.–21.08. bei **43,1 / 42,4 / 42,3 %** — die Stichprobe hatte 43,3 % gemessen.
+
 `assert_de_namensquote_bricht_nicht_ein` sieht sich lokal **keinen einzigen Tag** an: er
 verlangt mindestens 1.000 Halte je Betriebstag, und so groß ist keine Fixture. Grün heißt
 hier also „nichts angesehen", nicht „nichts gefunden" — der Beleg, dass er trifft, ist

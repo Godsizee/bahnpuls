@@ -219,9 +219,13 @@ Diese Halte bleiben in den Daten stehen, gehen aber in keine Kennzahl ein:
 
 - **Ob ein Halt im Gebiet liegt, entscheidet dieselbe Liste, nach der gesammelt wird** —
   abgeleitet aus den Tarifplänen der beiden Verbünde, nach Heimatverbund und nicht nach
-  Übergangstarif. Geprüft wird über die Nummer **und** über den Namen: Die Nummern wechseln
-  zwischen den wöchentlichen Fahrplanausgaben fast vollständig, die Zugehörigkeit eines
-  Bahnhofs ändert sich dadurch nicht.
+  Übergangstarif. Geprüft wird **über den Namen**; die Nummer entscheidet nur dort, wo kein
+  Fahrplan den Halt benennt. Der Name muss es sein, weil die Nummern zwischen den
+  wöchentlichen Fahrplanausgaben fast vollständig wechseln und ein Bahnhof dadurch nicht
+  das Gebiet verlässt. Und er muss den Vorrang haben, weil dieselbe Nummer in einem
+  anderen Datensatz etwas anderes bedeutet: Zählte die Nummer gleichrangig mit, stünden
+  Klandorf in Brandenburg und Pernink in Tschechien in der Rangliste der Engpässe — beides
+  am 23.08.2026 gemessen und wieder herausgenommen.
 - **Ein Abschnitt zählt nur, wenn beide Endpunkte im Gebiet liegen.** Ohne diese Bedingung
   stand `Köln Hbf → Köln Messe/Deutz` mit 261 Zügen in der Engpass-Rangliste.
 - **Die Halte werden nicht gelöscht, sondern gekennzeichnet.** Fiele ein Halt aus der

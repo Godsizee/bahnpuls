@@ -153,9 +153,11 @@ models:
   - name: stg_de_gebietshalt
     description: >
       Die Gebietsliste VRN + RMV, wie sie der Collector filtert (BPULS-074/075) —
-      aus dem Seed `scope_stops`, also aus derselben Datei. Zwei Schlüssel, stop_id
-      **und** stop_name: die IDs rotieren zwischen Fahrplanversionen fast vollständig,
-      die Zugehörigkeit eines Halts ändert sich dadurch nicht.
+      aus dem Seed `scope_stops`, also aus derselben Datei. Zwei Schlüssel, aber nicht
+      gleichrangig: **der Name entscheidet, wo er bekannt ist**, die stop_id trägt nur
+      die Halte ohne Namen. Die IDs rotieren zwischen Fahrplanversionen fast vollständig
+      (deshalb reicht die ID nicht) und ihre Nummernkreise kollidieren (deshalb darf sie
+      nicht gleichrangig danebenstehen).
     columns:
       - name: stop_id
         tests:

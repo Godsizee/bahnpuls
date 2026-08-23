@@ -89,10 +89,12 @@ models:
       - name: halt_im_gebiet
         description: >
           Liegt der Halt in VRN + RMV (BPULS-075)? Entschieden gegen die Gebietsliste
-          `config/scope_stops.csv` — über die stop_id **oder** den Namen, weil die IDs
-          zwischen Fahrplanversionen rotieren. Halte außerhalb bleiben als Zeile stehen
-          (sonst spannt lag() den Abschnitt über sie hinweg), gehen aber in keine
-          Kennzahl ein.
+          `config/scope_stops.csv`: **wo ein Name bekannt ist, entscheidet der Name**,
+          die stop_id trägt nur die Halte ohne Namen. Der Name muss es sein, weil die
+          IDs zwischen Fahrplanversionen rotieren — und er muss den Vorrang haben, weil
+          die Nummernkreise kollidieren (sonst steht Klandorf im Rhein-Main-Gebiet).
+          Halte außerhalb bleiben als Zeile stehen (sonst spannt lag() den Abschnitt
+          über sie hinweg), gehen aber in keine Kennzahl ein.
         tests:
           - not_null
       - name: quelle
@@ -194,10 +196,12 @@ models:
       - name: halt_im_gebiet
         description: >
           Liegt der Halt in VRN + RMV (BPULS-075)? Entschieden gegen die Gebietsliste
-          `config/scope_stops.csv` — über die stop_id **oder** den Namen, weil die IDs
-          zwischen Fahrplanversionen rotieren. Halte außerhalb bleiben als Zeile stehen
-          (sonst spannt lag() den Abschnitt über sie hinweg), gehen aber in keine
-          Kennzahl ein.
+          `config/scope_stops.csv`: **wo ein Name bekannt ist, entscheidet der Name**,
+          die stop_id trägt nur die Halte ohne Namen. Der Name muss es sein, weil die
+          IDs zwischen Fahrplanversionen rotieren — und er muss den Vorrang haben, weil
+          die Nummernkreise kollidieren (sonst steht Klandorf im Rhein-Main-Gebiet).
+          Halte außerhalb bleiben als Zeile stehen (sonst spannt lag() den Abschnitt
+          über sie hinweg), gehen aber in keine Kennzahl ein.
         tests:
           - not_null
       - name: quelle

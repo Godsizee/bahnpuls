@@ -278,6 +278,20 @@ ereignisse as (
 -- und plausibel aussehend. Der Halt bleibt deshalb stehen und traegt eine
 -- Kennzeichnung; die Aggregate rechnen mit ihr, das Abdeckungsprotokoll zaehlt sie.
 --
+-- **Die beiden Schluessel sind nicht gleichrangig, und das ist an Produktionsdaten
+-- gelernt:** wo ein Name bekannt ist, entscheidet **er allein**; die stop_id ist nur der
+-- Ersatzschluessel fuer Halte, die keine Fahrplanversion benennt.
+--
+-- Der Grund ist derselbe wie bei BPULS-070: die Nummernkreise kollidieren. Mit der
+-- ID als gleichrangigem Schluessel standen am 2026-08-23 `Klandorf` (Brandenburg, 988
+-- Zuege) und `Pernink` (Tschechien, 476) in der Engpass-Rangliste -- ihre Nummer kommt
+-- zufaellig in der Gebietsliste vor. Insgesamt meldete
+-- assert_marts_ohne_gebietsfremde_abschnitte 63 solcher Bezeichnungen.
+--
+-- Die Gegenrichtung kostet nichts: ein Gebietshalt, dessen ID rotiert ist, traegt
+-- weiterhin seinen Namen, und der steht in der Liste -- sie ist aus denselben
+-- stops.txt gebaut, aus denen auch stg_de_static die Namen zieht.
+--
 -- Ein Halt ohne bekannten Namen und mit unbekannter ID gilt als **nicht im Gebiet**.
 -- Das ist die Gegenrichtung zu int_de_gebietsfremd ("nicht pruefbar ist nicht
 -- widerlegt") und hier bewusst so: dort geht es darum, eine ganze Fahrt zu verwerfen,
@@ -298,7 +312,10 @@ gebiet_name as (
 
 select
     ereignisse.*,
-    gebiet_id.stop_id is not null or gebiet_name.stop_name is not null as halt_im_gebiet
+    case
+        when ereignisse.stop_name is not null then gebiet_name.stop_name is not null
+        else gebiet_id.stop_id is not null
+    end as halt_im_gebiet
 
 from ereignisse
 left join gebiet_id

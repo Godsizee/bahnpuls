@@ -244,7 +244,13 @@ unit_tests:
   # Der dritte Halt ist der Gegenbeweis in die andere Richtung: er ist unter **keinem**
   # der beiden Schlüssel bekannt und muss draußen bleiben — sonst prüfte dieser Test nur,
   # dass alles hereinkommt.
-  - name: int_de_halt_gilt_auch_mit_gewanderter_stop_id_als_gebietshalt
+  #
+  # Der vierte ist der Grund, warum die Schlüssel **nicht gleichrangig** sind. Mit
+  # `id oder name` standen am 2026-08-23 `Klandorf` (Brandenburg, 988 Züge) und `Pernink`
+  # (Tschechien, 476) in der Engpass-Rangliste: ihre Nummer kommt zufällig in der
+  # Gebietsliste vor — dieselbe Kollision wie in BPULS-070, eine Ebene tiefer. Wo ein
+  # Name bekannt ist, entscheidet deshalb er; die Nummer trägt nur die Halte ohne Namen.
+  - name: int_de_der_name_entscheidet_die_gebietszugehoerigkeit
     model: int_de_stop_events
     given:
       - input: ref('int_de_ausfaelle')
@@ -261,12 +267,16 @@ unit_tests:
           - {art: 'stop',  schluessel: '486348', bezeichnung: 'Heidelberg Hbf'}
           - {art: 'stop',  schluessel: '999001', bezeichnung: 'Mannheim Hbf'}
           - {art: 'stop',  schluessel: '999002', bezeichnung: 'Köln Hbf'}
+          - {art: 'stop',  schluessel: '208460', bezeichnung: 'Klandorf'}
           - {art: 'linie', schluessel: 'trip1', bezeichnung: 'ICE 690'}
       - input: ref('stg_de_gtfsrt')
         rows:
           - {betriebstag: '2026-08-23', trip_key: '2026-08-23_trip1', trip_id: 'trip1', stop_sequence: 1, stop_id: '486348', soll_an: null, soll_ab: '2026-08-23 10:00:00', ist_an: null, ist_ab: '2026-08-23 10:00:00', delay_an_sek: null, delay_ab_sek: 0, halt_ausgelassen: false, zug_ausgefallen: false, snapshot_ts: '2026-08-23 10:05:00', quelle: 'de_gtfsrt'}
           - {betriebstag: '2026-08-23', trip_key: '2026-08-23_trip1', trip_id: 'trip1', stop_sequence: 2, stop_id: '999001', soll_an: '2026-08-23 10:15:00', soll_ab: '2026-08-23 10:17:00', ist_an: '2026-08-23 10:15:00', ist_ab: '2026-08-23 10:17:00', delay_an_sek: 0, delay_ab_sek: 0, halt_ausgelassen: false, zug_ausgefallen: false, snapshot_ts: '2026-08-23 10:25:00', quelle: 'de_gtfsrt'}
           - {betriebstag: '2026-08-23', trip_key: '2026-08-23_trip1', trip_id: 'trip1', stop_sequence: 3, stop_id: '999002', soll_an: '2026-08-23 12:00:00', soll_ab: '2026-08-23 12:02:00', ist_an: '2026-08-23 12:00:00', ist_ab: '2026-08-23 12:02:00', delay_an_sek: 0, delay_ab_sek: 0, halt_ausgelassen: false, zug_ausgefallen: false, snapshot_ts: '2026-08-23 12:10:00', quelle: 'de_gtfsrt'}
+          # Nummernkollision: die 208460 steht in der Gebietsliste (als Mannheim Hbf),
+          # der Fahrplan nennt unter ihr aber Klandorf in Brandenburg.
+          - {betriebstag: '2026-08-23', trip_key: '2026-08-23_trip1', trip_id: 'trip1', stop_sequence: 4, stop_id: '208460', soll_an: '2026-08-23 13:00:00', soll_ab: '2026-08-23 13:02:00', ist_an: '2026-08-23 13:00:00', ist_ab: '2026-08-23 13:02:00', delay_an_sek: 0, delay_ab_sek: 0, halt_ausgelassen: false, zug_ausgefallen: false, snapshot_ts: '2026-08-23 13:10:00', quelle: 'de_gtfsrt'}
     expect:
       rows:
         # Treffer über die ID.
@@ -275,3 +285,6 @@ unit_tests:
         - {trip_key: '2026-08-23_trip1', stop_sequence: 2, stop_name: 'Mannheim Hbf',   halt_im_gebiet: true}
         # Weder noch — und der Halt bleibt trotzdem als Zeile stehen.
         - {trip_key: '2026-08-23_trip1', stop_sequence: 3, stop_name: 'Köln Hbf',       halt_im_gebiet: false}
+        # Der Fall, der es in Produktion durchgelassen hat: die Nummer steht in der
+        # Liste, der Name widerspricht. Wo ein Name bekannt ist, entscheidet er.
+        - {trip_key: '2026-08-23_trip1', stop_sequence: 4, stop_name: 'Klandorf',       halt_im_gebiet: false}

@@ -8,12 +8,20 @@
 -- formulieren; sie liefen auseinander, und Collector und Dashboard zeigten
 -- verschiedene Gebiete, ohne dass ein Test anschlaegt.
 --
--- Zwei Schluessel, nicht einer: **stop_id und stop_name**. Die stop_id-Werte rotieren
--- zwischen den Fahrplan-Veroeffentlichungen fast vollstaendig (Q6, BPULS-023) -- ob ein
--- Halt im Gebiet liegt, aendert sich dadurch aber nicht. Waere die ID der einzige
--- Schluessel, fiele ein Gebietshalt allein deshalb aus dem Gebiet, weil er eine neue
--- Nummer bekommen hat. Der Name ist hier die stabilere Beschriftung; er stammt aus
--- demselben Feed wie die Namen in stg_de_static und ist deshalb zeichengleich.
+-- Zwei Schluessel, aber **nicht gleichrangig**: wo ein Name bekannt ist, entscheidet
+-- der Name; die stop_id traegt nur die Halte, die keine Fahrplanversion benennt.
+--
+-- Warum der Name ueberhaupt gebraucht wird: die stop_id-Werte rotieren zwischen den
+-- Veroeffentlichungen fast vollstaendig (Q6, BPULS-023) -- ob ein Halt im Gebiet liegt,
+-- aendert sich dadurch nicht. Waere die ID der einzige Schluessel, fiele ein Gebietshalt
+-- allein deshalb heraus, weil er eine neue Nummer bekommen hat.
+--
+-- Warum die ID nicht gleichrangig danebenstehen darf: die Nummernkreise kollidieren
+-- (BPULS-070). Gleichrangig gepruegt kamen so `Klandorf` (Brandenburg) und `Pernink`
+-- (Tschechien) ins Gebiet -- gemessen am 2026-08-23 an Produktionsdaten.
+--
+-- Der Name stammt aus demselben Feed wie die Namen in stg_de_static und ist deshalb
+-- zeichengleich.
 --
 -- Die Liste ist Konfiguration, nicht einkompiliert (ADR-008), und sie ist bewusst
 -- **nicht** nach Verbund/Agency gebaut (CLAUDE.md Regel 7).
