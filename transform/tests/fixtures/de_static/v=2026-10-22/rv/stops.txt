@@ -1,4 +1,4 @@
 stop_name,parent_station,stop_id,stop_lat,stop_lon,location_type,platform_code
-Vorderpfalz Nord,,S1,49.5100,8.4000,,
-Doppelstunden-Halt,,S2,49.5500,8.3500,,
-Hinterpfalz Sued,,S3,49.6000,8.3000,,
+Neustadt(Weinstr)Hbf,,S1,49.3503,8.1414,,
+Schifferstadt,,S2,49.3856,8.3699,,
+Speyer Hbf,,S3,49.3247,8.4344,,

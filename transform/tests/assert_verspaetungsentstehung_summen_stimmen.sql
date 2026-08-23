@@ -17,7 +17,12 @@ with detail as (
         count(haltezeit_delta_sek) as haltezeit_n
 
     from {{ ref('mart_zuglauf') }}
+    -- Dieselbe Bedingung wie im Aggregat, beide Teile: mart_zuglauf traegt weiterhin
+    -- **alle** Halte einer Fahrt, auch die ausserhalb von VRN + RMV (BPULS-075). Fehlte
+    -- hier `abschnitt_im_gebiet`, meldete dieser Test genau den Ausschluss als
+    -- Abweichung, den er nicht pruefen soll.
     where abschnitt_direkt
+      and abschnitt_im_gebiet
     group by all
 
 ),

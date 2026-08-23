@@ -35,6 +35,10 @@ select
     zug_ausgefallen,
     route_kurzname,
     block_id,
+    -- Liegt der Halt in VRN + RMV (BPULS-075)? Eine Quelle, die das nicht beantworten
+    -- kann, muss hier Stellung beziehen statt die Spalte wegzulassen -- sonst rechnete
+    -- sie stillschweigend ausserhalb des Gebiets mit.
+    halt_im_gebiet,
     quelle
 
 from {{ ref('int_de_stop_events') }}

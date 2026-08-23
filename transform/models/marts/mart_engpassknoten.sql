@@ -44,7 +44,11 @@ with zuglauf as (
     -- Ohne lueckenlose Folge beschreibt "von -> nach" keine gefahrene Strecke; der
     -- erste Halt einer Fahrt hat keinen Vorhalt. Gleiche Bedingung wie in
     -- mart_verspaetungsentstehung -- ein Konsistenztest haelt beide zusammen.
+    -- Und nur Abschnitte, deren **beide** Endpunkte in VRN + RMV liegen (BPULS-075).
+    -- Der Collector sammelt Fernverkehrsfahrten mit ihrem ganzen Laufweg; ohne diese
+    -- Bedingung stuenden Abschnitte in der Rangliste, die das Zielgebiet nie beruehren.
     where abschnitt_direkt
+      and abschnitt_im_gebiet
 
     {% if is_incremental() %}
     and betriebstag >= (

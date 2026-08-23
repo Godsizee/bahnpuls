@@ -22,7 +22,11 @@ with zuglauf as (
 
     select *
     from {{ ref('mart_zuglauf') }}
+    -- Und nur Abschnitte, deren **beide** Endpunkte in VRN + RMV liegen (BPULS-075).
+    -- Der Collector sammelt Fernverkehrsfahrten mit ihrem ganzen Laufweg; ohne diese
+    -- Bedingung stuenden Abschnitte in der Rangliste, die das Zielgebiet nie beruehren.
     where abschnitt_direkt
+      and abschnitt_im_gebiet
 
     {% if is_incremental() %}
     and betriebstag >= (

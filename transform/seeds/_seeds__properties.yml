@@ -1,0 +1,27 @@
+version: 2
+
+seeds:
+  - name: scope_stops
+    description: >
+      Die Gebietsliste VRN + RMV (BPULS-074) — **dieselbe Datei, die der Collector
+      filtert**: `config/scope_stops.csv`, über `seed-paths` eingebunden statt kopiert.
+      Zwei Formulierungen desselben Gebiets liefen auseinander, und dann zeigten
+      Collector und Dashboard verschiedene Gebiete, ohne dass ein Test anschlägt.
+
+      Abgeleitet aus den Tarifplänen der beiden Verbünde über
+      `tools/gebietsliste-aus-tarifplaenen.py`; das Kriterium ist der **Heimatverbund**,
+      nicht der Übergangstarif (Aschaffenburg/VAB und Hersfeld-Rotenburg/NVV sind
+      draußen). Die Liste ist Konfiguration, nicht einkompiliert (ADR-008), und
+      bewusst keine Agency-Liste (CLAUDE.md Regel 7).
+    columns:
+      - name: stop_id
+        description: >
+          stop_id aus dem gtfs.de-Fahrplan. Die Liste enthält mehrere Versionen
+          nebeneinander, weil die IDs zwischen Veröffentlichungen rotieren — derselbe
+          Bahnhof steht deshalb mehrfach, unter verschiedenen Nummern.
+        tests:
+          - not_null
+          - unique
+      - name: stop_name
+        tests:
+          - not_null

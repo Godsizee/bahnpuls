@@ -26,6 +26,10 @@ RUN cd /app/transform && /opt/venv/bin/dbt deps
 # --chown statt eines spaeteren `chown -R /app`: das lief ueber node_modules mit rund
 # 900 Paketen und kostete bei jedem Bau ueber hunderttausend Dateioperationen.
 COPY --chown=node:node --from=webdeps /app/dashboard/node_modules ./dashboard/node_modules
+# config/ traegt die Gebietsliste (config/scope_stops.csv). dbt bindet sie als Seed ein
+# statt sie zu kopieren -- es ist dieselbe Datei, die der Collector filtert (BPULS-075).
+# Fehlt sie im Image, faellt der Seed aus und jede Gebietskennzahl waere leer.
+COPY --chown=node:node config ./config
 COPY --chown=node:node transform ./transform
 COPY --chown=node:node dashboard ./dashboard
 COPY --chown=node:node deploy/dashboard-entrypoint.sh deploy/dashboard-rebuild.sh deploy/dashboard-quellen-pruefen.js deploy/dashboard-seitenabfragen-pruefen.py deploy/diagnose.py ./deploy/

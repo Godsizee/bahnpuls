@@ -136,6 +136,7 @@ select
     round(100 * namensquote, 1) as name_bekannt,
     ausgefallene_halte,
     ausgelassene_halte,
+    halte_gebietsfremd,
     fahrten_gebietsfremd
 from bahnpuls.mart_datenqualitaet
 order by betriebstag desc
@@ -159,8 +160,16 @@ drei sind Betrieb und gehören zum Bild.
     <Column id=name_bekannt title="Bahnhofsname bekannt %" fmt="#,##0.0" />
     <Column id=ausgefallene_halte title="Ausfälle" />
     <Column id=ausgelassene_halte title="ausgelassen" />
+    <Column id=halte_gebietsfremd title="Halte außerhalb" />
     <Column id=fahrten_gebietsfremd title="aussortiert" />
 </DataTable>
+
+**Halte außerhalb** sind Halte in den Daten, die nicht in VRN oder RMV liegen. Sie kommen
+mit den Fernzügen herein: Gesammelt wird eine Fahrt, sobald sie einen Bahnhof im Gebiet
+berührt — und zwar mit ihrem ganzen Laufweg, also auch mit München, Köln oder Hamburg.
+Diese Halte bleiben in den Daten stehen, damit ein Laufweg lückenlos lesbar bleibt, gehen
+aber in keine Kennzahl ein. Was ein Zug an Verspätung **mitbringt**, geht dabei nicht
+verloren: sie steht an seinem ersten Halt im Gebiet.
 
 Die letzte Spalte zählt Fahrten, die **gar nicht hierher gehören** und deshalb aus allen
 Zahlen genommen wurden. Wie sie hereinkommen: gesammelt wird über eine Liste von

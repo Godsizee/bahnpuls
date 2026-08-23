@@ -207,6 +207,37 @@ zwei Halte namentlich im Gebiet" hätte zwar fast allen Fremdverkehr abgefangen,
 einen bekannten Halt, der im Gebiet liegt. Von einem Fernzug, der einmal hier hält, ist
 das nicht zu unterscheiden.
 
+### Halte außerhalb von VRN und RMV
+
+Derselbe Mechanismus, der einen Fernzug erfasst, bringt seinen **ganzen Laufweg** mit: Ein
+ICE München–Frankfurt–Hamburg wird wegen seiner Halte in Hessen gesammelt und trägt
+München und Hamburg mit in die Daten. Gemessen am 23.08.2026 lagen so **43,3 % aller Halte
+mit bekanntem Namen außerhalb** des Zielgebiets — angeführt von Karlsruhe, Köln, Nürnberg,
+Kassel-Wilhelmshöhe, Stuttgart und München.
+
+Diese Halte bleiben in den Daten stehen, gehen aber in keine Kennzahl ein:
+
+- **Ob ein Halt im Gebiet liegt, entscheidet dieselbe Liste, nach der gesammelt wird** —
+  abgeleitet aus den Tarifplänen der beiden Verbünde, nach Heimatverbund und nicht nach
+  Übergangstarif. Geprüft wird über die Nummer **und** über den Namen: Die Nummern wechseln
+  zwischen den wöchentlichen Fahrplanausgaben fast vollständig, die Zugehörigkeit eines
+  Bahnhofs ändert sich dadurch nicht.
+- **Ein Abschnitt zählt nur, wenn beide Endpunkte im Gebiet liegen.** Ohne diese Bedingung
+  stand `Köln Hbf → Köln Messe/Deutz` mit 261 Zügen in der Engpass-Rangliste.
+- **Die Halte werden nicht gelöscht, sondern gekennzeichnet.** Fiele ein Halt aus der
+  Reihenfolge, spannte der Abschnitt über ihn hinweg und wiese zwei nicht benachbarte
+  Bahnhöfe als direkte Fahrt aus — plausibel aussehend und dadurch besonders teuer.
+- **Die Verspätung, mit der ein Zug einfährt, bleibt erhalten.** Sie steht als
+  Ankunftsverspätung an seinem ersten Halt im Gebiet. Nur der Laufzeitanteil des
+  Einfahrtsabschnitts fehlt — er ist auf der Strecke davor entstanden. Damit bleibt ein
+  Zug, der 20 Minuten mitbringt, von einem unterscheidbar, der sie hier aufsammelt.
+- **Die Zahl steht daneben**, wie bei den aussortierten Fahrten: Wie viele Halte außerhalb
+  lagen, weist das Abdeckungsprotokoll je Betriebstag aus.
+
+Was das kostet, ist benannt: Der Laufweg eines Fernzuges ist auf diesen Seiten nur noch
+innerhalb von VRN und RMV zu sehen. Wo ein Zug seine Verspätung außerhalb aufgesammelt
+hat, beantworten diese Daten nicht.
+
 ## Normierung je Zug
 
 Aggregierte Abschnittswerte werden **je Zug** ausgewiesen, nie als Rohsumme. Eine Summe

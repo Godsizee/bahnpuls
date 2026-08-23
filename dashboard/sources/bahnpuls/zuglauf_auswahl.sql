@@ -19,7 +19,13 @@
 --   2. **Drei Tage, nicht einer.** Bei einem einzigen Tag waere ein Betriebstag-Filter
 --      eine Auswahlliste mit einem Eintrag. Drei Tage kosten das Dreifache an Zeilen und
 --      machen die Frage "wie war gestern" ueberhaupt erst stellbar.
---   3. **Was die Seite nicht zeichnet, bleibt draussen** (von_stop_*, abschnitt_direkt,
+--   3. **Nur Halte in VRN + RMV** (BPULS-075). Der Collector sammelt Fernverkehrslaeufe
+--      mit ihrem **ganzen** Laufweg; ein ICE braechte sonst Muenchen und Hamburg mit.
+--      Der Laufzeitanteil des Einfahrtsabschnitts faellt damit weg -- er rechnet gegen
+--      einen Halt, der hier nicht mehr steht, und der Wasserfall ginge sonst nicht auf.
+--      Die **Ankunftsverspaetung am ersten Gebietshalt bleibt**: an ihr ist ein Zug, der
+--      die Verspaetung mitbringt, von einem zu unterscheiden, der sie hier aufsammelt.
+--   4. **Was die Seite nicht zeichnet, bleibt draussen** (von_stop_*, abschnitt_direkt,
 --      ist_endgueltig, die Soll-Zeitstempel je Halt). Uebersichtszahlen kommen aus
 --      mart_datenqualitaet, nie von hier -- sonst stuende die Stichprobe als Gesamtzahl
 --      auf der Startseite.
@@ -51,6 +57,7 @@ fahrten as (
     join tage
       on  tage.quelle      = zuglauf.quelle
       and tage.betriebstag = zuglauf.betriebstag
+    where zuglauf.halt_im_gebiet
     group by 1, 2, 3, 4
     -- Eine Fahrt mit einem einzigen gemeldeten Halt ergibt keinen Laufweg.
     having count(*) >= 2
@@ -86,7 +93,12 @@ select
 
     zuglauf.delay_an_sek,
     zuglauf.delay_ab_sek,
-    zuglauf.laufzeit_delta_sek,
+
+    -- Nur fuer Abschnitte, die vollstaendig im Gebiet liegen. Der Einfahrtsabschnitt
+    -- rechnet gegen einen Halt, der auf dieser Seite nicht mehr steht -- sein Wert waere
+    -- nicht nachvollziehbar und stuende zugleich in keinem Aggregat.
+    case when zuglauf.abschnitt_im_gebiet then zuglauf.laufzeit_delta_sek end
+        as laufzeit_delta_sek,
     zuglauf.haltezeit_delta_sek,
     zuglauf.halt_ausgelassen,
     zuglauf.zug_ausgefallen,
@@ -96,3 +108,4 @@ from mart_zuglauf as zuglauf
 join fahrten
   on  zuglauf.quelle   = fahrten.quelle
   and zuglauf.trip_key = fahrten.trip_key
+where zuglauf.halt_im_gebiet

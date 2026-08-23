@@ -149,3 +149,19 @@ models:
           Name zur Nachvollziehbarkeit eines Befundes („welche Haltestelle war das?").
           Geht in keine Kennzahl ein — die Namen der beiden Nummernkreise dürfen nicht
           vermischt werden.
+
+  - name: stg_de_gebietshalt
+    description: >
+      Die Gebietsliste VRN + RMV, wie sie der Collector filtert (BPULS-074/075) —
+      aus dem Seed `scope_stops`, also aus derselben Datei. Zwei Schlüssel, stop_id
+      **und** stop_name: die IDs rotieren zwischen Fahrplanversionen fast vollständig,
+      die Zugehörigkeit eines Halts ändert sich dadurch nicht.
+    columns:
+      - name: stop_id
+        tests:
+          - not_null
+          - unique
+      - name: stop_name
+        tests:
+          - not_null
+

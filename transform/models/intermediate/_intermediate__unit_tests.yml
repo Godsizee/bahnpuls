@@ -55,6 +55,35 @@ unit_tests:
         # Negativer Laufzeitanteil ist Pufferabbau (A2), kein Fehler und keine Null.
         - {trip_key: 't4', nach_stop_sequence: 2, von_stop_sequence: 1, laufzeit_delta_sek: -120, haltezeit_delta_sek: 60}
 
+  # Der Anlass von BPULS-075: `Köln Hbf -> Köln Messe/Deutz` stand mit 261 Zügen in der
+  # Engpass-Rangliste, obwohl Köln in keiner Halteliste vorkommt — der Collector sammelt
+  # Fernverkehrsfahrten mit ihrem **ganzen** Laufweg.
+  #
+  # Zwei Dinge müssen zugleich gelten, und sie ziehen in verschiedene Richtungen:
+  # der gebietsfremde Halt darf in **keine** Kennzahl eingehen, und er muss trotzdem in
+  # der Reihenfolge stehen bleiben. Fiele er heraus, spannte lag() den Abschnitt über ihn
+  # hinweg und wiese zwei nicht benachbarte Betriebsstellen als direkte Fahrt aus.
+  #
+  # Der Einfahrtsabschnitt (fremd -> Gebiet) ist deshalb `abschnitt_direkt: true` und
+  # `abschnitt_im_gebiet: false`: er ist gefahren worden, gehört aber nicht hierher. Die
+  # **Eingangsverspätung am ersten Gebietshalt bleibt stehen** — daran ist ein Zug, der
+  # die Verspätung mitbringt, von einem zu unterscheiden, der sie im Gebiet aufsammelt.
+  - name: int_segment_gebietsfremder_halt_bricht_den_abschnitt_nicht
+    model: int_segment_delta
+    given:
+      - input: ref('fct_stop_events')
+        rows:
+          - {trip_key: 'ice', stop_sequence: 1, betriebstag: '2026-08-23', stop_id: 'K', stop_name: 'Köln Hbf',      delay_an_sek: null, delay_ab_sek: 600,  halt_ausgelassen: false, zug_ausgefallen: false, halt_im_gebiet: false}
+          - {trip_key: 'ice', stop_sequence: 2, betriebstag: '2026-08-23', stop_id: 'M', stop_name: 'Mainz Hbf',     delay_an_sek: 900,  delay_ab_sek: 960,  halt_ausgelassen: false, zug_ausgefallen: false, halt_im_gebiet: true}
+          - {trip_key: 'ice', stop_sequence: 3, betriebstag: '2026-08-23', stop_id: 'F', stop_name: 'Frankfurt Hbf', delay_an_sek: 1020, delay_ab_sek: 1080, halt_ausgelassen: false, zug_ausgefallen: false, halt_im_gebiet: true}
+    expect:
+      rows:
+        - {trip_key: 'ice', nach_stop_sequence: 1, von_stop_id: null, abschnitt_direkt: null, abschnitt_im_gebiet: false, von_halt_im_gebiet: null,  nach_halt_im_gebiet: false, delay_an_sek: null, laufzeit_delta_sek: null}
+        # Eingefahren mit 15 Minuten: der Abschnitt zählt nicht, die Ankunftsverspätung bleibt.
+        - {trip_key: 'ice', nach_stop_sequence: 2, von_stop_id: 'K',  abschnitt_direkt: true, abschnitt_im_gebiet: false, von_halt_im_gebiet: false, nach_halt_im_gebiet: true,  delay_an_sek: 900,  laufzeit_delta_sek: 300}
+        # Erst dieser Abschnitt liegt vollständig im Gebiet — nur er darf zählen.
+        - {trip_key: 'ice', nach_stop_sequence: 3, von_stop_id: 'M',  abschnitt_direkt: true, abschnitt_im_gebiet: true,  von_halt_im_gebiet: true,  nach_halt_im_gebiet: true,  delay_an_sek: 1020, laufzeit_delta_sek: 60}
+
   - name: int_de_dubletten_aendern_das_ergebnis_nicht
     description: >
       Beim Redeploy startet Coolify den neuen Container, bevor es den alten stoppt —
@@ -79,6 +108,12 @@ unit_tests:
         rows: []
       - input: ref('int_de_gebietsfremd')
         rows: []
+      # Gebietsliste (BPULS-075): beide Halte liegen im Gebiet, damit dieser Test
+      # allein die Verdichtung prüft und nicht nebenbei am Gebietsfilter hängt.
+      - input: ref('stg_de_gebietshalt')
+        rows:
+          - {stop_id: 'A', stop_name: 'Bahnhof A'}
+          - {stop_id: 'B', stop_name: 'Bahnhof B'}
       - input: ref('stg_de_static')
         rows:
           - {art: 'stop',  schluessel: 'A', bezeichnung: 'Bahnhof A'}
@@ -174,6 +209,12 @@ unit_tests:
         rows: []
       - input: ref('int_de_gebietsfremd')
         rows: []
+      # Gebietsliste (BPULS-075): beide Halte liegen im Gebiet, damit dieser Test
+      # allein die Verdichtung prüft und nicht nebenbei am Gebietsfilter hängt.
+      - input: ref('stg_de_gebietshalt')
+        rows:
+          - {stop_id: 'A', stop_name: 'Bahnhof A'}
+          - {stop_id: 'B', stop_name: 'Bahnhof B'}
       - input: ref('stg_de_static')
         rows:
           - {art: 'stop',  schluessel: 'A', bezeichnung: 'Bahnhof A'}
@@ -193,3 +234,44 @@ unit_tests:
       rows:
         - {trip_key: '2026-08-13_trip1', stop_sequence: 1, stop_id: 'A', stop_name: 'Bahnhof A', delay_an_sek: 120, delay_ab_sek: 120}
         - {trip_key: '2026-08-13_trip2', stop_sequence: 1, stop_id: 'B', stop_name: 'Bahnhof B', delay_an_sek: 180, delay_ab_sek: 180}
+
+  # Die stop_id-Werte rotieren zwischen den Fahrplan-Veröffentlichungen fast vollständig
+  # (Q6) — ob ein Halt in VRN + RMV liegt, ändert sich dadurch nicht. Wäre die ID der
+  # einzige Schlüssel, fiele ein Gebietshalt allein deshalb aus dem Gebiet, weil er eine
+  # neue Nummer bekommen hat, und die Kennzahl beschriebe ein Gebiet, das mit jeder
+  # Veröffentlichung schrumpft. Deshalb zählt auch der Name.
+  #
+  # Der dritte Halt ist der Gegenbeweis in die andere Richtung: er ist unter **keinem**
+  # der beiden Schlüssel bekannt und muss draußen bleiben — sonst prüfte dieser Test nur,
+  # dass alles hereinkommt.
+  - name: int_de_halt_gilt_auch_mit_gewanderter_stop_id_als_gebietshalt
+    model: int_de_stop_events
+    given:
+      - input: ref('int_de_ausfaelle')
+        rows: []
+      - input: ref('int_de_gebietsfremd')
+        rows: []
+      - input: ref('stg_de_gebietshalt')
+        rows:
+          - {stop_id: '486348', stop_name: 'Heidelberg Hbf'}
+          - {stop_id: '208460', stop_name: 'Mannheim Hbf'}
+      - input: ref('stg_de_static')
+        rows:
+          # Heidelberg unter der Nummer aus der Liste, Mannheim unter einer neuen.
+          - {art: 'stop',  schluessel: '486348', bezeichnung: 'Heidelberg Hbf'}
+          - {art: 'stop',  schluessel: '999001', bezeichnung: 'Mannheim Hbf'}
+          - {art: 'stop',  schluessel: '999002', bezeichnung: 'Köln Hbf'}
+          - {art: 'linie', schluessel: 'trip1', bezeichnung: 'ICE 690'}
+      - input: ref('stg_de_gtfsrt')
+        rows:
+          - {betriebstag: '2026-08-23', trip_key: '2026-08-23_trip1', trip_id: 'trip1', stop_sequence: 1, stop_id: '486348', soll_an: null, soll_ab: '2026-08-23 10:00:00', ist_an: null, ist_ab: '2026-08-23 10:00:00', delay_an_sek: null, delay_ab_sek: 0, halt_ausgelassen: false, zug_ausgefallen: false, snapshot_ts: '2026-08-23 10:05:00', quelle: 'de_gtfsrt'}
+          - {betriebstag: '2026-08-23', trip_key: '2026-08-23_trip1', trip_id: 'trip1', stop_sequence: 2, stop_id: '999001', soll_an: '2026-08-23 10:15:00', soll_ab: '2026-08-23 10:17:00', ist_an: '2026-08-23 10:15:00', ist_ab: '2026-08-23 10:17:00', delay_an_sek: 0, delay_ab_sek: 0, halt_ausgelassen: false, zug_ausgefallen: false, snapshot_ts: '2026-08-23 10:25:00', quelle: 'de_gtfsrt'}
+          - {betriebstag: '2026-08-23', trip_key: '2026-08-23_trip1', trip_id: 'trip1', stop_sequence: 3, stop_id: '999002', soll_an: '2026-08-23 12:00:00', soll_ab: '2026-08-23 12:02:00', ist_an: '2026-08-23 12:00:00', ist_ab: '2026-08-23 12:02:00', delay_an_sek: 0, delay_ab_sek: 0, halt_ausgelassen: false, zug_ausgefallen: false, snapshot_ts: '2026-08-23 12:10:00', quelle: 'de_gtfsrt'}
+    expect:
+      rows:
+        # Treffer über die ID.
+        - {trip_key: '2026-08-23_trip1', stop_sequence: 1, stop_name: 'Heidelberg Hbf', halt_im_gebiet: true}
+        # Treffer über den Namen, obwohl die Nummer gewandert ist.
+        - {trip_key: '2026-08-23_trip1', stop_sequence: 2, stop_name: 'Mannheim Hbf',   halt_im_gebiet: true}
+        # Weder noch — und der Halt bleibt trotzdem als Zeile stehen.
+        - {trip_key: '2026-08-23_trip1', stop_sequence: 3, stop_name: 'Köln Hbf',       halt_im_gebiet: false}

@@ -96,6 +96,14 @@ Halte 5 und 7 — `abschnitt_direkt`), eine Nachtfahrt über Mitternacht (`1007`
 Pufferabbau (`1009`), zwei durchweg ausgelassene Fahrten (`1010`, `1011`), eine verdrehte
 Soll-Zeit (`1012`) und eine gebietsfremde Fahrt über Nahverkehrshalte (`1013`).
 
+**Die Halte der Fixture liegen in VRN + RMV** (seit BPULS-075). Das ist keine Kosmetik:
+Halte außerhalb gehen in kein Aggregat mehr ein, und eine Fixture mit erfundenen Namen
+(`Vorderpfalz Nord`, `Doppelstunden-Halt`) wäre nach der Umstellung grün gewesen, **weil
+sie leer ist**. Ausgenommen ist Halt `C` — er ist der gebietsfremde Fall: Fahrt `1001`
+fährt Mannheim → Heidelberg → Stuttgart, wie ein IC, der das Gebiet verlässt. Er trägt in
+zwei Fahrplanversionen zwei Schreibweisen (`Stuttgart Hbf`, `Stuttgart Hbf (tief)`) und
+bleibt damit zugleich der Fall für `assert_de_static_namen_eindeutig`.
+
 `de/2026-10-25_snapshots.parquet` ist die **Rücksprungnacht** (Fahrt `1020`, Fahrplan
 `v=2026-10-22`): Halt `S2` liegt mit 02:30/02:32 in der Stunde, die es in dieser Nacht
 zweimal gibt, `S3` mit 03:20 sauber dahinter. Beide müssen entwertet werden — `S2`, weil
@@ -208,14 +216,15 @@ dbt build --vars '{"de_gtfsrt_glob": "tests/fixtures/de/*.parquet", "de_static_d
 Ohne `de_static_dir` bricht `stg_de_static` ab — es sucht dann unter `../data/static/`
 nach einem Fahrplanarchiv, das lokal niemand hat.
 
-Erwartung: `PASS=214 WARN=4 ERROR=0` von 218 (Stand 2026-08-23, nachgemessen — vorher 229,
-elf Tests weniger nach dem Ausbau der CH-Quelle). Alle vier Warnungen tragen
+Erwartung: `PASS=235 WARN=4 ERROR=0` von 239 (Stand 2026-08-23 nach BPULS-075 — vorher
+214 von 218: dazu kamen der Seed, `stg_de_gebietshalt`, vier Unit-Tests und der
+Abschlusstest `assert_marts_ohne_gebietsfremde_abschnitte`). Alle vier Warnungen tragen
 `severity: warn` und sind gewollt — sie beschreiben Eigenschaften der Quelle, keine
 Modellfehler, und dürfen deshalb den Seitenbau nicht anhalten:
 
 | Warnung | Treffer | Was sie meldet |
 |---|---|---|
-| `assert_keine_stille_zeitumstellung` | 2 | Ankunft und Abfahrt von Halt `S2` der Rücksprungnacht |
+| `assert_keine_stille_zeitumstellung` | 2 | Ankunft und Abfahrt von Halt `S2` (`Schifferstadt`) der Rücksprungnacht |
 | `dbt_utils_accepted_range … delay_ab_sek` | 1 | die −83.050-s-Abfahrt der DE-Fixture |
 | `assert_de_static_namen_eindeutig` | 1 | derselbe Schlüssel mit zwei Namen im Fahrplanarchiv |
 | `assert_de_soll_an_vor_soll_ab` | 1 | die verdrehte Soll-Zeit von Fahrt `1012` |
@@ -231,6 +240,16 @@ in keinem Mart; `mart_datenqualitaet` weist sie als `fahrten_gebietsfremd = 1` a
 **Gegengeprüft in beide Richtungen:** nimmt man `tests/fixtures/de_static/v=2026-08-13/nv/stops.parquet`
 beiseite, taucht die Fahrt mit ihren vier Halten wieder auf, die Spalte steht auf 0 — und
 der Lauf trägt die Warnung von `stg_de_nahverkehrshalt`, dass die Liste fehlt.
+
+Der Gebietsausschluss (BPULS-075) ist ebenso an der Fixture geprüft, und zwar an der
+Stelle, an der er wirken muss: `Heidelberg Hbf → Stuttgart Hbf (tief)` steht in **keinem**
+Aggregat, `Mannheim Hbf → Heidelberg Hbf` schon; `mart_datenqualitaet` weist den Halt als
+`halte_gebietsfremd = 1` aus. **Gegengeprüft in beide Richtungen:** nimmt man
+`abschnitt_im_gebiet` aus `mart_verspaetungsentstehung` heraus, schlagen drei Tests an —
+`assert_marts_ohne_gebietsfremde_abschnitte` (mit der Stuttgarter Zeile),
+`assert_verspaetungsentstehung_summen_stimmen` und `assert_engpassknoten_deckt_a1`, weil
+Detail- und Aggregatsicht dann auseinanderlaufen. Der Unit-Test
+`mart_verspaetungsentstehung_rechnet_nur_im_gebiet` meldet es noch davor.
 
 `assert_de_namensquote_bricht_nicht_ein` sieht sich lokal **keinen einzigen Tag** an: er
 verlangt mindestens 1.000 Halte je Betriebstag, und so groß ist keine Fixture. Grün heißt

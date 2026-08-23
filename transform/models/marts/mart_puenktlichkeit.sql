@@ -121,7 +121,15 @@ laufweg as (
         min(case when not halt_ausgelassen then halt_nr end)
             over (partition by trip_key)          as erster_bedienter,
         max(case when not halt_ausgelassen then halt_nr end)
-            over (partition by trip_key)          as letzter_bedienter
+            over (partition by trip_key)          as letzter_bedienter,
+
+        -- Die Fensterfunktionen laufen bewusst ueber den **ganzen beobachteten Lauf**,
+        -- auch ueber seine Halte ausserhalb von VRN + RMV. Erst danach wird auf das
+        -- Gebiet eingeschraenkt (BPULS-075). Andersherum verlore der erste Gebietshalt
+        -- eines einfahrenden Fernzuges seine planmaessige Ankunft -- und damit genau die
+        -- Eingangsverspaetung, an der ein Zug, der die Verspaetung mitbringt, von einem
+        -- zu unterscheiden ist, der sie im Gebiet aufsammelt.
+        bool_or(halt_im_gebiet) over (partition by trip_key) as fahrt_im_gebiet
 
     from zuglauf
 
@@ -136,6 +144,8 @@ eingeordnet as (
         trip_key,
         delay_an_sek,
         zug_ausgefallen,
+        halt_im_gebiet,
+        fahrt_im_gebiet,
 
         -- Am ersten Halt eines Laufs kommt planmaessig nichts an. Ihn mitzuzaehlen
         -- hiesse, eine Datenluecke zu messen, wo der Fahrplan nichts vorsieht
@@ -208,6 +218,9 @@ fahrtzustand as (
     left join {{ ref('int_de_soll_laufweg') }} as soll_laufweg
       on  soll_laufweg.betriebstag = eingeordnet.betriebstag
       and soll_laufweg.trip_key    = eingeordnet.trip_key
+    -- Fahrten ohne einen einzigen Halt im Gebiet zaehlen hier nicht mit: sie sind ueber
+    -- eine Nummernkollision oder als reiner Durchlaeufer hereingekommen (BPULS-075).
+    where eingeordnet.fahrt_im_gebiet
     group by 1, 2, 3, 4
 
 ),
@@ -254,6 +267,10 @@ gezaehlt as (
 
     from eingeordnet
     cross join schwellen
+    -- Gezaehlt wird nur, was in VRN + RMV liegt (BPULS-075). Die Halte davor und danach
+    -- stehen weiter in mart_zuglauf -- sie gehoeren zum Laufweg, aber nicht in eine
+    -- Puenktlichkeitsquote ueber dieses Gebiet.
+    where eingeordnet.halt_im_gebiet
     group by 1, 2, 3, 4
 
 )

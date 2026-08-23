@@ -6,7 +6,11 @@ profile: 'bahnpuls'
 
 model-paths: ["models"]
 test-paths: ["tests"]
-seed-paths: ["seeds"]
+# ../config, nicht eine Kopie unter seeds/: die Gebietsliste ist **dieselbe Datei**,
+# die der Collector filtert (config/scope_stops.csv, BPULS-074/075). Zwei
+# Formulierungen desselben Gebiets laufen auseinander, und dann zeigen Collector und
+# Dashboard verschiedene Gebiete, ohne dass ein Test anschlaegt.
+seed-paths: ["seeds", "../config"]
 macro-paths: ["macros"]
 
 target-path: "target"
@@ -29,6 +33,18 @@ vars:
   # hier, er hat sein eigenes Flag. Wird das Intervall geaendert, muss dieser Wert
   # mitgezogen werden, sonst rechnet mart_erhebung gegen eine falsche Erwartung.
   de_poll_intervall_sek: 30
+
+seeds:
+  bahnpuls:
+    scope_stops:
+      +column_types:
+        # varchar, nicht der abgeleitete BIGINT: im Feed ist die stop_id eine
+        # Zeichenkette, und ein Join varchar gegen bigint scheitert lautlos an der
+        # Typkonversion statt am Wert.
+        stop_id: varchar
+        stop_name: varchar
+        stop_lat: double
+        stop_lon: double
 
 models:
   bahnpuls:

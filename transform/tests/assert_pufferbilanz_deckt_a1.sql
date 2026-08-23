@@ -1,5 +1,6 @@
 -- mart_pufferbilanz zerlegt genau die Abschnitte, die mart_verspaetungsentstehung
--- summiert: beide filtern auf `abschnitt_direkt`, beide zaehlen nur bestimmbare
+-- summiert: beide filtern auf `abschnitt_direkt`
+-- und `abschnitt_im_gebiet` (BPULS-075), beide zaehlen nur bestimmbare
 -- Laufzeitanteile.
 --
 -- Eine Ausnahme, und die ist der Grund fuer den `<=`-Vergleich statt Gleichheit: A2

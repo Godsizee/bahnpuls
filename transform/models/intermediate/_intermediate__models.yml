@@ -86,6 +86,15 @@ models:
       - name: zug_ausgefallen
         tests:
           - not_null
+      - name: halt_im_gebiet
+        description: >
+          Liegt der Halt in VRN + RMV (BPULS-075)? Entschieden gegen die Gebietsliste
+          `config/scope_stops.csv` — über die stop_id **oder** den Namen, weil die IDs
+          zwischen Fahrplanversionen rotieren. Halte außerhalb bleiben als Zeile stehen
+          (sonst spannt lag() den Abschnitt über sie hinweg), gehen aber in keine
+          Kennzahl ein.
+        tests:
+          - not_null
       - name: quelle
         tests:
           - not_null
@@ -114,6 +123,21 @@ models:
           - not_null
       - name: nach_stop_sequence
         description: Halt, an dem der Abschnitt endet; identisch mit stop_sequence der Faktentabelle.
+        tests:
+          - not_null
+      - name: von_halt_im_gebiet
+        description: >
+          Lag der **Vorhalt** in VRN + RMV? NULL am ersten Halt einer Fahrt — dort gibt
+          es keinen Vorhalt, und "unbekannt" ist die richtige Antwort statt "nein".
+      - name: nach_halt_im_gebiet
+        description: Liegt der Halt, an dem der Abschnitt endet, in VRN + RMV?
+        tests:
+          - not_null
+      - name: abschnitt_im_gebiet
+        description: >
+          Beide Endpunkte im Gebiet (BPULS-075). **Die Bedingung jedes Aggregats.** Am
+          ersten Halt einer Fahrt false, nicht NULL: es gibt keinen Abschnitt, über den
+          etwas unbekannt sein könnte.
         tests:
           - not_null
       - name: laufzeit_delta_sek
@@ -165,6 +189,15 @@ models:
         tests:
           - not_null
       - name: stop_sequence
+        tests:
+          - not_null
+      - name: halt_im_gebiet
+        description: >
+          Liegt der Halt in VRN + RMV (BPULS-075)? Entschieden gegen die Gebietsliste
+          `config/scope_stops.csv` — über die stop_id **oder** den Namen, weil die IDs
+          zwischen Fahrplanversionen rotieren. Halte außerhalb bleiben als Zeile stehen
+          (sonst spannt lag() den Abschnitt über sie hinweg), gehen aber in keine
+          Kennzahl ein.
         tests:
           - not_null
       - name: quelle

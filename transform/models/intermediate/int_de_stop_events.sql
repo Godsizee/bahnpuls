@@ -156,107 +156,152 @@ abfahrt as (
         partition by trip_key, stop_sequence order by snapshot_ts desc
     ) = 1
 
+),
+
+-- Die beiden Wege in dieselbe Menge -- beobachtete Halte und aufgeloeste Ausfaelle --
+-- stehen als CTE, damit die Gebietszugehoerigkeit **einmal** darauf entschieden wird
+-- und nicht in jedem Zweig noch einmal.
+ereignisse as (
+
+    select
+        halte.betriebstag,
+        halte.trip_key,
+        halte.stop_sequence::bigint as stop_sequence,
+        halte.stop_id,
+
+        -- Name aus den statischen Fahrplaenen, vereinigt ueber alle Versionen (BPULS-023).
+        -- Bleibt NULL, wo keine Version den Halt kennt -- eine ID als Namen auszugeben waere
+        -- eine Luege im Dashboard, dort steht dann bewusst die ID als solche.
+        halte_name.bezeichnung as stop_name,
+
+        soll.soll_an,
+        soll.soll_ab,
+        ankunft.ist_an,
+        abfahrt.ist_ab,
+        ankunft.delay_an_sek::bigint as delay_an_sek,
+        abfahrt.delay_ab_sek::bigint as delay_ab_sek,
+
+        -- Endgueltig ist ein Wert, wenn ueber den Stichtag hinaus beobachtet wurde: dann
+        -- kann keine spaetere Meldung mehr kommen. Endet die Beobachtung vorher -- laufender
+        -- Betriebstag, oder der Collector stand still --, ist der Wert noch in Bewegung.
+        coalesce(
+            zustand.letzter_snapshot_ts >= coalesce(soll.soll_ab, soll.soll_an)
+                + interval {{ karenz }} minute,
+            false
+        ) as ist_endgueltig,
+
+        coalesce(zustand.halt_ausgelassen, false) as halt_ausgelassen,
+        coalesce(zustand.zug_ausgefallen, false)  as zug_ausgefallen,
+
+        -- route_id ist im Echtzeitfeed zu 100 % leer (gemessen 2026-08-20 an 2.346 Fahrten
+        -- im Scope), der Weg fuehrt deshalb ueber die trip_id in trips.txt. block_id liefert
+        -- die Quelle gar nicht (BPULS-003).
+        linien_name.bezeichnung as route_kurzname,
+        cast(null as varchar) as block_id,
+
+        halte.quelle
+
+    from halte
+    left join {{ ref('stg_de_static') }} as halte_name
+      on  halte_name.art        = 'stop'
+      and halte_name.schluessel = halte.stop_id
+    left join {{ ref('stg_de_static') }} as linien_name
+      on  linien_name.art        = 'linie'
+      and linien_name.schluessel = halte.trip_id
+    left join soll
+      on  halte.trip_key      = soll.trip_key
+      and halte.stop_sequence = soll.stop_sequence
+    left join zustand
+      on  halte.trip_key      = zustand.trip_key
+      and halte.stop_sequence = zustand.stop_sequence
+    left join ankunft
+      on  halte.trip_key      = ankunft.trip_key
+      and halte.stop_sequence = ankunft.stop_sequence
+    left join abfahrt
+      on  halte.trip_key      = abfahrt.trip_key
+      and halte.stop_sequence = abfahrt.stop_sequence
+    where not exists (
+        select 1 from fremde_fahrten
+        where fremde_fahrten.betriebstag = halte.betriebstag
+          and fremde_fahrten.trip_key    = halte.trip_key
+    )
+
+    union all by name
+
+    -- Dritter Weg in dieselbe Menge: vollstaendig ausgefallene Fahrten, die im Feed
+    -- **ohne** Halte gemeldet werden und deshalb weiter oben gar nicht vorkommen
+    -- koennen. Sie werden in int_de_ausfaelle aus dem Soll-Fahrplan aufgeloest
+    -- (BPULS-032).
+    --
+    -- Der union steht hier und nicht in fct_stop_events: die Nahtstelle traegt einen
+    -- Zweig je **Quelle**, nicht je Meldungsform. Fuer Downstream ist ein aufgeloester
+    -- Ausfall ein Halt-Ereignis wie jedes andere -- mit NULL-Verspaetungen und
+    -- zug_ausgefallen = true.
+    --
+    -- Dubletten sind ausgeschlossen: int_de_ausfaelle nimmt nur Fahrten, zu denen es
+    -- **keine** beobachteten Halte gibt.
+    select
+        betriebstag,
+        trip_key,
+        stop_sequence,
+        stop_id,
+        stop_name,
+        soll_an,
+        soll_ab,
+        ist_an,
+        ist_ab,
+        delay_an_sek,
+        delay_ab_sek,
+        ist_endgueltig,
+        halt_ausgelassen,
+        zug_ausgefallen,
+        route_kurzname,
+        block_id,
+        quelle
+
+    from {{ ref('int_de_ausfaelle') }} as ausfaelle
+    where not exists (
+        select 1 from fremde_fahrten
+        where fremde_fahrten.betriebstag = ausfaelle.betriebstag
+          and fremde_fahrten.trip_key    = ausfaelle.trip_key
+    )
+
+),
+
+-- Liegt der Halt in VRN + RMV (BPULS-075)? Zwei Schluessel, weil die stop_id zwischen
+-- Fahrplanversionen rotiert und der Name das stabilere Merkmal ist -- die Begruendung
+-- steht in stg_de_gebietshalt.
+--
+-- **Entwertet, nicht gefiltert** (CLAUDE.md Regel 8, Fallstrick A1): faellt ein Halt aus
+-- der Reihenfolge heraus, spannt das lag() in int_segment_delta den Abschnitt darueber
+-- hinweg und weist zwei nicht benachbarte Betriebsstellen als direkte Fahrt aus -- still
+-- und plausibel aussehend. Der Halt bleibt deshalb stehen und traegt eine
+-- Kennzeichnung; die Aggregate rechnen mit ihr, das Abdeckungsprotokoll zaehlt sie.
+--
+-- Ein Halt ohne bekannten Namen und mit unbekannter ID gilt als **nicht im Gebiet**.
+-- Das ist die Gegenrichtung zu int_de_gebietsfremd ("nicht pruefbar ist nicht
+-- widerlegt") und hier bewusst so: dort geht es darum, eine ganze Fahrt zu verwerfen,
+-- hier darum, einen einzelnen Halt in eine Gebietskennzahl einzurechnen. Bei einer
+-- Namensquote von 99,4 % betrifft das unter einem Prozent der Halte, und
+-- mart_datenqualitaet weist sie aus.
+gebiet_id as (
+
+    select distinct stop_id from {{ ref('stg_de_gebietshalt') }}
+
+),
+
+gebiet_name as (
+
+    select distinct stop_name from {{ ref('stg_de_gebietshalt') }}
+
 )
 
 select
-    halte.betriebstag,
-    halte.trip_key,
-    halte.stop_sequence::bigint as stop_sequence,
-    halte.stop_id,
+    ereignisse.*,
+    gebiet_id.stop_id is not null or gebiet_name.stop_name is not null as halt_im_gebiet
 
-    -- Name aus den statischen Fahrplaenen, vereinigt ueber alle Versionen (BPULS-023).
-    -- Bleibt NULL, wo keine Version den Halt kennt -- eine ID als Namen auszugeben waere
-    -- eine Luege im Dashboard, dort steht dann bewusst die ID als solche.
-    halte_name.bezeichnung as stop_name,
-
-    soll.soll_an,
-    soll.soll_ab,
-    ankunft.ist_an,
-    abfahrt.ist_ab,
-    ankunft.delay_an_sek::bigint as delay_an_sek,
-    abfahrt.delay_ab_sek::bigint as delay_ab_sek,
-
-    -- Endgueltig ist ein Wert, wenn ueber den Stichtag hinaus beobachtet wurde: dann
-    -- kann keine spaetere Meldung mehr kommen. Endet die Beobachtung vorher -- laufender
-    -- Betriebstag, oder der Collector stand still --, ist der Wert noch in Bewegung.
-    coalesce(
-        zustand.letzter_snapshot_ts >= coalesce(soll.soll_ab, soll.soll_an)
-            + interval {{ karenz }} minute,
-        false
-    ) as ist_endgueltig,
-
-    coalesce(zustand.halt_ausgelassen, false) as halt_ausgelassen,
-    coalesce(zustand.zug_ausgefallen, false)  as zug_ausgefallen,
-
-    -- route_id ist im Echtzeitfeed zu 100 % leer (gemessen 2026-08-20 an 2.346 Fahrten
-    -- im Scope), der Weg fuehrt deshalb ueber die trip_id in trips.txt. block_id liefert
-    -- die Quelle gar nicht (BPULS-003).
-    linien_name.bezeichnung as route_kurzname,
-    cast(null as varchar) as block_id,
-
-    halte.quelle
-
-from halte
-left join {{ ref('stg_de_static') }} as halte_name
-  on  halte_name.art        = 'stop'
-  and halte_name.schluessel = halte.stop_id
-left join {{ ref('stg_de_static') }} as linien_name
-  on  linien_name.art        = 'linie'
-  and linien_name.schluessel = halte.trip_id
-left join soll
-  on  halte.trip_key      = soll.trip_key
-  and halte.stop_sequence = soll.stop_sequence
-left join zustand
-  on  halte.trip_key      = zustand.trip_key
-  and halte.stop_sequence = zustand.stop_sequence
-left join ankunft
-  on  halte.trip_key      = ankunft.trip_key
-  and halte.stop_sequence = ankunft.stop_sequence
-left join abfahrt
-  on  halte.trip_key      = abfahrt.trip_key
-  and halte.stop_sequence = abfahrt.stop_sequence
-where not exists (
-    select 1 from fremde_fahrten
-    where fremde_fahrten.betriebstag = halte.betriebstag
-      and fremde_fahrten.trip_key    = halte.trip_key
-)
-
-union all by name
-
--- Dritter Weg in dieselbe Menge: vollstaendig ausgefallene Fahrten, die im Feed
--- **ohne** Halte gemeldet werden und deshalb weiter oben gar nicht vorkommen
--- koennen. Sie werden in int_de_ausfaelle aus dem Soll-Fahrplan aufgeloest
--- (BPULS-032).
---
--- Der union steht hier und nicht in fct_stop_events: die Nahtstelle traegt einen
--- Zweig je **Quelle**, nicht je Meldungsform. Fuer Downstream ist ein aufgeloester
--- Ausfall ein Halt-Ereignis wie jedes andere -- mit NULL-Verspaetungen und
--- zug_ausgefallen = true.
---
--- Dubletten sind ausgeschlossen: int_de_ausfaelle nimmt nur Fahrten, zu denen es
--- **keine** beobachteten Halte gibt.
-select
-    betriebstag,
-    trip_key,
-    stop_sequence,
-    stop_id,
-    stop_name,
-    soll_an,
-    soll_ab,
-    ist_an,
-    ist_ab,
-    delay_an_sek,
-    delay_ab_sek,
-    ist_endgueltig,
-    halt_ausgelassen,
-    zug_ausgefallen,
-    route_kurzname,
-    block_id,
-    quelle
-
-from {{ ref('int_de_ausfaelle') }} as ausfaelle
-where not exists (
-    select 1 from fremde_fahrten
-    where fremde_fahrten.betriebstag = ausfaelle.betriebstag
-      and fremde_fahrten.trip_key    = ausfaelle.trip_key
-)
+from ereignisse
+left join gebiet_id
+  on gebiet_id.stop_id = ereignisse.stop_id
+left join gebiet_name
+  on gebiet_name.stop_name = ereignisse.stop_name

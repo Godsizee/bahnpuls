@@ -1,2 +1,2 @@
 stop_name,parent_station,stop_id,stop_lat,stop_lon,location_type,platform_code
-Frankfurt(Main)Hbf Fernbahnhof,,C,50.1070,8.6636,,
+Stuttgart Hbf (tief),,C,48.7838,9.1817,,

@@ -124,6 +124,13 @@ gezaehlt as (
         -- es zu hoffen.
         count(stop_name) as halte_mit_name,
 
+        -- Halte ausserhalb VRN + RMV (BPULS-075). Sie stehen weiter in mart_zuglauf --
+        -- der Laufweg eines Fernzuges soll lueckenlos lesbar bleiben --, gehen aber in
+        -- keine Kennzahl ein. Ein Ausschluss, der nirgends auftaucht, ist von einem
+        -- Datenverlust nicht zu unterscheiden; das ist derselbe Grund, aus dem
+        -- fahrten_gebietsfremd danebensteht.
+        count(*) filter (where not halt_im_gebiet) as halte_gebietsfremd,
+
         -- Nicht endgueltige Werte sind noch in Bewegung: eine Aussage ueber heute
         -- steht auf anderem Grund als eine ueber vorgestern.
         count(*) filter (where not ist_endgueltig) as halte_nicht_endgueltig

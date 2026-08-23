@@ -8,6 +8,13 @@ Eine einzelne Fahrt, von Halt zu Halt nachgezeichnet. Statt einer Zahl am Ende �
 Minuten zu spät" — steht hier, an welcher Stelle diese Minuten dazugekommen sind, und ob
 das unterwegs passierte oder während eines Aufenthalts.
 
+**Gezeigt wird der Laufweg innerhalb von VRN und RMV.** Ein Fernzug fährt weiter, als
+hier zu sehen ist — seine Halte außerhalb des Gebiets stehen in den Daten, aber nicht auf
+dieser Seite. Was er an Verspätung mitbringt, ist trotzdem abzulesen: Sie steht als
+Ankunftsverspätung an seinem ersten Halt hier. Nur der Laufzeitanteil des
+Einfahrtsabschnitts fehlt, weil er auf einer Strecke entstanden ist, die diese Seite nicht
+zeigt (siehe [Methodik](/methodik)).
+
 **So liest man die Diagramme:** Das obere zeigt, was jeder einzelne Abschnitt und jeder
 Halt beigetragen hat. Ein Balken nach oben heißt, dort ist Verspätung entstanden; ein
 Balken nach unten heißt, dort wurde welche aufgeholt. Die Farbe sagt, ob es unterwegs

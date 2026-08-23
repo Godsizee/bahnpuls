@@ -71,6 +71,13 @@ select
     nach_stop_id       as stop_id,
     nach_stop_name     as stop_name,
     abschnitt_direkt,
+    -- Der Laufweg bleibt vollstaendig lesbar; wer aggregiert, filtert (BPULS-075).
+    -- Ein Fernzug bringt seinen Laufweg ausserhalb von VRN + RMV mit -- die Zeilen zu
+    -- entfernen risse Luecken in die Reihenfolge, die Kennzeichnung dagegen laesst die
+    -- Eingangsverspaetung am ersten Gebietshalt stehen.
+    von_halt_im_gebiet,
+    nach_halt_im_gebiet as halt_im_gebiet,
+    abschnitt_im_gebiet,
     soll_an,
     soll_ab,
 

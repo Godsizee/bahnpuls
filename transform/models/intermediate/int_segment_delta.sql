@@ -21,6 +21,7 @@ with stop_events as (
         halt_ausgelassen,
         zug_ausgefallen,
         ist_endgueltig,
+        halt_im_gebiet,
         -- Ein ausgefallener Zug oder ein ausgelassener Halt hat keine Verspaetung --
         -- nicht die Verspaetung 0 (CLAUDE.md Regel 8). Die Zeile bleibt trotzdem in
         -- der Reihenfolge stehen: faellt sie heraus, wuerde der Abschnitt darueber
@@ -42,7 +43,8 @@ with_previous as (
         lag(stop_sequence) over w as von_stop_sequence,
         lag(stop_id)       over w as von_stop_id,
         lag(stop_name)     over w as von_stop_name,
-        lag(delay_ab_sek)  over w as von_delay_ab_sek
+        lag(delay_ab_sek)  over w as von_delay_ab_sek,
+        lag(halt_im_gebiet) over w as von_halt_im_gebiet
 
     from stop_events
     window w as (partition by trip_key order by stop_sequence)
@@ -64,6 +66,14 @@ select
     -- Fahrt. Fuer CH per Konstruktion immer wahr (row_number im Staging), fuer
     -- kuenftige Quellen mit echter stop_sequence nicht garantiert.
     von_stop_sequence = stop_sequence - 1 as abschnitt_direkt,
+    von_halt_im_gebiet,
+    halt_im_gebiet as nach_halt_im_gebiet,
+    -- Ein Abschnitt gehoert dem Gebiet nur, wenn **beide** Endpunkte darin liegen
+    -- (BPULS-075). Genau daran scheiterte der Anlass: `Koeln Hbf -> Koeln Messe/Deutz`
+    -- stand mit 261 Zuegen in der Engpass-Rangliste, obwohl Koeln in keiner Halteliste
+    -- vorkommt. Am ersten Halt einer Fahrt gibt es keinen Vorhalt -- dort ist der Wert
+    -- false, nicht NULL: es gibt keinen Abschnitt, ueber den etwas unbekannt waere.
+    coalesce(von_halt_im_gebiet and halt_im_gebiet, false) as abschnitt_im_gebiet,
     soll_an,
     soll_ab,
     delay_an_sek,

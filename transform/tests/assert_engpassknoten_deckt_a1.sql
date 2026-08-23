@@ -1,7 +1,7 @@
 -- mart_engpassknoten und mart_verspaetungsentstehung rechnen dieselbe Groesse auf zwei
 -- Achsen: einmal nach Abschnitt, einmal nach Abschnitt **und Tagesstunde**, und mit
 -- unterschiedlichem Schluessel (Name statt stop_id). Beide filtern auf `abschnitt_direkt`
--- und beziehen sich damit auf exakt dieselben Zeilen aus mart_zuglauf.
+-- und `abschnitt_im_gebiet` (BPULS-075) und beziehen sich damit auf exakt dieselben Zeilen aus mart_zuglauf.
 --
 -- Die Summen je Betriebstag und Quelle muessen deshalb uebereinstimmen. Der Test faengt
 -- genau das, was sonst niemandem auffiele: eine der beiden Formeln aendert sich, die
