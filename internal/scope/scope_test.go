@@ -142,3 +142,25 @@ func TestLoadCSV(t *testing.T) {
 		}
 	})
 }
+
+// TestLoadCSVQuotedNameWithComma sichert den Fehler vom 2026-08-23 ab: die
+// erzeugte Haltestellenliste wurde mit einem f-string statt mit einem
+// CSV-Writer geschrieben, und 363 der Namen tragen selbst ein Komma
+// ("Aglasterhausen, Bahnhof"). Der Collector startete daraufhin nicht mehr --
+// gefangen erst vom Healthcheck im Deploy, nicht von einem Test.
+func TestLoadCSVQuotedNameWithComma(t *testing.T) {
+	inhalt := "stop_id,stop_name,stop_lat,stop_lon\n" +
+		"123,\"Aglasterhausen, Bahnhof\",49.35,8.99\n" +
+		"456,Mannheim Hbf,49.48,8.47\n"
+
+	filter, err := newFilterFromReader(strings.NewReader(inhalt))
+	if err != nil {
+		t.Fatalf("Liste mit gequotetem Komma nicht ladbar: %v", err)
+	}
+	if filter.Len() != 2 {
+		t.Errorf("Len() = %d, want 2", filter.Len())
+	}
+	if !filter.HasStop("123") {
+		t.Error("der Halt mit Komma im Namen fehlt")
+	}
+}

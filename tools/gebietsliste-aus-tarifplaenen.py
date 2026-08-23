@@ -23,6 +23,7 @@ Aufruf aus dem Repo-Wurzelverzeichnis:
 
 Ohne `--schreiben` wird nur berichtet, nichts veraendert.
 """
+import csv
 import re
 import sys
 import unicodedata
@@ -194,11 +195,24 @@ def main():
         return 0
 
     zeilen = sorted(drin, key=lambda r: (r[1], r[0]))
+    # csv.writer, nicht f-string: 363 der Namen tragen selbst ein Komma
+    # ("Aglasterhausen, Bahnhof"). Ohne Quoting zerreisst das die Zeile, und der
+    # Collector startet nicht mehr -- am 2026-08-23 genau so passiert, der
+    # Healthcheck hat den Rollback ausgeloest.
     with SCOPE.open("w", encoding="utf-8", newline="") as f:
-        f.write("stop_id,stop_name,stop_lat,stop_lon\n")
-        for sid, name, lat, lon in zeilen:
-            f.write(f"{sid},{name},{lat},{lon}\n")
+        schreiber = csv.writer(f, lineterminator="\n")
+        schreiber.writerow(["stop_id", "stop_name", "stop_lat", "stop_lon"])
+        schreiber.writerows(zeilen)
     print(f"\ngeschrieben: {len(zeilen)} Halte nach {SCOPE}")
+
+    # Gegenprobe am geschriebenen Ergebnis, nicht an der Absicht: die Datei muss
+    # sich wieder als vierspaltige CSV lesen lassen.
+    with SCOPE.open(encoding="utf-8", newline="") as f:
+        spalten = {len(z) for z in csv.reader(f)}
+    if spalten != {4}:
+        print(f"BEFUND: Datei hat Zeilen mit {sorted(spalten)} Feldern, erwartet 4")
+        return 1
+    print("gegengeprueft: alle Zeilen haben vier Felder")
     return 0
 
 

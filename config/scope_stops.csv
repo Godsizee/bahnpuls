@@ -3,25 +3,25 @@ stop_id,stop_name,stop_lat,stop_lon
 632606,Adelsheim Nord,49.42149,9.392754
 425440,Adelsheim Ost,49.403122,9.395127
 621481,Adelsheim Ost,49.403122,9.395127
-36217,Adelsheim, Nordbahnhof,49.42145,9.392659
-490892,Adelsheim, Ost,49.4029,9.394968
+36217,"Adelsheim, Nordbahnhof",49.42145,9.392659
+490892,"Adelsheim, Ost",49.4029,9.394968
 123005,Aglasterhausen,49.350098,8.990838
 379849,Aglasterhausen,49.350098,8.990838
 606401,Aglasterhausen,49.350098,8.990838
-247606,Aglasterhausen, Bahnhof,49.35007,8.990771
+247606,"Aglasterhausen, Bahnhof",49.35007,8.990771
 353724,Albersweiler(Pfalz),49.218586,8.024059
 61371,Albersweiler(Pfalz),49.218586,8.024059
 212302,Albig,49.771374,8.116579
 451438,Albig,49.771374,8.116579
 7915,Albig,49.771374,8.116579
-31500,Albig, Bahnhof,49.771866,8.116512
+31500,"Albig, Bahnhof",49.771866,8.116512
 156090,Albshausen,50.545715,8.434869
 229503,Albshausen,50.545715,8.434869
 91293,Albshausen,50.545715,8.434869
 223631,Albsheim(Eis),49.58075,8.179166
 498788,Albsheim(Eis),49.58075,8.179166
 655259,Albsheim(Eis),49.58075,8.179166
-345282,Albsheim, Bahnhof,49.580555,8.179277
+345282,"Albsheim, Bahnhof",49.580555,8.179277
 347668,Allendorf(Dillkr),50.743813,8.185486
 434919,Allendorf(Dillkr),50.743813,8.185486
 492152,Alsbach-Hähnlein-Alsbach Hähnlein-Alsbach Bahnhof,49.739784,8.606483
@@ -29,14 +29,14 @@ stop_id,stop_name,stop_lat,stop_lon
 145330,Alsenz,49.727493,7.817189
 528042,Alsenz,49.727493,7.817189
 579134,Alsenz,49.727493,7.817189
-363718,Alsenz, Bahnhof,49.727745,7.817202
+363718,"Alsenz, Bahnhof",49.727745,7.817202
 344516,Alsfeld Bahnhof,50.750732,9.264839
 283489,Alsfeld(Oberhess),50.75096,9.264297
 443952,Alsfeld(Oberhess),50.75096,9.264297
 211710,Alsheim,49.76553,8.342462
 340070,Alsheim,49.76553,8.342462
 491607,Alsheim,49.76553,8.342462
-501571,Alsheim, Bahnhof,49.765453,8.342573
+501571,"Alsheim, Bahnhof",49.765453,8.342573
 186379,Altenbamberg,49.786858,7.830745
 330081,Altenbamberg,49.786858,7.830745
 541305,Altenbamberg,49.786858,7.830745
@@ -72,9 +72,9 @@ stop_id,stop_name,stop_lat,stop_lon
 358105,Alzey West,49.74098,8.107255
 649574,Alzey West,49.74098,8.107255
 88717,Alzey West,49.74098,8.107255
-574415,Alzey, Bahnhof,49.75014,8.109532
-403838,Alzey, Südbahnhof,49.738213,8.118327
-486711,Alzey, Westbahnhof,49.74089,8.107376
+574415,"Alzey, Bahnhof",49.75014,8.109532
+403838,"Alzey, Südbahnhof",49.738213,8.118327
+486711,"Alzey, Westbahnhof",49.74089,8.107376
 212195,Angersbach,50.630974,9.446944
 609227,Angersbach,50.630974,9.446944
 352660,Annweiler am Trifels,49.205387,7.966149
@@ -89,19 +89,19 @@ stop_id,stop_name,stop_lat,stop_lon
 406945,Armsheim,49.808372,8.074113
 543663,Armsheim,49.808372,8.074113
 639548,Armsheim,49.808372,8.074113
-289183,Armsheim, Bahnhof,49.808254,8.074237
+289183,"Armsheim, Bahnhof",49.808254,8.074237
 151711,Asselheim,49.57622,8.161602
 35022,Asselheim,49.57622,8.161602
 95162,Asselheim,49.57622,8.161602
-154928,Asselheim, Bahnhof,49.576416,8.162596
+154928,"Asselheim, Bahnhof",49.576416,8.162596
 221925,Assenheim(Oberhess),50.30494,8.812462
 360909,Assenheim(Oberhess),50.30494,8.812462
 403804,Assenheim(Oberhess),50.30494,8.812462
-611009,Auerbach (b. Mosbach), Bahnhof,49.39956,9.223201
-13149,Auerbach(b Mosbach, Baden),49.399563,9.223276
-23177,Auerbach(b Mosbach, Baden),49.399563,9.223276
-586693,Auerbach(b Mosbach, Baden),49.399563,9.223276
-406734,Auerbach, Bahnhof,49.70174,8.613334
+611009,"Auerbach (b. Mosbach), Bahnhof",49.39956,9.223201
+13149,"Auerbach(b Mosbach, Baden)",49.399563,9.223276
+23177,"Auerbach(b Mosbach, Baden)",49.399563,9.223276
+586693,"Auerbach(b Mosbach, Baden)",49.399563,9.223276
+406734,"Auerbach, Bahnhof",49.70174,8.613334
 241973,Aumenau,50.400307,8.249234
 343325,Aumenau,50.400307,8.249234
 448271,Aumenau,50.400307,8.249234
@@ -113,9 +113,9 @@ stop_id,stop_name,stop_lat,stop_lon
 639468,Aßlar,50.588657,8.462756
 416487,Aßlar Bahnhof,50.588676,8.462792
 565327,Aßlar-Werdorf Bahnhof,50.59309,8.418728
-101901,BASF, Bahnhof Mitte,49.51024,8.432018
-228726,BASF, Bahnhof Nord,49.520176,8.427194
-676797,BASF, Bahnhof Süd,49.494,8.438944
+101901,"BASF, Bahnhof Mitte",49.51024,8.432018
+228726,"BASF, Bahnhof Nord",49.520176,8.427194
+676797,"BASF, Bahnhof Süd",49.494,8.438944
 316739,Babenhausen Bahnhof,49.957867,8.956994
 420252,Babenhausen Langstadt,49.922276,8.945733
 561588,Babenhausen Langstadt,49.922276,8.945733
@@ -132,7 +132,7 @@ stop_id,stop_name,stop_lat,stop_lon
 405774,Bacharach,50.056103,7.769523
 576211,Bacharach,50.056103,7.769523
 598801,Bacharach,50.056103,7.769523
-653654,Bacharach, Bahnhof,50.056038,7.769637
+653654,"Bacharach, Bahnhof",50.056038,7.769637
 215144,Bad Camberg,50.296623,8.255051
 446161,Bad Camberg,50.296623,8.255051
 539721,Bad Camberg,50.296623,8.255051
@@ -140,8 +140,8 @@ stop_id,stop_name,stop_lat,stop_lon
 129122,Bad Dürkheim,49.460632,8.170701
 212224,Bad Dürkheim,49.460632,8.170701
 640343,Bad Dürkheim,49.460632,8.170701
-606424,Bad Dürkheim, Bahnhof,49.46098,8.170447
-260551,Bad Dürkheim, Trift,49.466385,8.192968
+606424,"Bad Dürkheim, Bahnhof",49.46098,8.170447
+260551,"Bad Dürkheim, Trift",49.466385,8.192968
 476913,Bad Dürkheim-Trift,49.466415,8.193072
 564784,Bad Dürkheim-Trift,49.466415,8.193072
 569042,Bad Dürkheim-Trift,49.466415,8.193072
@@ -162,7 +162,7 @@ stop_id,stop_name,stop_lat,stop_lon
 123646,Bad Kreuznach,49.8424,7.866435
 220647,Bad Kreuznach,49.8424,7.866435
 314258,Bad Kreuznach,49.8424,7.866435
-514775,Bad Kreuznach, Bahnhof,49.84234,7.866466
+514775,"Bad Kreuznach, Bahnhof",49.84234,7.866466
 385302,Bad König,49.73858,9.001539
 471115,Bad König,49.73858,9.001539
 75009,Bad König,49.73858,9.001539
@@ -181,11 +181,11 @@ stop_id,stop_name,stop_lat,stop_lon
 193786,Bad Laasphe-Oberndorf Bf,50.95227,8.300164
 407502,Bad Mergentheim,49.49365,9.771662
 660694,Bad Mergentheim,49.49365,9.771662
-228375,Bad Mergentheim, Bahnhof,49.493713,9.771712
+228375,"Bad Mergentheim, Bahnhof",49.493713,9.771712
 209758,Bad Münster a Stein,49.813427,7.846989
 364502,Bad Münster a Stein,49.813427,7.846989
 640640,Bad Münster a Stein,49.813427,7.846989
-126946,Bad Münster, Bahnhof,49.813404,7.846946
+126946,"Bad Münster, Bahnhof",49.813404,7.846946
 165722,Bad Nauheim,50.367905,8.749334
 315229,Bad Nauheim,50.367905,8.749334
 447099,Bad Nauheim,50.367905,8.749334
@@ -215,7 +215,7 @@ stop_id,stop_name,stop_lat,stop_lon
 11189,Bad Sobernheim,49.78285,7.649816
 241388,Bad Sobernheim,49.78285,7.649816
 554364,Bad Sobernheim,49.78285,7.649816
-317152,Bad Sobernheim, Bahnhof,49.782948,7.649253
+317152,"Bad Sobernheim, Bahnhof",49.782948,7.649253
 30207,Bad Soden (Taunus) Bahnhof,50.143017,8.503887
 119074,Bad Soden(Taunus),50.14296,8.504426
 476984,Bad Soden(Taunus),50.14296,8.504426
@@ -243,7 +243,7 @@ stop_id,stop_name,stop_lat,stop_lon
 119303,Bad Wimpfen Im Tal,49.229847,9.187046
 218643,Bad Wimpfen Im Tal,49.229847,9.187046
 650562,Bad Wimpfen Im Tal,49.229847,9.187046
-264030,Bad Wimpfen, Im Tal,49.229706,9.186406
+264030,"Bad Wimpfen, Im Tal",49.229706,9.186406
 120595,Bad Wimpfen-Hohenstadt,49.24254,9.138753
 295958,Bad Wimpfen-Hohenstadt,49.24268,9.13866
 422274,Bad Wimpfen-Hohenstadt,49.24254,9.138753
@@ -259,7 +259,7 @@ stop_id,stop_name,stop_lat,stop_lon
 314855,Bammental,49.35959,8.783685
 347805,Bammental,49.35959,8.783685
 7072,Bammental,49.35959,8.783685
-598609,Bammental, Bahnhof,49.35944,8.783592
+598609,"Bammental, Bahnhof",49.35944,8.783592
 148050,Bauerbach,49.073963,8.748153
 22768,Bauerbach,49.073963,8.748153
 425552,Bauerbach,49.073963,8.748153
@@ -273,12 +273,12 @@ stop_id,stop_name,stop_lat,stop_lon
 230185,Bellheim Bf,49.188305,8.29456
 351245,Bellheim Bf,49.188305,8.29456
 74523,Bellheim Bf,49.188305,8.29456
-676573,Bellheim, Am Mühlbuckel,49.1927,8.297523
-513625,Bellheim, Bahnhof,49.188507,8.294549
+676573,"Bellheim, Am Mühlbuckel",49.1927,8.297523
+513625,"Bellheim, Bahnhof",49.188507,8.294549
 508994,Bensheim,49.681328,8.616717
 567318,Bensheim,49.681328,8.616717
 75290,Bensheim,49.681328,8.616717
-659606,Bensheim, Bahnhof,49.68095,8.616766
+659606,"Bensheim, Bahnhof",49.68095,8.616766
 333332,Bensheim-Auerbach,49.701557,8.613366
 444736,Bensheim-Auerbach,49.701557,8.613366
 659698,Bensheim-Auerbach,49.701557,8.613366
@@ -290,14 +290,14 @@ stop_id,stop_name,stop_lat,stop_lon
 43116,Berzhahn,50.53989,8.006031
 472704,Berzhahn,50.53989,8.006031
 98701,Berzhahn Bf,50.539867,8.006001
-89815,Bestenheid, Bahnhof Glashütte,49.786167,9.500151
+89815,"Bestenheid, Bahnhof Glashütte",49.786167,9.500151
 427132,Betzdorf Bf,50.78928,7.870032
 26333,Betzdorf(Sieg),50.789295,7.87005
 49016,Betzdorf(Sieg),50.789295,7.87005
 355334,Biblis,49.68888,8.450413
 40404,Biblis,49.68888,8.450413
 659552,Biblis,49.68888,8.450413
-379500,Biblis, Bahnhof,49.688953,8.450497
+379500,"Biblis, Bahnhof",49.688953,8.450497
 254483,Bickenbach Bahnhof,49.760067,8.603423
 325926,Bickenbach(Bergstr),49.76038,8.603497
 466646,Bickenbach(Bergstr),49.76038,8.603497
@@ -317,15 +317,15 @@ stop_id,stop_name,stop_lat,stop_lon
 224098,Binau,49.37259,9.083631
 465553,Binau,49.37259,9.083631
 482315,Binau,49.37259,9.083631
-675182,Binau, Bahnhof,49.372032,9.083872
+675182,"Binau, Bahnhof",49.372032,9.083872
 237704,Bingen(Rhein) Hbf,49.968727,7.884263
 51775,Bingen(Rhein) Hbf,49.968727,7.884263
 549655,Bingen(Rhein) Hbf,49.968727,7.884263
 200938,Bingen(Rhein) Stadt,49.969746,7.902985
 248683,Bingen(Rhein) Stadt,49.969746,7.902985
 79580,Bingen(Rhein) Stadt,49.969746,7.902985
-634086,Bingen, Hauptbahnhof,49.96874,7.883543
-322352,Bingen, Stadtbahnhof,49.9698,7.902731
+634086,"Bingen, Hauptbahnhof",49.96874,7.883543
+322352,"Bingen, Stadtbahnhof",49.9698,7.902731
 248800,Bingen-Gaulsheim,49.96707,7.950983
 280750,Bingen-Gaulsheim,49.967064,7.951114
 378216,Bingen-Gaulsheim,49.96707,7.950983
@@ -333,7 +333,7 @@ stop_id,stop_name,stop_lat,stop_lon
 207591,Birkenau,49.56104,8.708359
 270774,Birkenau,49.56104,8.708359
 460720,Birkenau,49.56104,8.708359
-418790,Birkenau, Bahnhof,49.561005,8.708241
+418790,"Birkenau, Bahnhof",49.561005,8.708241
 46227,Birkenbringhausen,51.022373,8.744887
 566572,Birkenbringhausen,51.022373,8.744887
 677835,Birkenbringhausen,51.022373,8.744887
@@ -369,22 +369,22 @@ stop_id,stop_name,stop_lat,stop_lon
 224456,Bobenheim,49.58814,8.35032
 320184,Bobenheim,49.58814,8.35032
 496902,Bobenheim,49.58814,8.35032
-436457,Bobenheim, Bahnhof,49.58787,8.350326
+436457,"Bobenheim, Bahnhof",49.58787,8.350326
 330111,Bobstadt,49.66325,8.451786
 345122,Bobstadt,49.66325,8.451786
 363772,Bobstadt,49.66325,8.451786
-228273,Bobstadt, Bahnhof,49.662594,8.452015
-483332,Bockenheim, Bahnhof,49.606922,8.188036
+228273,"Bobstadt, Bahnhof",49.662594,8.452015
+483332,"Bockenheim, Bahnhof",49.606922,8.188036
 465348,Bockenheim-Kindenheim,49.606953,8.188033
 473891,Bockenheim-Kindenheim,49.606953,8.188033
 524007,Bockenheim-Kindenheim,49.606953,8.188033
 1514,Bodenheim,49.929585,8.312491
 199168,Bodenheim,49.929585,8.312491
 636572,Bodenheim,49.929585,8.312491
-8208,Bodenheim, Bahnhof,49.930042,8.311617
+8208,"Bodenheim, Bahnhof",49.930042,8.311617
 230537,Boppard Hauptbahnhof,50.2314,7.586066
 97030,Boxberg-Wölchingen,49.485596,9.640048
-491069,Boxberg-Wölchingen, Bahnhof,49.485435,9.640091
+491069,"Boxberg-Wölchingen, Bahnhof",49.485435,9.640091
 584358,Brandoberndorf,50.43162,8.493816
 626913,Brandoberndorf,50.43162,8.493816
 663428,Brandoberndorf,50.43162,8.493816
@@ -400,13 +400,13 @@ stop_id,stop_name,stop_lat,stop_lon
 580037,Breitenstein (Pfalz),49.344475,8.001977
 78311,Breitenstein (Pfalz),49.344475,8.001977
 655052,Breitscheidt Bf,50.748425,7.661453
-579856,Breitscheidt(Altenkirchen, Ww),50.748436,7.661486
-649902,Breitscheidt(Altenkirchen, Ww),50.748436,7.661486
-156017,Bretzenheim (Nahe), Bahnhof,49.874233,7.898257
+579856,"Breitscheidt(Altenkirchen, Ww)",50.748436,7.661486
+649902,"Breitscheidt(Altenkirchen, Ww)",50.748436,7.661486
+156017,"Bretzenheim (Nahe), Bahnhof",49.874233,7.898257
 335516,Bretzenheim(Nahe),49.874588,7.898692
 493905,Bretzenheim(Nahe),49.874588,7.898692
 516068,Bretzenheim(Nahe),49.874588,7.898692
-418996,Bronnbach, Bahnhof,49.714947,9.543567
+418996,"Bronnbach, Bahnhof",49.714947,9.543567
 462485,Bruchenbrücken,50.30218,8.788489
 475308,Bruchenbrücken,50.30218,8.788489
 554977,Bruchenbrücken,50.30218,8.788489
@@ -452,14 +452,14 @@ stop_id,stop_name,stop_lat,stop_lon
 115727,Buchen(Odenw),49.52353,9.327179
 130263,Buchen(Odenw),49.52353,9.327179
 634854,Buchen(Odenw),49.52353,9.327179
-56457,Buchen, Bahnhof,49.523567,9.327163
-325775,Buchen, Bahnhof Ost,49.51915,9.332094
+56457,"Buchen, Bahnhof",49.523567,9.327163
+325775,"Buchen, Bahnhof Ost",49.51915,9.332094
 436284,Buchenau(Lahn),50.87061,8.601115
 442475,Buchenau(Lahn),50.87061,8.601115
 159628,Budenheim,50.026836,8.174062
 341900,Budenheim,50.026836,8.174062
 445012,Budenheim,50.026836,8.174062
-76172,Budenheim, Bahnhof,50.026825,8.17395
+76172,"Budenheim, Bahnhof",50.026825,8.17395
 2762,Burg-u. Nieder Gemünden,50.69089,9.047665
 314898,Burg-u. Nieder Gemünden,50.69089,9.047665
 515433,Burghaun Bahnhof,50.7006,9.727899
@@ -483,11 +483,11 @@ stop_id,stop_name,stop_lat,stop_lon
 352534,Bödigheim,49.47593,9.317207
 377476,Bödigheim,49.47593,9.317207
 474562,Bödigheim,49.47593,9.317207
-331396,Bödigheim, Bahnhof,49.475697,9.317012
+331396,"Bödigheim, Bahnhof",49.475697,9.317012
 135343,Böhl-Iggelheim,49.37983,8.303602
 36999,Böhl-Iggelheim,49.37983,8.303602
 42326,Böhl-Iggelheim,49.37983,8.303602
-583539,Böhl-Iggelheim, Bahnhof,49.379852,8.304619
+583539,"Böhl-Iggelheim, Bahnhof",49.379852,8.304619
 12016,Büches-Düdelsheim,50.29737,9.066751
 139211,Büches-Düdelsheim,50.29737,9.066751
 555730,Büches-Düdelsheim,50.29737,9.066751
@@ -508,7 +508,7 @@ stop_id,stop_name,stop_lat,stop_lon
 497707,Bürstadt,49.645767,8.458188
 58245,Bürstadt,49.645767,8.458188
 92841,Bürstadt,49.64509,8.45925
-117824,Bürstadt, Bahnhof,49.645287,8.459148
+117824,"Bürstadt, Bahnhof",49.645287,8.459148
 344018,Büttelborn-Klein-Gerau Bahnhof,49.919758,8.517339
 329985,Caldern,50.852943,8.670066
 426482,Caldern,50.852943,8.670066
@@ -519,7 +519,7 @@ stop_id,stop_name,stop_lat,stop_lon
 149818,Dallau,49.388077,9.18755
 15418,Dallau,49.388077,9.18755
 187715,Dallau,49.388077,9.18755
-459208,Dallau, Bahnhof,49.387585,9.187088
+459208,"Dallau, Bahnhof",49.387585,9.187088
 132955,Darmstadt Central Station (FlixTrain),49.872517,8.629379
 16087,Darmstadt Central Station (FlixTrain),49.872517,8.629379
 485319,Darmstadt Central Station (FlixTrain),49.872517,8.629379
@@ -565,7 +565,7 @@ stop_id,stop_name,stop_lat,stop_lon
 299280,Deidesheim,49.408348,8.192634
 473928,Deidesheim,49.408348,8.192634
 558467,Deidesheim,49.408348,8.192634
-580551,Deidesheim, Bahnhof,49.40849,8.192725
+580551,"Deidesheim, Bahnhof",49.40849,8.192725
 153667,Dernbach(Westerw),50.457226,7.783693
 252237,Dernbach(Westerw),50.457226,7.783693
 291387,Dernbach(Westerw),50.457226,7.783693
@@ -584,7 +584,7 @@ stop_id,stop_name,stop_lat,stop_lon
 248680,Dienheim,49.841354,8.35714
 442895,Dienheim,49.841354,8.35714
 656660,Dienheim,49.841354,8.35714
-368700,Dienheim, Bahnhof,49.840878,8.357009
+368700,"Dienheim, Bahnhof",49.840878,8.357009
 143575,Dietzenbach Bahnhof,50.008064,8.785541
 24126,Dietzenbach Bahnhof,50.008064,8.785541
 303214,Dietzenbach Bahnhof,50.007977,8.785096
@@ -609,10 +609,10 @@ stop_id,stop_name,stop_lat,stop_lon
 116176,Dillenburg-Niederscheld-Süd Bahnhof,50.71752,8.303403
 107814,Distelhausen,49.598232,9.683508
 541789,Distelhausen,49.598232,9.683508
-457193,Distelhausen (Tbb.), Bahnhof,49.598347,9.683812
+457193,"Distelhausen (Tbb.), Bahnhof",49.598347,9.683812
 124415,Dittigheim,49.607964,9.674912
 224757,Dittigheim,49.607964,9.674912
-693084,Dittigheim, Bahnhof,49.60797,9.674883
+693084,"Dittigheim, Bahnhof",49.60797,9.674883
 287549,Dorheim(Wetterau),50.352703,8.79051
 52100,Dorheim(Wetterau),50.352703,8.79051
 531715,Dorheim(Wetterau),50.352703,8.79051
@@ -621,7 +621,7 @@ stop_id,stop_name,stop_lat,stop_lon
 426899,Dortelweil,50.207615,8.751267
 439876,Dortelweil,50.207615,8.751267
 472776,Dortelweil,50.207615,8.751267
-544129,Dreieich Buchschlag, Bahnhof Mast 06,50.02248,8.661155
+544129,"Dreieich Buchschlag, Bahnhof Mast 06",50.02248,8.661155
 127365,Dreieich-Buchschlag,50.022476,8.661151
 376525,Dreieich-Buchschlag,50.022476,8.661151
 397409,Dreieich-Buchschlag Bahnhof,50.02248,8.661155
@@ -655,13 +655,13 @@ stop_id,stop_name,stop_lat,stop_lon
 166085,Eberbach,49.465767,8.984152
 240370,Eberbach,49.465767,8.984152
 66524,Eberbach,49.465767,8.984152
-425866,Eberbach, Bahnhof,49.46535,8.984357
+425866,"Eberbach, Bahnhof",49.46535,8.984357
 175566,Ebersburg-Ried Bahnhof,50.45885,9.769917
 544462,Ebersburg-Schmalnau Bahnhof,50.45612,9.788305
 115754,Ebertsheim,49.564003,8.108237
 502679,Ebertsheim,49.564003,8.108237
 630265,Ebertsheim,49.564003,8.108237
-241494,Ebertsheim, Bahnhof,49.564053,8.108553
+241494,"Ebertsheim, Bahnhof",49.564053,8.108553
 247761,Echzell,50.389805,8.890353
 621777,Echzell,50.389805,8.890353
 650265,Echzell,50.389805,8.890353
@@ -673,15 +673,15 @@ stop_id,stop_name,stop_lat,stop_lon
 36704,Eddersheim,50.039494,8.456741
 415430,Eddersheim,50.039494,8.456741
 89633,Eddersheim,50.039494,8.456741
-612484,Edelfingen, Bahnhof,49.513084,9.743379
+612484,"Edelfingen, Bahnhof",49.513084,9.743379
 201426,Edenkoben,49.282055,8.14062
 340938,Edenkoben,49.282055,8.14062
 351460,Edenkoben,49.282055,8.14062
-484445,Edenkoben, Bahnhof,49.282063,8.140623
+484445,"Edenkoben, Bahnhof",49.282063,8.140623
 379435,Edesheim(Pfalz),49.263737,8.139075
 447922,Edesheim(Pfalz),49.263737,8.139075
 488467,Edesheim(Pfalz),49.263737,8.139075
-664426,Edesheim, Bahnhof,49.263756,8.139078
+664426,"Edesheim, Bahnhof",49.263756,8.139078
 243621,Edingen(Wetzlar),50.632362,8.323007
 609772,Edingen(Wetzlar),50.632362,8.323007
 625115,Edingen(Wetzlar),50.632362,8.323007
@@ -697,17 +697,17 @@ stop_id,stop_name,stop_lat,stop_lon
 4601,Eggenstein Bf,49.075672,8.397941
 634201,Eggenstein Bf,49.075672,8.397941
 4285,Eggenstein Schweriner Straße,49.08588,8.402203
-18546,Eggenstein Schweriner Straße, Eggenstein-Leopoldsh,49.085724,8.402144
-541241,Eggenstein Schweriner Straße, Eggenstein-Leopoldsh,49.085724,8.402144
-969,Eggenstein Schweriner Straße, Eggenstein-Leopoldsh,49.085724,8.402144
+18546,"Eggenstein Schweriner Straße, Eggenstein-Leopoldsh",49.085724,8.402144
+541241,"Eggenstein Schweriner Straße, Eggenstein-Leopoldsh",49.085724,8.402144
+969,"Eggenstein Schweriner Straße, Eggenstein-Leopoldsh",49.085724,8.402144
 290169,Eggenstein Spöcker Weg,49.07987,8.399697
-20128,Eggenstein Spöcker Weg, Eggenstein-Leopoldshafen,49.079746,8.399657
-495103,Eggenstein Spöcker Weg, Eggenstein-Leopoldshafen,49.079746,8.399657
-71479,Eggenstein Spöcker Weg, Eggenstein-Leopoldshafen,49.079746,8.399657
+20128,"Eggenstein Spöcker Weg, Eggenstein-Leopoldshafen",49.079746,8.399657
+495103,"Eggenstein Spöcker Weg, Eggenstein-Leopoldshafen",49.079746,8.399657
+71479,"Eggenstein Spöcker Weg, Eggenstein-Leopoldshafen",49.079746,8.399657
 407108,Eggenstein Süd,49.07114,8.396068
-201996,Eggenstein Süd, Eggenstein-Leopoldshafen,49.071426,8.396256
-519450,Eggenstein Süd, Eggenstein-Leopoldshafen,49.071426,8.396256
-532953,Eggenstein Süd, Eggenstein-Leopoldshafen,49.071426,8.396256
+201996,"Eggenstein Süd, Eggenstein-Leopoldshafen",49.071426,8.396256
+519450,"Eggenstein Süd, Eggenstein-Leopoldshafen",49.071426,8.396256
+532953,"Eggenstein Süd, Eggenstein-Leopoldshafen",49.071426,8.396256
 657453,Ehringshausen Bahnhof,50.595104,8.383621
 30400,Ehringshausen(Kr Wetzlar),50.595066,8.383841
 585562,Ehringshausen(Kr Wetzlar),50.595066,8.383841
@@ -724,12 +724,12 @@ stop_id,stop_name,stop_lat,stop_lon
 123564,Eicholzheim,49.432438,9.290317
 24608,Eicholzheim,49.432438,9.290317
 53170,Eicholzheim,49.432438,9.290317
-625490,Eicholzheim, Bahnhof,49.432472,9.290206
+625490,"Eicholzheim, Bahnhof",49.432472,9.290206
 153838,Einsiedlerhof,49.431004,7.662216
 434004,Einsiedlerhof,49.431004,7.662216
 551794,Einsiedlerhof,49.431004,7.662216
-681149,Einsiedlerhof, Bahnhof,49.430912,7.66192
-301422,Eisenberg (Pfalz), Bahnhof,49.554455,8.070375
+681149,"Einsiedlerhof, Bahnhof",49.430912,7.66192
+301422,"Eisenberg (Pfalz), Bahnhof",49.554455,8.070375
 331847,Eisenberg(Pfalz),49.55448,8.070582
 400364,Eisenberg(Pfalz),49.55448,8.070582
 413757,Eisenberg(Pfalz),49.55448,8.070582
@@ -743,13 +743,13 @@ stop_id,stop_name,stop_lat,stop_lon
 177015,Ellhofen,49.149952,9.316035
 357714,Ellhofen,49.149956,9.316042
 500885,Ellhofen,49.149952,9.316035
-303915,Elmstein, Bahnhof,49.349842,7.942877
-316797,Elmstein, Bahnhof,49.349895,7.942877
-443958,Elmstein, Bahnhof,49.349842,7.942877
-69620,Elmstein, Bahnhof,49.349842,7.942877
+303915,"Elmstein, Bahnhof",49.349842,7.942877
+316797,"Elmstein, Bahnhof",49.349895,7.942877
+443958,"Elmstein, Bahnhof",49.349842,7.942877
+69620,"Elmstein, Bahnhof",49.349842,7.942877
 372940,Elpersheim,49.473095,9.873427
 374837,Elpersheim,49.473095,9.873427
-673939,Elpersheim, Bahnhof,49.473152,9.873231
+673939,"Elpersheim, Bahnhof",49.473152,9.873231
 363251,Elz Bahnhof,50.41435,8.038442
 358727,Elz Süd,50.408707,8.032124
 118528,Elz(Limburg/Lahn),50.414295,8.038458
@@ -765,11 +765,11 @@ stop_id,stop_name,stop_lat,stop_lon
 178129,Enkenbach,49.489933,7.899501
 470790,Enkenbach,49.489933,7.899501
 502964,Enkenbach,49.489933,7.899501
-55280,Enkenbach, Bahnhof,49.489937,7.899677
+55280,"Enkenbach, Bahnhof",49.489937,7.899677
 41582,Eppelsheim(Rheinhess),49.70006,8.162882
 665420,Eppelsheim(Rheinhess),49.70006,8.162882
 83776,Eppelsheim(Rheinhess),49.70006,8.162882
-570412,Eppelsheim, Bahnhof,49.699852,8.163278
+570412,"Eppelsheim, Bahnhof",49.699852,8.163278
 27095,Eppertshausen,49.94537,8.84236
 433349,Eppertshausen,49.94537,8.84236
 69580,Eppertshausen,49.94537,8.84236
@@ -800,10 +800,10 @@ stop_id,stop_name,stop_lat,stop_lon
 317988,Erbach(Odenw) Nord,49.669582,8.989963
 532122,Erbach(Odenw) Nord,49.669582,8.989963
 585937,Erbach(Odenw) Nord,49.669582,8.989963
-12571,Erfenstein, Haltepunkt,49.35309,8.017518
-342592,Erfenstein, Haltepunkt,49.35309,8.017518
-516035,Erfenstein, Haltepunkt,49.35309,8.017518
-599185,Erfenstein, Haltepunkt,49.35309,8.017518
+12571,"Erfenstein, Haltepunkt",49.35309,8.017518
+342592,"Erfenstein, Haltepunkt",49.35309,8.017518
+516035,"Erfenstein, Haltepunkt",49.35309,8.017518
+599185,"Erfenstein, Haltepunkt",49.35309,8.017518
 414963,Erndtebrück,50.991234,8.255317
 491734,Erndtebrück,50.991234,8.255317
 443607,Erndtebrück Bf,50.991,8.255149
@@ -815,7 +815,7 @@ stop_id,stop_name,stop_lat,stop_lon
 383563,Erpolzheim,49.488327,8.210697
 536158,Erpolzheim,49.488327,8.210697
 77698,Erpolzheim,49.488327,8.210697
-621325,Erpolzheim, Bahnhof,49.488518,8.210611
+621325,"Erpolzheim, Bahnhof",49.488518,8.210611
 365870,Erzhausen,49.950867,8.650993
 572603,Erzhausen,49.950867,8.650993
 608975,Erzhausen,49.950867,8.650993
@@ -832,7 +832,7 @@ stop_id,stop_name,stop_lat,stop_lon
 65820,Eschelbronn,49.323982,8.867796
 74099,Eschelbronn,49.323982,8.867796
 99877,Eschelbronn,49.323982,8.867796
-42915,Eschelbronn, Bahnhof,49.32391,8.867764
+42915,"Eschelbronn, Bahnhof",49.32391,8.867764
 571848,Eschenau (b Heilbronn),49.143803,9.402747
 338885,Eschenau(b Heilbronn),49.143784,9.402735
 381421,Eschenau(b Heilbronn),49.143784,9.402735
@@ -841,7 +841,7 @@ stop_id,stop_name,stop_lat,stop_lon
 508658,Eschhofen,50.393482,8.104429
 268558,Eubigheim,49.50173,9.538015
 651550,Eubigheim,49.50173,9.538015
-369322,Eubigheim, Bahnhof,49.501675,9.537782
+369322,"Eubigheim, Bahnhof",49.501675,9.537782
 232970,Feudingen,50.940796,8.329337
 583553,Feudingen,50.940796,8.329337
 310681,Flieden,50.42177,9.577568
@@ -850,28 +850,28 @@ stop_id,stop_name,stop_lat,stop_lon
 428998,Flomersheim,49.513958,8.333801
 459318,Flomersheim,49.513958,8.333801
 512279,Flomersheim,49.513958,8.333801
-212444,Flomersheim, Bahnhof,49.51401,8.334192
+212444,"Flomersheim, Bahnhof",49.51401,8.334192
 35267,Flörsheim (Main) Bahnhof,50.016876,8.430683
 154361,Flörsheim(Main),50.017212,8.431013
 535936,Flörsheim(Main),50.017212,8.431013
 667985,Flörsheim(Main),50.017212,8.431013
-504631,Flörsheim-Dalsheim, Bhf,49.65708,8.204439
-197277,Frankeneck, Bahnhof,49.375153,8.050657
-539343,Frankeneck, Bahnhof,49.375153,8.050657
-578235,Frankeneck, Bahnhof,49.375767,8.050657
-602939,Frankeneck, Bahnhof,49.375153,8.050657
+504631,"Flörsheim-Dalsheim, Bhf",49.65708,8.204439
+197277,"Frankeneck, Bahnhof",49.375153,8.050657
+539343,"Frankeneck, Bahnhof",49.375153,8.050657
+578235,"Frankeneck, Bahnhof",49.375767,8.050657
+602939,"Frankeneck, Bahnhof",49.375153,8.050657
 284439,Frankenstein(Pfalz),49.438866,7.969802
 420391,Frankenstein(Pfalz),49.438866,7.969802
 88565,Frankenstein(Pfalz),49.438866,7.969802
-81897,Frankenstein, Bahnhof,49.43897,7.969161
+81897,"Frankenstein, Bahnhof",49.43897,7.969161
 266602,Frankenthal Hbf,49.53557,8.349702
 371416,Frankenthal Hbf,49.53557,8.349702
 649657,Frankenthal Hbf,49.53557,8.349702
 525443,Frankenthal Süd,49.522648,8.349558
 536937,Frankenthal Süd,49.522648,8.349558
 595348,Frankenthal Süd,49.522648,8.349558
-463606,Frankenthal, Haltepunkt Süd,49.52312,8.349571
-318707,Frankenthal, Hauptbahnhof,49.535896,8.349742
+463606,"Frankenthal, Haltepunkt Süd",49.52312,8.349571
+318707,"Frankenthal, Hauptbahnhof",49.535896,8.349742
 486140,Frankfurt (Main) Berkersheim Bahnhof,50.176353,8.69761
 38974,Frankfurt (Main) Eschersheim Bahnhof,50.158146,8.655136
 172785,Frankfurt (Main) Farbwerke,50.0979,8.526784
@@ -1010,11 +1010,11 @@ stop_id,stop_name,stop_lat,stop_lon
 454595,Freimersheim(Rheinh),49.710777,8.086508
 539497,Freimersheim(Rheinh),49.710777,8.086508
 670318,Freimersheim(Rheinh),49.710777,8.086508
-150261,Freimersheim/Az, Bahnhof,49.71049,8.086302
+150261,"Freimersheim/Az, Bahnhof",49.71049,8.086302
 262261,Freinsheim,49.50149,8.205192
 536353,Freinsheim,49.50149,8.205192
 56493,Freinsheim,49.50149,8.205192
-87975,Freinsheim, Bahnhof,49.50131,8.205239
+87975,"Freinsheim, Bahnhof",49.50131,8.205239
 195222,Freudenberg-Kirschfurt,49.74375,9.317982
 252936,Freudenberg-Kirschfurt,49.743755,9.317981
 264291,Freudenberg-Kirschfurt,49.743755,9.317981
@@ -1077,18 +1077,18 @@ stop_id,stop_name,stop_lat,stop_lon
 131323,Fürth(Odenw),49.648533,8.781003
 145553,Fürth(Odenw),49.648533,8.781003
 79115,Fürth(Odenw),49.648533,8.781003
-578976,Fürth, Bahnhof,49.64851,8.780637
+578976,"Fürth, Bahnhof",49.64851,8.780637
 393390,Gamburg(Tauber),49.698296,9.59558
 542744,Gamburg(Tauber),49.698296,9.59558
-115698,Gamburg, Bahnhof,49.698242,9.595355
+115698,"Gamburg, Bahnhof",49.698242,9.595355
 509941,Gau Algesheim,49.961433,8.016065
 625879,Gau Algesheim,49.961433,8.016065
 644048,Gau Algesheim,49.961433,8.016065
 256801,Gau Bickelheim,49.840294,8.020291
 3093,Gau Bickelheim,49.840294,8.020291
 647564,Gau Bickelheim,49.840294,8.020291
-124348,Gau-Algesheim, Bahnhof,49.96142,8.016116
-6886,Gau-Bickelheim, Bahnhof,49.840183,8.020886
+124348,"Gau-Algesheim, Bahnhof",49.96142,8.016116
+6886,"Gau-Bickelheim, Bahnhof",49.840183,8.020886
 144934,Gaubüttelbrunn,49.634438,9.854452
 192521,Gaubüttelbrunn,49.634888,9.854429
 524025,Gaubüttelbrunn,49.634438,9.854452
@@ -1116,10 +1116,10 @@ stop_id,stop_name,stop_lat,stop_lon
 283930,Gensingen-Horrweiler,49.89826,7.938188
 404527,Gensingen-Horrweiler,49.89826,7.938188
 64949,Gensingen-Horrweiler,49.89826,7.938188
-68327,Gensingen-Horrweiler, Bahnhof,49.89793,7.938224
+68327,"Gensingen-Horrweiler, Bahnhof",49.89793,7.938224
 21410,Gerlachsheim,49.581036,9.710819
 278514,Gerlachsheim,49.581036,9.710819
-258962,Gerlachsheim, Bahnhof,49.581028,9.710878
+258962,"Gerlachsheim, Bahnhof",49.581028,9.710878
 234262,Germersheim,49.225403,8.365282
 411039,Germersheim,49.225403,8.365282
 695347,Germersheim,49.225403,8.365282
@@ -1129,9 +1129,9 @@ stop_id,stop_name,stop_lat,stop_lon
 350956,Germersheim Süd/Nolte,49.20834,8.373755
 411038,Germersheim Süd/Nolte,49.20834,8.373755
 633177,Germersheim Süd/Nolte,49.20834,8.373755
-388062,Germersheim, Bahnhof,49.22559,8.365076
-644831,Germersheim, Mitte/Rhein,49.220116,8.379314
-592846,Germersheim, Süd/Nolte,49.208313,8.373664
+388062,"Germersheim, Bahnhof",49.22559,8.365076
+644831,"Germersheim, Mitte/Rhein",49.220116,8.379314
+592846,"Germersheim, Süd/Nolte",49.208313,8.373664
 385459,Gernsheim,49.753597,8.4902
 505749,Gernsheim,49.753597,8.4902
 627588,Gernsheim,49.753597,8.4902
@@ -1222,7 +1222,7 @@ stop_id,stop_name,stop_lat,stop_lon
 307309,Groß-Rohrheim,49.714066,8.476857
 47738,Groß-Rohrheim,49.714066,8.476857
 532856,Groß-Rohrheim,49.714066,8.476857
-459716,Groß-Rohrheim, Bahnhof,49.71395,8.476674
+459716,"Groß-Rohrheim, Bahnhof",49.71395,8.476674
 164624,Groß-Umstadt Klein-Umstadt,49.894367,8.938635
 349907,Groß-Umstadt Klein-Umstadt,49.894367,8.938635
 51606,Groß-Umstadt Klein-Umstadt,49.894367,8.938635
@@ -1272,15 +1272,15 @@ stop_id,stop_name,stop_lat,stop_lon
 593916,Grünebacherhütte,50.781654,7.891546
 179290,Grünsfeld,49.604935,9.745447
 285152,Grünsfeld,49.604935,9.745447
-342161,Grünsfeld, Bahnhof,49.6049,9.745652
+342161,"Grünsfeld, Bahnhof",49.6049,9.745652
 110880,Grünstadt,49.564384,8.167962
 329167,Grünstadt,49.564384,8.167962
 644553,Grünstadt,49.564384,8.167962
 419070,Grünstadt Nord,49.573357,8.170781
 609693,Grünstadt Nord,49.573357,8.170781
 633305,Grünstadt Nord,49.573357,8.170781
-184370,Grünstadt, Bahnhof,49.564365,8.167896
-670594,Grünstadt, Bahnhof Nord,49.573647,8.170609
+184370,"Grünstadt, Bahnhof",49.564365,8.167896
+670594,"Grünstadt, Bahnhof Nord",49.573647,8.170609
 89117,Gundelsheim (Neckar),49.28276,9.158073
 181845,Gundelsheim(Neckar),49.282932,9.15787
 228166,Gundelsheim(Neckar),49.282932,9.15787
@@ -1288,11 +1288,11 @@ stop_id,stop_name,stop_lat,stop_lon
 356527,Gundersheim(Rheinhess),49.690166,8.196596
 461520,Gundersheim(Rheinhess),49.690166,8.196596
 669291,Gundersheim(Rheinhess),49.690166,8.196596
-499154,Gundersheim, Bahnhof,49.690144,8.196471
+499154,"Gundersheim, Bahnhof",49.690144,8.196471
 192246,Guntersblum,49.79198,8.351257
 327804,Guntersblum,49.79198,8.351257
 525638,Guntersblum,49.79198,8.351257
-652489,Guntersblum, Bahnhof,49.791557,8.351107
+652489,"Guntersblum, Bahnhof",49.791557,8.351107
 110106,Göbelnrod,50.59763,8.921448
 167912,Göbelnrod,50.59763,8.921448
 82243,Göbelnrod,50.59763,8.921448
@@ -1327,7 +1327,7 @@ stop_id,stop_name,stop_lat,stop_lon
 150096,Hainstadt(Baden),49.543056,9.326884
 422845,Hainstadt(Baden),49.543056,9.326884
 503342,Hainstadt(Baden),49.543056,9.326884
-517846,Hainstadt, Bahnhof,49.542904,9.32701
+517846,"Hainstadt, Bahnhof",49.542904,9.32701
 293206,Haitz-Höchst,50.208633,9.226821
 528211,Haitz-Höchst,50.208633,9.226821
 81357,Haitz-Höchst,50.208633,9.226821
@@ -1372,8 +1372,8 @@ stop_id,stop_name,stop_lat,stop_lon
 246955,Hauenstein(Pfalz),49.201393,7.830006
 255493,Hauenstein(Pfalz),49.201393,7.830006
 65704,Hauenstein(Pfalz),49.201393,7.830006
-213744,Hauenstein, Bahnhof,49.201347,7.830039
-600360,Hauenstein, Bahnhof Mitte,49.19904,7.849497
+213744,"Hauenstein, Bahnhof",49.201347,7.830039
+600360,"Hauenstein, Bahnhof Mitte",49.19904,7.849497
 183499,Haunetal-Neukirchen,50.77084,9.692546
 315113,Haunetal-Neukirchen,50.77084,9.692546
 403799,Haunetal-Neukirchen,50.77084,9.692546
@@ -1383,12 +1383,12 @@ stop_id,stop_name,stop_lat,stop_lon
 267498,Haßloch(Pfalz),49.371956,8.253396
 409187,Haßloch(Pfalz),49.371956,8.253396
 509079,Haßloch(Pfalz),49.371956,8.253396
-148430,Haßloch, Bahnhof,49.371944,8.252607
+148430,"Haßloch, Bahnhof",49.371944,8.252607
 273733,Haßmersheim,49.30403,9.154129
 626809,Haßmersheim,49.30403,9.154129
 84673,Haßmersheim,49.30403,9.154129
-273587,Haßmersheim, Bahnhof,49.303936,9.153994
-617282,Heddesheim-Hirschberg, Bf DB,49.509422,8.633771
+273587,"Haßmersheim, Bahnhof",49.303936,9.153994
+617282,"Heddesheim-Hirschberg, Bf DB",49.509422,8.633771
 29365,Heddesheim/Hirschberg,49.509407,8.633746
 558164,Heddesheim/Hirschberg,49.509407,8.633746
 86145,Heddesheim/Hirschberg,49.509407,8.633746
@@ -1401,9 +1401,9 @@ stop_id,stop_name,stop_lat,stop_lon
 216602,Heidelberg Orthopädie,49.409996,8.774913
 497060,Heidelberg Orthopädie,49.409996,8.774913
 611112,Heidelberg Orthopädie,49.409996,8.774913
-144297,Heidelberg, Altstadt,49.4151,8.720441
-635340,Heidelberg, Hauptbahnhof,49.404316,8.676243
-109767,Heidelberg, Weststadt/Südstadt,49.398407,8.689341
+144297,"Heidelberg, Altstadt",49.4151,8.720441
+635340,"Heidelberg, Hauptbahnhof",49.404316,8.676243
+109767,"Heidelberg, Weststadt/Südstadt",49.398407,8.689341
 205179,Heidelberg-Altstadt,49.415237,8.720887
 338300,Heidelberg-Altstadt,49.415237,8.720887
 477528,Heidelberg-Altstadt,49.415237,8.720887
@@ -1422,7 +1422,7 @@ stop_id,stop_name,stop_lat,stop_lon
 184456,Heidesheim(Rheinhess),49.997025,8.111318
 449697,Heidesheim(Rheinhess),49.997025,8.111318
 483058,Heidesheim(Rheinhess),49.997025,8.111318
-494220,Heidesheim, Bahnhof,49.996967,8.111095
+494220,"Heidesheim, Bahnhof",49.996967,8.111095
 225179,Heilbr.-Böckingen Berufsschulzentrum,49.14037,9.181617
 311640,Heilbr.-Böckingen Berufsschulzentrum,49.14037,9.181617
 415934,Heilbr.-Böckingen Berufsschulzentrum,49.14037,9.181617
@@ -1489,31 +1489,31 @@ stop_id,stop_name,stop_lat,stop_lon
 313175,Heilbronn Trappensee,49.14028,9.25257
 9317,Heilbronn Trappensee,49.14028,9.25257
 247219,Heilbronn Trappensee (S-Bahn),49.14037,9.252917
-374472,Heilbronn, Kaufland (S-Bahn),49.169777,9.224584
+374472,"Heilbronn, Kaufland (S-Bahn)",49.169777,9.224584
 186025,Heiligenstein(Pfalz),49.28566,8.393726
 228652,Heiligenstein(Pfalz),49.28566,8.393726
 589120,Heiligenstein(Pfalz),49.28566,8.393726
-304160,Heiligenstein, Bahnhof,49.28558,8.393606
+304160,"Heiligenstein, Bahnhof",49.28558,8.393606
 266676,Heinzenhausen,49.625595,7.607437
 36996,Heinzenhausen,49.625595,7.607437
 612783,Heinzenhausen,49.625595,7.607437
-31505,Heinzenhausen, Bahnhof,49.625595,7.607778
-202441,Helmbach, Bahnhof,49.343346,7.985996
-314848,Helmbach, Bahnhof,49.343346,7.985996
-33159,Helmbach, Bahnhof,49.343346,7.985996
-389629,Helmbach, Bahnhof,49.343414,7.9859643
+31505,"Heinzenhausen, Bahnhof",49.625595,7.607778
+202441,"Helmbach, Bahnhof",49.343346,7.985996
+314848,"Helmbach, Bahnhof",49.343346,7.985996
+33159,"Helmbach, Bahnhof",49.343346,7.985996
+389629,"Helmbach, Bahnhof",49.343414,7.9859643
 33564,Helmstadt(Baden),49.320087,8.97513
 55414,Helmstadt(Baden),49.320087,8.97513
 662489,Helmstadt(Baden),49.320087,8.97513
-320018,Helmstadt, Bahnhof,49.320076,8.974969
+320018,"Helmstadt, Bahnhof",49.320076,8.974969
 235550,Hemsbach,49.59087,8.648722
 472515,Hemsbach,49.59087,8.648722
 639662,Hemsbach,49.59087,8.648722
-226095,Hemsbach, Bahnhof,49.59097,8.648728
+226095,"Hemsbach, Bahnhof",49.59097,8.648728
 238113,Heppenheim(Bergstr),49.641552,8.633379
 365711,Heppenheim(Bergstr),49.641552,8.633379
 512076,Heppenheim(Bergstr),49.641552,8.633379
-456148,Heppenheim, Bahnhof,49.641396,8.63343
+456148,"Heppenheim, Bahnhof",49.641396,8.63343
 608645,Herbolzheim (Jagst),49.28169,9.25978
 18543,Herbolzheim(Jagst),49.281494,9.259824
 569578,Herbolzheim(Jagst),49.281494,9.259824
@@ -1526,7 +1526,7 @@ stop_id,stop_name,stop_lat,stop_lon
 295860,Hergershausen,49.936802,8.916575
 315989,Hergershausen,49.936802,8.916575
 75401,Hergershausen,49.936802,8.916575
-685261,Herxheim a.B., Bahnhof,49.509766,8.189797
+685261,"Herxheim a.B., Bahnhof",49.509766,8.189797
 239269,Herxheim am Berg,49.50949,8.190044
 283394,Herxheim am Berg,49.50949,8.190044
 359476,Herxheim am Berg,49.50949,8.190044
@@ -1552,19 +1552,19 @@ stop_id,stop_name,stop_lat,stop_lon
 125618,Hinterweidenthal Ost,49.203133,7.773047
 362434,Hinterweidenthal Ost,49.203133,7.773047
 437214,Hinterweidenthal Ost,49.203133,7.773047
-513413,Hinterweidenthal, Bahnhof,49.201466,7.74726
-273072,Hinterweidenthal, Ost,49.20305,7.773104
-412208,Hirschhorn (Pfalz), Bahnhof,49.515484,7.681135
+513413,"Hinterweidenthal, Bahnhof",49.201466,7.74726
+273072,"Hinterweidenthal, Ost",49.20305,7.773104
+412208,"Hirschhorn (Pfalz), Bahnhof",49.515484,7.681135
 175191,Hirschhorn(Neckar),49.44267,8.896055
 614893,Hirschhorn(Neckar),49.44267,8.896055
 645594,Hirschhorn(Neckar),49.44267,8.896055
 142641,Hirschhorn(Pfalz),49.515587,7.681008
 230793,Hirschhorn(Pfalz),49.515587,7.681008
 563043,Hirschhorn(Pfalz),49.515587,7.681008
-361511,Hirschhorn, Bahnhof,49.44241,8.896052
+361511,"Hirschhorn, Bahnhof",49.44241,8.896052
 399850,Hochhausen(Tauber),49.66381,9.633235
 78805,Hochhausen(Tauber),49.66381,9.633235
-170942,Hochhausen, Bahnhof,49.663887,9.633344
+170942,"Hochhausen, Bahnhof",49.663887,9.633344
 108069,Hochheim (Main) Bahnhof,50.004284,8.350317
 15453,Hochheim(Main),50.004307,8.350017
 409598,Hochheim(Main),50.004307,8.350017
@@ -1572,14 +1572,14 @@ stop_id,stop_name,stop_lat,stop_lon
 219672,Hochspeyer,49.444073,7.904164
 333548,Hochspeyer,49.444073,7.904164
 654401,Hochspeyer,49.444073,7.904164
-50387,Hochspeyer, Bahnhof,49.44408,7.904016
+50387,"Hochspeyer, Bahnhof",49.44408,7.904016
 175544,Hochstetten,49.13357,8.41577
 248594,Hochstetten,49.13357,8.41577
 59150,Hochstetten,49.13357,8.41577
 282604,Hochstetten Altenheim,49.132614,8.418157
-116970,Hochstetten Altenheim, Linkenheim-Hochstetten,49.13254,8.418277
-304554,Hochstetten Altenheim, Linkenheim-Hochstetten,49.13254,8.418277
-570068,Hochstetten Altenheim, Linkenheim-Hochstetten,49.13254,8.418277
+116970,"Hochstetten Altenheim, Linkenheim-Hochstetten",49.13254,8.418277
+304554,"Hochstetten Altenheim, Linkenheim-Hochstetten",49.13254,8.418277
+570068,"Hochstetten Altenheim, Linkenheim-Hochstetten",49.13254,8.418277
 178963,Hochstetten Grenzstraße,49.129784,8.416037
 318753,Hochstetten Grenzstraße,49.12955,8.415723
 346424,Hochstetten Grenzstraße,49.129784,8.416037
@@ -1590,11 +1590,11 @@ stop_id,stop_name,stop_lat,stop_lon
 139107,Hockenheim,49.317413,8.537385
 483540,Hockenheim,49.317413,8.537385
 667729,Hockenheim,49.317413,8.537385
-32240,Hockenheim, Bahnhof,49.31756,8.537418
+32240,"Hockenheim, Bahnhof",49.31756,8.537418
 287298,Hoffenheim,49.272038,8.838411
 365812,Hoffenheim,49.272038,8.838411
 394220,Hoffenheim,49.272038,8.838411
-568075,Hoffenheim, Bahnhof,49.27182,8.838353
+568075,"Hoffenheim, Bahnhof",49.27182,8.838353
 141952,Hofheim (Ried),49.659466,8.40897
 216758,Hofheim (Ried),49.659466,8.40897
 297841,Hofheim (Ried),49.659466,8.40897
@@ -1603,9 +1603,9 @@ stop_id,stop_name,stop_lat,stop_lon
 132524,Hofheim(Taunus),50.084473,8.443842
 149613,Hofheim(Taunus),50.084473,8.443842
 348580,Hofheim(Taunus),50.084473,8.443842
-361231,Hofheim, Bahnhof,49.65943,8.408887
-623015,Hohen-Sülzen, Bahnhof,49.621643,8.214141
-157504,Hohenecken, Bahnhof,49.415024,7.698517
+361231,"Hofheim, Bahnhof",49.65943,8.408887
+623015,"Hohen-Sülzen, Bahnhof",49.621643,8.214141
+157504,"Hohenecken, Bahnhof",49.415024,7.698517
 158781,Hohensülzen,49.621788,8.214173
 172268,Hohensülzen,49.621788,8.214173
 453457,Hohensülzen,49.621788,8.214173
@@ -1646,15 +1646,15 @@ stop_id,stop_name,stop_lat,stop_lon
 150529,Idstein-Wörsdorf Bahnhof,50.24471,8.249399
 323551,Igersheim,49.493423,9.812535
 59269,Igersheim,49.493423,9.812535
-691508,Igersheim, Bahnhof,49.49352,9.812684
+691508,"Igersheim, Bahnhof",49.49352,9.812684
 478539,Imsweiler,49.597656,7.807976
 516957,Imsweiler,49.597656,7.807976
 68947,Imsweiler,49.597656,7.807976
-243060,Imsweiler, Bahnhof,49.597935,7.808022
+243060,"Imsweiler, Bahnhof",49.597935,7.808022
 119598,Ingelheim,49.976276,8.053716
 214078,Ingelheim,49.976276,8.053716
 77542,Ingelheim,49.976276,8.053716
-298997,Ingelheim, Bahnhof,49.976246,8.053603
+298997,"Ingelheim, Bahnhof",49.976246,8.053603
 182993,Ittlingen,49.187122,8.934671
 319301,Ittlingen,49.18712,8.93458
 329245,Ittlingen,49.18712,8.93458
@@ -1662,13 +1662,13 @@ stop_id,stop_name,stop_lat,stop_lon
 300213,Jockgrim Bf,49.09229,8.272272
 40667,Jockgrim Bf,49.09229,8.272272
 544917,Jockgrim Bf,49.09229,8.272272
-243217,Jockgrim, Bahnhof,49.091774,8.272262
+243217,"Jockgrim, Bahnhof",49.091774,8.272262
 543651,Jossa,50.232506,9.604178
 75649,Jossa,50.232506,9.604178
-162948,KIT-Campus Nord Bahnhof, Eggenstein-Leopoldshafen,49.09707,8.43033
-206612,KIT-Campus Nord Bahnhof, Eggenstein-Leopoldshafen,49.09707,8.43033
-245018,KIT-Campus Nord Bahnhof, Eggenstein-Leopoldshafen,49.09707,8.43033
-461012,KIT-Campus Nord Bahnhof, Eggenstein-Leopoldshafen,49.09707,8.43033
+162948,"KIT-Campus Nord Bahnhof, Eggenstein-Leopoldshafen",49.09707,8.43033
+206612,"KIT-Campus Nord Bahnhof, Eggenstein-Leopoldshafen",49.09707,8.43033
+245018,"KIT-Campus Nord Bahnhof, Eggenstein-Leopoldshafen",49.09707,8.43033
+461012,"KIT-Campus Nord Bahnhof, Eggenstein-Leopoldshafen",49.09707,8.43033
 461183,Kaiserslautern Galgenschanze,49.43549,7.744124
 527071,Kaiserslautern Galgenschanze,49.43549,7.744124
 551203,Kaiserslautern Galgenschanze,49.43549,7.744124
@@ -1681,17 +1681,17 @@ stop_id,stop_name,stop_lat,stop_lon
 197085,Kaiserslautern West,49.447536,7.749812
 514592,Kaiserslautern West,49.447536,7.749812
 605439,Kaiserslautern West,49.447536,7.749812
-623758,Kaiserslautern, Galgenschanze,49.435547,7.744134
-513044,Kaiserslautern, Hbf,49.436264,7.768253
-693701,Kaiserslautern, Pfaffwerk Bf,49.434734,7.751356
-397039,Kaiserslautern, Westbahnhof,49.447533,7.74973
+623758,"Kaiserslautern, Galgenschanze",49.435547,7.744134
+513044,"Kaiserslautern, Hbf",49.436264,7.768253
+693701,"Kaiserslautern, Pfaffwerk Bf",49.434734,7.751356
+397039,"Kaiserslautern, Westbahnhof",49.447533,7.74973
 123437,Kaiserslautern-Hohenecken,49.41579,7.699292
 1527,Kaiserslautern-Hohenecken,49.41579,7.699292
 85416,Kaiserslautern-Hohenecken,49.41579,7.699292
 112506,Kandel,49.07914,8.198025
 275062,Kandel,49.07914,8.198025
 518808,Kandel,49.07914,8.198025
-447615,Kandel, Bahnhof,49.079082,8.197881
+447615,"Kandel, Bahnhof",49.079082,8.197881
 247036,Karben-Groß-Karben Bahnhof,50.232018,8.75382
 492945,Karben-Okarben Bahnhof,50.25315,8.753908
 162813,Karlsdorf Bahnhof,49.14439,8.548189
@@ -1704,7 +1704,7 @@ stop_id,stop_name,stop_lat,stop_lon
 18788,Katzweiler,49.50008,7.700935
 319194,Katzweiler,49.50008,7.700935
 504122,Katzweiler,49.50008,7.700935
-484009,Katzweiler, Bahnhof,49.500336,7.700404
+484009,"Katzweiler, Bahnhof",49.500336,7.700404
 568803,Kelkheim,50.137264,8.44773
 605950,Kelkheim,50.137264,8.44773
 662766,Kelkheim,50.137264,8.44773
@@ -1724,14 +1724,14 @@ stop_id,stop_name,stop_lat,stop_lon
 103096,Kennelgarten,49.440998,7.733013
 653223,Kennelgarten,49.440998,7.733013
 657618,Kennelgarten,49.440998,7.733013
-163024,Kennelgarten, Bahnhof,49.441025,7.733408
+163024,"Kennelgarten, Bahnhof",49.441025,7.733408
 393192,Kerkerbach,50.40188,8.135717
 529813,Kerkerbach,50.40188,8.135717
 85490,Kerkerbach,50.40188,8.135717
 273323,Kindsbach,49.419373,7.612836
 507181,Kindsbach,49.419373,7.612836
 87622,Kindsbach,49.419373,7.612836
-241693,Kindsbach, Bahnhof,49.41943,7.613141
+241693,"Kindsbach, Bahnhof",49.41943,7.613141
 181278,Kirch Göns,50.473373,8.666869
 440279,Kirch Göns,50.473373,8.666869
 92863,Kirch Göns,50.473373,8.666869
@@ -1747,9 +1747,9 @@ stop_id,stop_name,stop_lat,stop_lon
 341190,Kirchheim(Weinstr),49.537163,8.181452
 43139,Kirchheim(Weinstr),49.537163,8.181452
 447295,Kirchheim(Weinstr),49.537163,8.181452
-181931,Kirchheim/Rohrbach, Bf,49.37916,8.675318
-23042,Kirchheim/Wstr., Bahnhof,49.537354,8.180742
-432683,Kirchheimbol., Schlossg. Bf.,49.668537,8.016323
+181931,"Kirchheim/Rohrbach, Bf",49.37916,8.675318
+23042,"Kirchheim/Wstr., Bahnhof",49.537354,8.180742
+432683,"Kirchheimbol., Schlossg. Bf.",49.668537,8.016323
 220041,Kirchheimbolanden,49.668545,8.016526
 525143,Kirchheimbolanden,49.668545,8.016526
 54634,Kirchheimbolanden,49.668545,8.016526
@@ -1759,7 +1759,7 @@ stop_id,stop_name,stop_lat,stop_lon
 133382,Klein Winternheim-Ober Olm,49.939713,8.206986
 20517,Klein Winternheim-Ober Olm,49.939713,8.206986
 549982,Klein Winternheim-Ober Olm,49.939713,8.206986
-371511,Klein-Winternheim, Bahnhof,49.939632,8.207161
+371511,"Klein-Winternheim, Bahnhof",49.939632,8.207161
 157099,Kleingemünden,50.062992,9.687704
 37500,Kleingemünden,50.062992,9.687704
 90173,Kleingemünden,50.062992,9.687702
@@ -1774,8 +1774,8 @@ stop_id,stop_name,stop_lat,stop_lon
 153705,Knöringen-Essingen,49.237488,8.148229
 223303,Knöringen-Essingen,49.237488,8.148229
 412003,Knöringen-Essingen,49.237488,8.148229
-323779,Knöringen-Essingen, Bahnhof,49.237484,8.14825
-594589,Kreimbach, Bahnhof,49.55145,7.631404
+323779,"Knöringen-Essingen, Bahnhof",49.237484,8.14825
+594589,"Kreimbach, Bahnhof",49.55145,7.631404
 285567,Kreimbach-Kaulbach,49.55149,7.631296
 317451,Kreimbach-Kaulbach,49.55149,7.631296
 400855,Kreimbach-Kaulbach,49.55149,7.631296
@@ -1806,7 +1806,7 @@ stop_id,stop_name,stop_lat,stop_lon
 86787,Kälberau,50.09091,9.091445
 249375,Königshofen(Baden),49.54602,9.724669
 599852,Königshofen(Baden),49.54602,9.724669
-117833,Königshofen, Bahnhof,49.54605,9.724577
+117833,"Königshofen, Bahnhof",49.54605,9.724577
 455331,Königsstollen,50.776455,7.934575
 506396,Königsstollen,50.776455,7.934575
 102400,Königstein (Taunus) Bahnhof,50.177143,8.469591
@@ -1817,13 +1817,13 @@ stop_id,stop_name,stop_lat,stop_lon
 527364,Köppern,50.269794,8.646746
 565820,Köppern,50.269794,8.646746
 653356,Köppern,50.269794,8.646746
-22041,LU Rheingönheim, Bahnhof,49.447296,8.409605
-15431,LU-Mundenheim, Bahnhof,49.461674,8.421257
-224638,LU-Oggersheim, Bahnhof,49.493046,8.381327
+22041,"LU Rheingönheim, Bahnhof",49.447296,8.409605
+15431,"LU-Mundenheim, Bahnhof",49.461674,8.421257
+224638,"LU-Oggersheim, Bahnhof",49.493046,8.381327
 270649,Ladenburg,49.474243,8.602803
 582510,Ladenburg,49.474243,8.602803
 7557,Ladenburg,49.474243,8.602803
-297791,Ladenburg, Bahnhof,49.4743,8.60286
+297791,"Ladenburg, Bahnhof",49.4743,8.60286
 432926,Lahnstein Friedrichssegen Bahnhof,50.311935,7.650709
 240958,Lahnstein Niederlahnstein Bahnhof,50.316372,7.599469
 77096,Lahntal-Caldern Bahnhof,50.852978,8.670042
@@ -1835,18 +1835,18 @@ stop_id,stop_name,stop_lat,stop_lon
 301359,Lambrecht(Pfalz),49.373337,8.074391
 323256,Lambrecht(Pfalz),49.373337,8.074391
 91739,Lambrecht(Pfalz),49.373337,8.074391
-305579,Lambrecht, Bahnhof,49.373337,8.074714
-351240,Lambrecht, Bahnhof,49.373337,8.074714
-487614,Lambrecht, Bahnhof,49.373337,8.074714
-655373,Lambrecht, Bahnhof,49.37325,8.074785
+305579,"Lambrecht, Bahnhof",49.373337,8.074714
+351240,"Lambrecht, Bahnhof",49.373337,8.074714
+487614,"Lambrecht, Bahnhof",49.373337,8.074714
+655373,"Lambrecht, Bahnhof",49.37325,8.074785
 149724,Lambsheim,49.511864,8.283476
 237066,Lambsheim,49.511864,8.283476
 376990,Lambsheim,49.511864,8.283476
-209834,Lambsheim, Bahnhof,49.511856,8.282943
+209834,"Lambsheim, Bahnhof",49.511856,8.282943
 290523,Lampertheim,49.598213,8.478489
 359887,Lampertheim,49.598213,8.478489
 504490,Lampertheim,49.598213,8.478489
-138087,Lampertheim, Bahnhof,49.598293,8.478587
+138087,"Lampertheim, Bahnhof",49.598293,8.478587
 429679,Lampertsmühle-Otterbach,49.48366,7.729408
 562881,Lampertsmühle-Otterbach,49.48366,7.729408
 654535,Lampertsmühle-Otterbach,49.48366,7.729408
@@ -1857,11 +1857,11 @@ stop_id,stop_name,stop_lat,stop_lon
 457214,Landau(Pfalz)Süd,49.189163,8.114176
 304016,Landau(Pfalz)West,49.195747,8.107052
 440080,Landau(Pfalz)West,49.195747,8.107052
-92506,Landau, Hauptbahnhof,49.198025,8.126313
+92506,"Landau, Hauptbahnhof",49.198025,8.126313
 144693,Landstuhl,49.416286,7.565931
 636160,Landstuhl,49.416286,7.565931
 665821,Landstuhl,49.416286,7.565931
-678634,Landstuhl, Bahnhof,49.416332,7.566159
+678634,"Landstuhl, Bahnhof",49.416332,7.566159
 136202,Lang Göns,50.49692,8.667054
 535733,Lang Göns,50.49692,8.667054
 68105,Lang Göns,50.49692,8.667054
@@ -1880,7 +1880,7 @@ stop_id,stop_name,stop_lat,stop_lon
 530208,Langenlonsheim,49.90137,7.899887
 5368,Langenlonsheim,49.90137,7.899887
 76140,Langenlonsheim,49.90137,7.899887
-69454,Langenlonsheim, Bahnhof,49.901302,7.899856
+69454,"Langenlonsheim, Bahnhof",49.901302,7.899856
 110548,Langenprozelten,50.061573,9.661381
 507630,Langenprozelten,50.061573,9.661384
 51866,Langenprozelten,50.061573,9.661384
@@ -1889,26 +1889,26 @@ stop_id,stop_name,stop_lat,stop_lon
 72888,Langenselbold,50.162067,9.057682
 475526,Langenselbold Bahnhof,50.162308,9.058639
 163850,Langgöns Bahnhof,50.497704,8.667036
-641712,Laubenheim (Nahe), Bahnhof,49.918716,7.89726
+641712,"Laubenheim (Nahe), Bahnhof",49.918716,7.89726
 167097,Laubenheim(Nahe),49.9188,7.897215
 480615,Laubenheim(Nahe),49.9188,7.897215
 511140,Laubenheim(Nahe),49.9188,7.897215
-485512,Laubenheim, Bahnhof,49.96117,8.314142
+485512,"Laubenheim, Bahnhof",49.96117,8.314142
 274372,Lauda,49.565384,9.709512
 36135,Lauda,49.565384,9.709512
-65027,Lauda, Bahnhof,49.566154,9.708533
+65027,"Lauda, Bahnhof",49.566154,9.708533
 204248,Laudenbach (Württ),49.455105,9.923276
 219523,Laudenbach(Bergstr),49.612076,8.644539
 64451,Laudenbach(Bergstr),49.612076,8.644539
 83441,Laudenbach(Bergstr),49.612076,8.644539
 126050,Laudenbach(Württ),49.45542,9.9231
 21064,Laudenbach(Württ),49.45542,9.9231
-420630,Laudenbach, Bahnhof,49.6122,8.644506
+420630,"Laudenbach, Bahnhof",49.6122,8.644506
 252246,Lauterbach (Hessen) Nordbahnhof,50.644142,9.406223
 426622,Lauterbach (Hessen)-Wallenrod Bahnhof,50.664936,9.332161
 320527,Lauterbach(Hess)Nord,50.643692,9.407491
 634406,Lauterbach(Hess)Nord,50.643692,9.407491
-584369,Lauterecken, Bahnhof,49.65325,7.590495
+584369,"Lauterecken, Bahnhof",49.65325,7.590495
 119841,Lauterecken-Grumbach,49.65371,7.59071
 385745,Lauterecken-Grumbach,49.65371,7.59071
 568032,Lauterecken-Grumbach,49.65371,7.59071
@@ -1922,17 +1922,17 @@ stop_id,stop_name,stop_lat,stop_lon
 610929,Leingarten Mitte,49.145355,9.114127
 636505,Leingarten Mitte,49.14563,9.112802
 482558,Leopoldshafen Frankfurter Straße,49.100964,8.403883
-571460,Leopoldshafen Frankfurter Straße, Eggenstein-Leopo,49.100834,8.403753
-651592,Leopoldshafen Frankfurter Straße, Eggenstein-Leopo,49.100834,8.403753
-95022,Leopoldshafen Frankfurter Straße, Eggenstein-Leopo,49.100834,8.403753
+571460,"Leopoldshafen Frankfurter Straße, Eggenstein-Leopo",49.100834,8.403753
+651592,"Leopoldshafen Frankfurter Straße, Eggenstein-Leopo",49.100834,8.403753
+95022,"Leopoldshafen Frankfurter Straße, Eggenstein-Leopo",49.100834,8.403753
 1536,Leopoldshafen Leopoldstraße,49.097195,8.401099
 537946,Leopoldshafen Leopoldstraße,49.097164,8.401098
 58880,Leopoldshafen Leopoldstraße,49.097195,8.401099
 618110,Leopoldshafen Leopoldstraße,49.097195,8.401099
 262384,Leopoldshafen Viermorgen,49.09038,8.40073
-404834,Leopoldshafen Viermorgen, Eggenstein-Leopoldshafen,49.09047,8.400281
-516981,Leopoldshafen Viermorgen, Eggenstein-Leopoldshafen,49.09047,8.400281
-566277,Leopoldshafen Viermorgen, Eggenstein-Leopoldshafen,49.09047,8.400281
+404834,"Leopoldshafen Viermorgen, Eggenstein-Leopoldshafen",49.09047,8.400281
+516981,"Leopoldshafen Viermorgen, Eggenstein-Leopoldshafen",49.09047,8.400281
+566277,"Leopoldshafen Viermorgen, Eggenstein-Leopoldshafen",49.09047,8.400281
 29411,Leun-Stockhausen Bahnhof,50.540215,8.325173
 235045,Leun/Braunfels,50.539913,8.366902
 47069,Leun/Braunfels,50.539913,8.366902
@@ -1962,11 +1962,11 @@ stop_id,stop_name,stop_lat,stop_lon
 248474,Limburgerhof,49.424274,8.390747
 30137,Limburgerhof,49.424274,8.390747
 630230,Limburgerhof,49.424274,8.390747
-432880,Limburgerhof, Bahnhof,49.42425,8.390768
+432880,"Limburgerhof, Bahnhof",49.42425,8.390768
 163933,Lindach,49.41692,9.00646
 444214,Lindach,49.41692,9.00646
 53352,Lindach,49.41692,9.00646
-197269,Lindach, Bahnhof,49.416843,9.006644
+197269,"Lindach, Bahnhof",49.416843,9.006644
 213941,Linden-Großen-Linden Bahnhof,50.527733,8.661607
 153223,Lindenholzhausen,50.377563,8.133372
 418099,Lindenholzhausen,50.377563,8.133372
@@ -1975,26 +1975,26 @@ stop_id,stop_name,stop_lat,stop_lon
 446826,Lingenfeld,49.252583,8.349523
 465162,Lingenfeld,49.252583,8.349523
 597824,Lingenfeld,49.252583,8.349523
-131946,Lingenfeld, Bahnhof,49.252567,8.349517
+131946,"Lingenfeld, Bahnhof",49.252567,8.349517
 253307,Linkenheim Friedrichstraße,49.119686,8.409345
-67796,Linkenheim Friedrichstraße, Linkenheim-Hochstetten,49.119686,8.409346
-78331,Linkenheim Friedrichstraße, Linkenheim-Hochstetten,49.119686,8.409346
-92349,Linkenheim Friedrichstraße, Linkenheim-Hochstetten,49.119686,8.409346
+67796,"Linkenheim Friedrichstraße, Linkenheim-Hochstetten",49.119686,8.409346
+78331,"Linkenheim Friedrichstraße, Linkenheim-Hochstetten",49.119686,8.409346
+92349,"Linkenheim Friedrichstraße, Linkenheim-Hochstetten",49.119686,8.409346
 32550,Linkenheim Rathaus,49.123123,8.408222
 406483,Linkenheim Rathaus,49.123188,8.408248
 480438,Linkenheim Rathaus,49.123188,8.408248
 73957,Linkenheim Rathaus,49.123188,8.408248
 498574,Linkenheim Schulzentrum,49.127487,8.413387
-133575,Linkenheim Schulzentrum, Linkenheim-Hochstetten,49.127525,8.413486
-37120,Linkenheim Schulzentrum, Linkenheim-Hochstetten,49.127525,8.413486
-602482,Linkenheim Schulzentrum, Linkenheim-Hochstetten,49.127525,8.413486
-183161,Linkenheim Süd, Linkenheim-Hochstetten,49.116863,8.4116
-249630,Linkenheim Süd, Linkenheim-Hochstetten,49.116863,8.4116
-671652,Linkenheim Süd, Linkenheim-Hochstetten,49.116863,8.4116
+133575,"Linkenheim Schulzentrum, Linkenheim-Hochstetten",49.127525,8.413486
+37120,"Linkenheim Schulzentrum, Linkenheim-Hochstetten",49.127525,8.413486
+602482,"Linkenheim Schulzentrum, Linkenheim-Hochstetten",49.127525,8.413486
+183161,"Linkenheim Süd, Linkenheim-Hochstetten",49.116863,8.4116
+249630,"Linkenheim Süd, Linkenheim-Hochstetten",49.116863,8.4116
+671652,"Linkenheim Süd, Linkenheim-Hochstetten",49.116863,8.4116
 166122,Lohnweiler,49.63568,7.599712
 533413,Lohnweiler,49.63568,7.599712
 600377,Lohnweiler,49.63568,7.599712
-92348,Lohnweiler, Bahnhof,49.635853,7.599657
+92348,"Lohnweiler, Bahnhof",49.635853,7.599657
 275299,Lohr Bahnhof,50.00441,9.580715
 332916,Lohr Bahnhof,50.004406,9.580721
 557982,Lohr Bahnhof,50.00441,9.580715
@@ -2009,7 +2009,7 @@ stop_id,stop_name,stop_lat,stop_lon
 125784,Lorsch,49.659092,8.566262
 288651,Lorsch,49.659092,8.566262
 640922,Lorsch,49.659092,8.566262
-526594,Lorsch, Bahnhof,49.659,8.565858
+526594,"Lorsch, Bahnhof",49.659,8.565858
 190289,Ludwigshafen(Rh)Hbf,49.47653,8.433042
 303891,Ludwigshafen(Rh)Hbf,49.47653,8.433042
 92846,Ludwigshafen(Rh)Hbf,49.47653,8.433042
@@ -2025,8 +2025,8 @@ stop_id,stop_name,stop_lat,stop_lon
 327742,Ludwigshafen(Rhein) Mitte,49.479004,8.452152
 468458,Ludwigshafen(Rhein) Mitte,49.479004,8.452152
 656075,Ludwigshafen(Rhein) Mitte,49.479004,8.452152
-502931,Ludwigshafen, Hauptbahnhof,49.476994,8.433321
-333345,Ludwigshafen, Mitte,49.479,8.452087
+502931,"Ludwigshafen, Hauptbahnhof",49.476994,8.433321
+333345,"Ludwigshafen, Mitte",49.479,8.452087
 148105,Ludwigshafen-Mundenheim,49.46157,8.421092
 268067,Ludwigshafen-Mundenheim,49.46157,8.421092
 329231,Ludwigshafen-Mundenheim,49.46157,8.421092
@@ -2044,21 +2044,21 @@ stop_id,stop_name,stop_lat,stop_lon
 157125,Lörzenbach-Fahrenbach,49.63885,8.764628
 365158,Lörzenbach-Fahrenbach,49.63885,8.764628
 631628,Lörzenbach-Fahrenbach,49.63885,8.764628
-629916,Lörzenbach-Fahrenbach, Bahnhof,49.638783,8.764638
+629916,"Lörzenbach-Fahrenbach, Bahnhof",49.638783,8.764638
 407732,Lütter,50.480865,9.765486
 451973,Lütter,50.480865,9.765486
 603039,Lützel,50.967045,8.174364
 96287,Lützel,50.967045,8.174364
 210260,Lützel Bf,50.96703,8.174022
-377739,Lützelsachsen, Bahnhof,49.528027,8.650076
-530202,MA-Friedrichsfeld, Südbahnhof,49.438374,8.57221
-84471,MA-Käfertal, DB-Bahnhof,49.50248,8.503147
-98612,MA-Rheinau, Bahnhof,49.424065,8.534965
-456832,MA-Seckenheim, Bahnhof,49.451427,8.538047
+377739,"Lützelsachsen, Bahnhof",49.528027,8.650076
+530202,"MA-Friedrichsfeld, Südbahnhof",49.438374,8.57221
+84471,"MA-Käfertal, DB-Bahnhof",49.50248,8.503147
+98612,"MA-Rheinau, Bahnhof",49.424065,8.534965
+456832,"MA-Seckenheim, Bahnhof",49.451427,8.538047
 224853,Maikammer-Kirrweiler,49.30558,8.147177
 422055,Maikammer-Kirrweiler,49.30558,8.147177
 452094,Maikammer-Kirrweiler,49.30558,8.147177
-678433,Maikammer-Kirrweiler, Bahnhof,49.305416,8.147037
+678433,"Maikammer-Kirrweiler, Bahnhof",49.305416,8.147037
 140548,Mainaschaff,49.98241,9.085731
 161560,Mainaschaff,49.982407,9.085739
 225408,Mainaschaff,49.982407,9.085739
@@ -2087,13 +2087,13 @@ stop_id,stop_name,stop_lat,stop_lon
 480848,Mainz Waggonfabrik,50.014915,8.235108
 645079,Mainz Waggonfabrik,50.014915,8.235108
 9990,Mainz Waggonfabrik,50.014915,8.235108
-494375,Mainz, Gonsenheim Bahnhof,49.99773,8.214429
-176337,Mainz, Hauptbahnhof,50.00145,8.258419
-528381,Mainz, Marienborn,49.96031,8.222819
-20015,Mainz, Mombach Bahnhof,50.022648,8.229269
-672739,Mainz, Nordbahnhof\W. & Mertz,50.020283,8.247154
-220311,Mainz, Römisches Theater,49.99342,8.277984
-687651,Mainz, Waggonfabrik,50.014393,8.234407
+494375,"Mainz, Gonsenheim Bahnhof",49.99773,8.214429
+176337,"Mainz, Hauptbahnhof",50.00145,8.258419
+528381,"Mainz, Marienborn",49.96031,8.222819
+20015,"Mainz, Mombach Bahnhof",50.022648,8.229269
+672739,"Mainz, Nordbahnhof\W. & Mertz",50.020283,8.247154
+220311,"Mainz, Römisches Theater",49.99342,8.277984
+687651,"Mainz, Waggonfabrik",50.014393,8.234407
 127359,Mainz-Bischofsheim,49.993225,8.3575
 409640,Mainz-Bischofsheim,49.993225,8.3575
 674853,Mainz-Bischofsheim,49.993225,8.3575
@@ -2125,9 +2125,9 @@ stop_id,stop_name,stop_lat,stop_lon
 208460,Mannheim Hbf,49.479355,8.468921
 223566,Mannheim Hbf,49.479355,8.468921
 442196,Mannheim Hbf,49.479355,8.468921
-53979,Mannheim, Arena/Maimarkt (DB),49.459793,8.51611
-57244,Mannheim, Handelshf./Jungbusch,49.49291,8.453973
-582139,Mannheim, Hauptbahnhof,49.479748,8.469936
+53979,"Mannheim, Arena/Maimarkt (DB)",49.459793,8.51611
+57244,"Mannheim, Handelshf./Jungbusch",49.49291,8.453973
+582139,"Mannheim, Hauptbahnhof",49.479748,8.469936
 321632,Mannheim-Friedrichsfeld Süd,49.438145,8.572382
 378179,Mannheim-Friedrichsfeld Süd,49.438145,8.572382
 654058,Mannheim-Friedrichsfeld Süd,49.438145,8.572382
@@ -2160,15 +2160,15 @@ stop_id,stop_name,stop_lat,stop_lon
 552719,Marburg(Lahn),50.81927,8.775014
 419255,Markelsheim,49.478264,9.835418
 572349,Markelsheim,49.478264,9.835418
-330882,Markelsheim, Bahnhof,49.47812,9.835331
+330882,"Markelsheim, Bahnhof",49.47812,9.835331
 22817,Mauer(b Heidelberg),49.3358,8.795545
 457260,Mauer(b Heidelberg),49.3358,8.795545
 615863,Mauer(b Heidelberg),49.3358,8.795545
-164746,Mauer, Bahnhof,49.335766,8.795621
+164746,"Mauer, Bahnhof",49.335766,8.795621
 350006,Meckesheim,49.32066,8.812836
 603978,Meckesheim,49.32066,8.812836
 680620,Meckesheim,49.32066,8.812836
-173365,Meckesheim, Bahnhof,49.320778,8.812724
+173365,"Meckesheim, Bahnhof",49.320778,8.812724
 234266,Melbach,50.37889,8.811518
 291369,Melbach,50.37889,8.811518
 653558,Melbach,50.37889,8.811518
@@ -2179,7 +2179,7 @@ stop_id,stop_name,stop_lat,stop_lon
 190830,Mertesheim,49.569195,8.133923
 458643,Mertesheim,49.569195,8.133923
 555581,Mertesheim,49.569195,8.133923
-174063,Mertesheim, Bahnhof,49.569153,8.133957
+174063,"Mertesheim, Bahnhof",49.569153,8.133957
 116669,Messel,49.921783,8.746587
 311127,Messel,49.921783,8.746587
 592084,Messel,49.921783,8.746587
@@ -2187,7 +2187,7 @@ stop_id,stop_name,stop_lat,stop_lon
 186987,Mettenheim,49.739906,8.334166
 531286,Mettenheim,49.739906,8.334166
 569478,Mettenheim,49.739906,8.334166
-222516,Mettenheim, Bahnhof,49.739735,8.334156
+222516,"Mettenheim, Bahnhof",49.739735,8.334156
 304303,Michelaubrück,50.11671,9.767679
 413891,Michelaubrück,50.116714,9.767679
 88494,Michelaubrück,50.11671,9.767679
@@ -2208,11 +2208,11 @@ stop_id,stop_name,stop_lat,stop_lon
 425604,Monsheim,49.633667,8.208162
 602186,Monsheim,49.633667,8.208162
 616139,Monsheim,49.633667,8.208162
-602510,Monsheim, Bahnhof,49.633472,8.208095
+602510,"Monsheim, Bahnhof",49.633472,8.208095
 202429,Monzingen,49.793465,7.588673
 247402,Monzingen,49.793465,7.588673
 555002,Monzingen,49.793465,7.588673
-287262,Monzingen, Bahnhof,49.79379,7.587485
+287262,"Monzingen, Bahnhof",49.79379,7.587485
 520201,Moosbachtal,49.165955,7.754959
 70361,Moosbachtal,49.165955,7.754959
 194902,Morlesau,50.117146,9.799066
@@ -2224,8 +2224,8 @@ stop_id,stop_name,stop_lat,stop_lon
 558128,Mosbach(Baden),49.35256,9.143655
 611107,Mosbach(Baden),49.35256,9.143655
 693220,Mosbach(Baden),49.35256,9.143655
-248408,Mosbach, Bahnhof,49.352264,9.143556
-389887,Mosbach, Westbahnhof,49.346764,9.134097
+248408,"Mosbach, Bahnhof",49.352264,9.143556
+389887,"Mosbach, Westbahnhof",49.346764,9.134097
 332617,Mosbach-Neckarelz,49.348484,9.113093
 365363,Mosbach-Neckarelz,49.348484,9.113093
 539946,Mosbach-Neckarelz,49.348484,9.113093
@@ -2236,7 +2236,7 @@ stop_id,stop_name,stop_lat,stop_lon
 227247,Mußbach,49.37196,8.168529
 424070,Mußbach,49.37196,8.168529
 430062,Mußbach,49.37196,8.168529
-294124,Mußbach, Bahnhof,49.371902,8.168471
+294124,"Mußbach, Bahnhof",49.371902,8.168471
 37566,Möckmühl,49.32079,9.357957
 509407,Möckmühl,49.32079,9.357957
 664824,Möckmühl,49.3208,9.358262
@@ -2248,7 +2248,7 @@ stop_id,stop_name,stop_lat,stop_lon
 10816,Mörlenbach,49.597298,8.730987
 124558,Mörlenbach,49.597298,8.730987
 580745,Mörlenbach,49.597298,8.730987
-105754,Mörlenbach, Bahnhof,49.597214,8.730861
+105754,"Mörlenbach, Bahnhof",49.597214,8.730861
 433358,Mücke(Hess),50.6171,9.029035
 565159,Mücke(Hess),50.6171,9.029035
 75186,Mücke(Hess),50.6171,9.029035
@@ -2270,14 +2270,14 @@ stop_id,stop_name,stop_lat,stop_lon
 685586,Münchhausen,50.963623,8.717247
 669707,Münchhausen (Marburg) Bahnhof,50.964035,8.718338
 684457,Münchhausen-Simtshausen Bahnhof,50.94189,8.7043
-149984,Münchweiler (Alsenz), Bahnhof,49.550697,7.887972
+149984,"Münchweiler (Alsenz), Bahnhof",49.550697,7.887972
 612153,Münchweiler(Alsenz),49.550606,7.887939
 654374,Münchweiler(Alsenz),49.550606,7.887939
 8598,Münchweiler(Alsenz),49.550606,7.887939
 398505,Münchweiler(Rodalb),49.221355,7.700417
 606382,Münchweiler(Rodalb),49.221355,7.700417
 633424,Münchweiler(Rodalb),49.221355,7.700417
-263498,Münchweiler, Bahnhof,49.221092,7.700853
+263498,"Münchweiler, Bahnhof",49.221092,7.700853
 269869,Münster (Hessen)-Altheim Bahnhof,49.923317,8.890875
 181274,Münster (b.Dieburg) Bahnhof,49.923203,8.853554
 296284,Münster(Hessen),49.923515,8.853717
@@ -2286,11 +2286,11 @@ stop_id,stop_name,stop_lat,stop_lon
 264233,Münster-Sarmsheim,49.947388,7.898033
 48354,Münster-Sarmsheim,49.947388,7.898033
 689658,Münster-Sarmsheim,49.947388,7.898033
-268801,Münster-Sarmsheim, Bahnhof,49.94782,7.898186
+268801,"Münster-Sarmsheim, Bahnhof",49.94782,7.898186
 482449,Nackenheim,49.919106,8.341885
 89171,Nackenheim,49.919106,8.341885
 89251,Nackenheim,49.919106,8.341885
-77290,Nackenheim, Bahnhof,49.919174,8.341639
+77290,"Nackenheim, Bahnhof",49.919174,8.341639
 338521,Nassau (Lahn) Bahnhof,50.311474,7.800665
 458094,Nassau (Lahn) Bf,50.311474,7.800665
 113092,Nassau(Lahn),50.31148,7.800691
@@ -2299,28 +2299,28 @@ stop_id,stop_name,stop_lat,stop_lon
 160433,Nauheim(b Gr.Gerau),49.94214,8.449929
 515585,Nauheim(b Gr.Gerau),49.94214,8.449929
 642256,Nauheim(b Gr.Gerau),49.94214,8.449929
-217618,Neckarau, Bahnhof,49.455315,8.494694
+217618,"Neckarau, Bahnhof",49.455315,8.494694
 384071,Neckarbischofsheim Nord,49.30699,8.942342
 436437,Neckarbischofsheim Nord,49.30699,8.942342
 478217,Neckarbischofsheim Nord,49.30699,8.942342
-653796,Neckarbischofsheim, Nordbhf.,49.30708,8.942621
+653796,"Neckarbischofsheim, Nordbhf.",49.30708,8.942621
 174379,Neckarburken,49.378204,9.163236
 362741,Neckarburken,49.378204,9.163236
 466423,Neckarburken,49.378204,9.163236
-30284,Neckarburken, Bahnhof,49.378227,9.163274
-289304,Neckarelz, Bahnhof,49.34869,9.112573
+30284,"Neckarburken, Bahnhof",49.378227,9.163274
+289304,"Neckarelz, Bahnhof",49.34869,9.112573
 305370,Neckargemünd,49.393677,8.788425
 306162,Neckargemünd,49.393677,8.788425
 353745,Neckargemünd,49.393677,8.788425
 115848,Neckargemünd Altstadt,49.39239,8.802954
 297957,Neckargemünd Altstadt,49.39239,8.802954
 306719,Neckargemünd Altstadt,49.39239,8.802954
-62488,Neckargemünd, Altstadt,49.392403,8.802933
-405332,Neckargemünd, Bahnhof,49.393845,8.788138
+62488,"Neckargemünd, Altstadt",49.392403,8.802933
+405332,"Neckargemünd, Bahnhof",49.393845,8.788138
 192741,Neckargerach,49.397907,9.074704
 39903,Neckargerach,49.397907,9.074704
 481306,Neckargerach,49.397907,9.074704
-297980,Neckargerach, Bahnhof,49.398037,9.074512
+297980,"Neckargerach, Bahnhof",49.398037,9.074512
 256408,Neckarhausen b.Neckarsteinach,49.41689,8.879595
 377042,Neckarhausen bei Neckarsteinach,49.416954,8.879703
 496379,Neckarhausen bei Neckarsteinach,49.416954,8.879703
@@ -2329,7 +2329,7 @@ stop_id,stop_name,stop_lat,stop_lon
 130703,Neckarsteinach,49.404907,8.841429
 481913,Neckarsteinach,49.404907,8.841429
 583122,Neckarsteinach,49.404907,8.841429
-410058,Neckarsteinach, Bahnhof,49.40466,8.841596
+410058,"Neckarsteinach, Bahnhof",49.40466,8.841596
 253919,Neckarsulm Mitte,49.193077,9.222717
 555530,Neckarsulm Mitte,49.193077,9.222717
 77114,Neckarsulm Mitte,49.193077,9.222717
@@ -2337,15 +2337,15 @@ stop_id,stop_name,stop_lat,stop_lon
 112014,Neckarzimmern,49.3169,9.137015
 217860,Neckarzimmern,49.3169,9.137015
 308639,Neckarzimmern,49.3169,9.137015
-345797,Neckarzimmern, Bahnhof,49.31665,9.137394
+345797,"Neckarzimmern, Bahnhof",49.31665,9.137394
 128103,Neidenfels,49.3862,8.045236
 337618,Neidenfels,49.3862,8.045236
 438258,Neidenfels,49.3862,8.045236
-200187,Neidenfels, Bahnhof,49.38614,8.045258
+200187,"Neidenfels, Bahnhof",49.38614,8.045258
 124619,Neidenstein,49.320236,8.890152
 61891,Neidenstein,49.320236,8.890152
 660470,Neidenstein,49.320236,8.890152
-559484,Neidenstein, Bahnhof,49.320217,8.890213
+559484,"Neidenstein, Bahnhof",49.320217,8.890213
 135946,Neu-Anspach,50.30096,8.51473
 310420,Neu-Anspach,50.30096,8.51473
 420071,Neu-Anspach,50.30096,8.51473
@@ -2354,7 +2354,7 @@ stop_id,stop_name,stop_lat,stop_lon
 267975,Neu-Edingen/Friedrichsfeld,49.44867,8.580125
 414074,Neu-Edingen/Friedrichsfeld,49.44867,8.580125
 590467,Neu-Edingen/Friedrichsfeld,49.44867,8.580125
-487028,Neu-Edingen/Friedrichsfeld, Bf,49.44833,8.580025
+487028,"Neu-Edingen/Friedrichsfeld, Bf",49.44833,8.580025
 172796,Neu-Isenburg,50.05305,8.665609
 435678,Neu-Isenburg,50.05305,8.665609
 678078,Neu-Isenburg,50.05305,8.665609
@@ -2373,7 +2373,7 @@ stop_id,stop_name,stop_lat,stop_lon
 238601,Neulußheim,49.2922,8.530075
 438745,Neulußheim,49.2922,8.530075
 559350,Neulußheim,49.2922,8.530075
-202154,Neulußheim, Bahnhof,49.29295,8.530671
+202154,"Neulußheim, Bahnhof",49.29295,8.530671
 153246,Neunkirchen Bf,50.784798,8.00593
 623005,Neustadt (Hessen) Bahnhof,50.85047,9.120807
 111912,Neustadt(Kr Marburg),50.85045,9.120643
@@ -2384,12 +2384,12 @@ stop_id,stop_name,stop_lat,stop_lon
 199632,Neustadt(Weinstr)Hbf,49.349552,8.140757
 212326,Neustadt(Weinstr)Hbf,49.349552,8.140757
 355202,Neustadt(Weinstr)Hbf,49.349552,8.140757
-24514,Neustadt, Böbig,49.353943,8.157817
-227129,Neustadt, Hauptbahnhof,49.349648,8.141584
-26722,Neustadt, Hauptbahnhof,49.349648,8.141584
-286766,Neustadt, Hauptbahnhof,49.349648,8.141584
-44915,Neustadt, Hauptbahnhof,49.349934,8.14038
-177524,Neustadt, Süd,49.341034,8.156963
+24514,"Neustadt, Böbig",49.353943,8.157817
+227129,"Neustadt, Hauptbahnhof",49.349648,8.141584
+26722,"Neustadt, Hauptbahnhof",49.349648,8.141584
+286766,"Neustadt, Hauptbahnhof",49.349648,8.141584
+44915,"Neustadt, Hauptbahnhof",49.349934,8.14038
+177524,"Neustadt, Süd",49.341034,8.156963
 259611,Neustadt-Böbig,49.354244,8.158313
 415619,Neustadt-Böbig,49.354244,8.158313
 84237,Neustadt-Böbig,49.354244,8.158313
@@ -2425,7 +2425,7 @@ stop_id,stop_name,stop_lat,stop_lon
 268199,Nieder-Ohmen,50.644966,9.034133
 498152,Nieder-Ohmen,50.644966,9.034133
 611625,Nieder-Ohmen,50.644966,9.034133
-171983,Nieder-Olm, Bahnhof,49.905193,8.204691
+171983,"Nieder-Olm, Bahnhof",49.905193,8.204691
 116629,Niederbrechen,50.359596,8.159856
 324488,Niederbrechen,50.359596,8.159856
 681951,Niederbrechen,50.359596,8.159856
@@ -2449,7 +2449,7 @@ stop_id,stop_name,stop_lat,stop_lon
 236804,Niederheimbach,50.036064,7.805471
 547410,Niederheimbach,50.036064,7.805471
 624928,Niederheimbach,50.036064,7.805471
-490338,Niederheimbach, Bahnhof,50.036106,7.80539
+490338,"Niederheimbach, Bahnhof",50.036106,7.80539
 443897,Niederhöchstadt,50.154198,8.547237
 8413,Niederhöchstadt,50.154198,8.547237
 97889,Niederhöchstadt,50.154198,8.547237
@@ -2484,7 +2484,7 @@ stop_id,stop_name,stop_lat,stop_lon
 472363,Niedersteinbach,50.086597,9.148562
 374468,Niederstetten,49.403572,9.915079
 476866,Niederstetten,49.403572,9.915079
-161649,Niederstetten, Bahnhof,49.403515,9.915281
+161649,"Niederstetten, Bahnhof",49.403515,9.915281
 561871,Niederwalgern,50.7366,8.708379
 595207,Niederwalgern,50.7366,8.708379
 139643,Niederweimar,50.756744,8.73382
@@ -2495,10 +2495,10 @@ stop_id,stop_name,stop_lat,stop_lon
 134785,Nierstein,49.872,8.34281
 22939,Nierstein,49.872,8.34281
 8019,Nierstein,49.872,8.34281
-198083,Nierstein, Bahnhof,49.87214,8.342717
+198083,"Nierstein, Bahnhof",49.87214,8.342717
 507754,Niklashausen,49.7017,9.613916
 9222,Niklashausen,49.7017,9.613916
-428826,Niklashausen, Bahnhof,49.701958,9.613653
+428826,"Niklashausen, Bahnhof",49.701958,9.613653
 310086,Nordheim (Württ),49.109318,9.148685
 22372,Nordheim(Württ),49.109383,9.148811
 255554,Nordheim(Württ),49.109383,9.148811
@@ -2506,7 +2506,7 @@ stop_id,stop_name,stop_lat,stop_lon
 124106,Norheim,49.808807,7.812291
 457305,Norheim,49.808807,7.812291
 75801,Norheim,49.808807,7.812291
-175535,Norheim, Bahnhof,49.808697,7.811893
+175535,"Norheim, Bahnhof",49.808697,7.811893
 233785,Ober Ramstadt,49.83205,8.743744
 416280,Ober Ramstadt,49.83205,8.743744
 534194,Ober Ramstadt,49.83205,8.743744
@@ -2525,7 +2525,7 @@ stop_id,stop_name,stop_lat,stop_lon
 503341,Obernau,49.934536,9.136088
 156761,Oberndorf(Wittgenstein),50.95224,8.300167
 492315,Oberndorf(Wittgenstein),50.95224,8.300167
-106110,Oberschefflenz, Bahnhof,49.416965,9.278842
+106110,"Oberschefflenz, Bahnhof",49.416965,9.278842
 688676,Obersinn,50.20902,9.617798
 75952,Obersinn,50.20902,9.617804
 80558,Obersinn,50.20902,9.617798
@@ -2564,7 +2564,7 @@ stop_id,stop_name,stop_lat,stop_lon
 220612,Ockenheim,49.950554,7.965441
 576736,Ockenheim,49.950554,7.965441
 92957,Ockenheim,49.950554,7.965441
-650968,Ockenheim, Bahnhof,49.9504,7.96626
+650968,"Ockenheim, Bahnhof",49.9504,7.96626
 140689,Odenheim,49.178997,8.746465
 329296,Odenheim Bf,49.17902,8.746388
 495282,Odenheim Bf,49.17902,8.746388
@@ -2608,23 +2608,23 @@ stop_id,stop_name,stop_lat,stop_lon
 530393,Oftersheim,49.373505,8.579013
 628245,Oftersheim,49.373505,8.579013
 75165,Oftersheim,49.373505,8.579013
-410460,Oftersheim, Bahnhof,49.37335,8.578992
+410460,"Oftersheim, Bahnhof",49.37335,8.578992
 27210,Okarben,50.252663,8.75335
 512630,Okarben,50.252663,8.75335
 583785,Okarben,50.252663,8.75335
 561982,Olsbrücken,49.53807,7.652759
 581682,Olsbrücken,49.53807,7.652759
 678116,Olsbrücken,49.53807,7.652759
-318036,Olsbrücken, Bahnhof,49.53798,7.65291
+318036,"Olsbrücken, Bahnhof",49.53798,7.65291
 145810,Oppenheim,49.85756,8.358078
 577862,Oppenheim,49.85756,8.358078
 624939,Oppenheim,49.85756,8.358078
-332641,Oppenheim, Bahnhof,49.857212,8.35824
+332641,"Oppenheim, Bahnhof",49.857212,8.35824
 554383,Ortenberg-Bleichenbach Bahnhof,50.32043,9.051369
 463050,Ortenberg-Effolderbach Bahnhof,50.33847,9.007568
 129618,Osterburken,49.429657,9.422692
 363111,Osterburken,49.429657,9.422692
-264962,Osterburken, Bahnhof,49.430008,9.4226
+264962,"Osterburken, Bahnhof",49.430008,9.4226
 198726,Ostheim(Kr Hanau),50.2191,8.903381
 543069,Ostheim(Kr Hanau),50.2191,8.903381
 75582,Ostheim(Kr Hanau),50.2191,8.903381
@@ -2634,8 +2634,8 @@ stop_id,stop_name,stop_lat,stop_lon
 12899,Osthofen,49.70542,8.325988
 148046,Osthofen,49.70542,8.325988
 534159,Osthofen,49.70542,8.325988
-386526,Osthofen, Bahnhof,49.705414,8.326017
-483307,Otterbach, Bahnhof,49.483814,7.729186
+386526,"Osthofen, Bahnhof",49.705414,8.326017
+483307,"Otterbach, Bahnhof",49.483814,7.729186
 18033,Otzberg Lengfeld,49.839455,8.902737
 410628,Otzberg Lengfeld,49.839455,8.902737
 462857,Otzberg Lengfeld,49.839455,8.902737
@@ -2643,7 +2643,7 @@ stop_id,stop_name,stop_lat,stop_lon
 25288,Partenstein,50.03838,9.523993
 255638,Partenstein,50.03838,9.52399
 511780,Partenstein,50.03838,9.52399
-43368,Pfeddersheim, Bahnhof,49.634644,8.279952
+43368,"Pfeddersheim, Bahnhof",49.634644,8.279952
 132503,Pfungstadt,49.806225,8.607033
 300299,Pfungstadt,49.806225,8.607033
 57012,Pfungstadt,49.806225,8.607033
@@ -2658,21 +2658,21 @@ stop_id,stop_name,stop_lat,stop_lon
 140195,Pirmasens Nord,49.259216,7.604401
 274759,Pirmasens Nord,49.259216,7.604401
 694319,Pirmasens Nord,49.259216,7.604401
-416751,Pirmasens, Hauptbahnhof,49.206184,7.598148
-411281,Pirmasens, Nord,49.259148,7.604571
+416751,"Pirmasens, Hauptbahnhof",49.206184,7.598148
+411281,"Pirmasens, Nord",49.259148,7.604571
 394576,Ramsen,49.535187,8.022562
 430359,Ramsen,49.535187,8.022562
 596497,Ramsen,49.535187,8.022562
-659282,Ramsen (Pfalz), Bahnhof,49.5352,8.022027
+659282,"Ramsen (Pfalz), Bahnhof",49.5352,8.022027
 433107,Ramstein,49.448753,7.556715
 439291,Ramstein,49.448753,7.556715
 71904,Ramstein,49.448753,7.556715
-39423,Ramstein, Bahnhof,49.448624,7.556808
+39423,"Ramstein, Bahnhof",49.448624,7.556808
 432303,Ranstadt,50.35673,8.983134
 537732,Ranstadt,50.35673,8.983134
 616639,Ranstadt,50.35673,8.983134
 621590,Ranstadt Bahnhof,50.356598,8.983758
-345992,Rathaus, Wörth am Rhein,49.05242,8.249809
+345992,"Rathaus, Wörth am Rhein",49.05242,8.249809
 117579,Raunheim,50.009712,8.454604
 242291,Raunheim,50.009712,8.454604
 503772,Raunheim,50.009712,8.454604
@@ -2680,7 +2680,7 @@ stop_id,stop_name,stop_lat,stop_lon
 102848,Reckweilerhof,49.606915,7.609127
 19615,Reckweilerhof,49.606915,7.609127
 20683,Reckweilerhof,49.606915,7.609127
-200957,Reckweilerhof, Bahnhof,49.607285,7.609171
+200957,"Reckweilerhof, Bahnhof",49.607285,7.609171
 594240,Reichelsheim (Wetterau) Bahnhof,50.36011,8.874663
 115989,Reichelsheim (Wetterau)-Beienheim Bahnhof,50.358826,8.820802
 236121,Reichelsheim (Wetterau)-Weckesheim Bahnhof,50.359657,8.842539
@@ -2692,15 +2692,15 @@ stop_id,stop_name,stop_lat,stop_lon
 55387,Reichenberg(Unterfr),49.73113,9.91289
 270942,Reicholzheim,49.728516,9.527543
 388132,Reicholzheim,49.728516,9.527543
-675110,Reicholzheim, Bahnhof,49.728836,9.527415
+675110,"Reicholzheim, Bahnhof",49.728836,9.527415
 137307,Reihen,49.21643,8.920591
 40140,Reihen,49.21643,8.920591
 430956,Reihen,49.21643,8.920591
-453853,Reihen, Bahnhof,49.216545,8.920459
+453853,"Reihen, Bahnhof",49.216545,8.920459
 133054,Reilsheim,49.353966,8.778836
 52121,Reilsheim,49.353966,8.778836
 543920,Reilsheim,49.353966,8.778836
-244000,Reilsheim, Bahnhof,49.35347,8.778553
+244000,"Reilsheim, Bahnhof",49.35347,8.778553
 336870,Reinheim (Odw.) Bahnhof,49.829163,8.834907
 55558,Reinheim(Odenw),49.829807,8.835689
 596642,Reinheim(Odenw),49.829807,8.835689
@@ -2708,7 +2708,7 @@ stop_id,stop_name,stop_lat,stop_lon
 229660,Reisen(Hess),49.57797,8.720015
 523138,Reisen(Hess),49.57797,8.720015
 524892,Reisen(Hess),49.57797,8.720015
-12408,Reisen, Bahnhof,49.577934,8.720072
+12408,"Reisen, Bahnhof",49.577934,8.720072
 555345,Reiskirchen Bahnhof,50.59777,8.829941
 358373,Reiskirchen(Kr Gi),50.597996,8.830701
 485113,Reiskirchen(Kr Gi),50.597996,8.830701
@@ -2727,9 +2727,9 @@ stop_id,stop_name,stop_lat,stop_lon
 453253,Rheinzabern Rappengasse,49.114838,8.273291
 478551,Rheinzabern Rappengasse,49.114838,8.273291
 515811,Rheinzabern Rappengasse,49.114838,8.273291
-173029,Rheinzabern, Alte Römerstraße,49.109425,8.273017
-119161,Rheinzabern, Bahnhof,49.119785,8.27422
-10178,Rheinzabern, Rappengasse,49.114433,8.273232
+173029,"Rheinzabern, Alte Römerstraße",49.109425,8.273017
+119161,"Rheinzabern, Bahnhof",49.119785,8.27422
+10178,"Rheinzabern, Rappengasse",49.114433,8.273232
 513039,Richen (b Eppingen),49.168354,8.936467
 576697,Richen(b Eppingen),49.167847,8.936554
 592137,Richen(b Eppingen),49.167847,8.936554
@@ -2737,7 +2737,7 @@ stop_id,stop_name,stop_lat,stop_lon
 25376,Riedrode,49.647488,8.49595
 354452,Riedrode,49.647488,8.49595
 492036,Riedrode,49.647488,8.49595
-536356,Riedrode, Bahnhof,49.647488,8.496059
+536356,"Riedrode, Bahnhof",49.647488,8.496059
 184862,Riedstadt-Goddelau,49.83323,8.489187
 319674,Riedstadt-Goddelau,49.83323,8.489187
 492684,Riedstadt-Goddelau,49.83323,8.489187
@@ -2752,29 +2752,29 @@ stop_id,stop_name,stop_lat,stop_lon
 133928,Rimbach Schulzentrum Bf,49.6223,8.75364
 275756,Rimbach Schulzentrum Bf,49.6223,8.75364
 372131,Rimbach Schulzentrum Bf,49.6223,8.75364
-102063,Rimbach, Bahnhof,49.62747,8.757478
-525834,Rimbach, Schulzentrum Bf,49.622284,8.753642
+102063,"Rimbach, Bahnhof",49.62747,8.757478
+525834,"Rimbach, Schulzentrum Bf",49.622284,8.753642
 279580,Rinnthal,49.217075,7.927918
 585625,Rinnthal,49.217075,7.927918
 10789,Rippberg,49.62472,9.291189
 548288,Rippberg,49.62472,9.291189
 563002,Rippberg,49.62472,9.291189
-330867,Rippberg, Bahnhof,49.62467,9.291005
+330867,"Rippberg, Bahnhof",49.62467,9.291005
 128912,Rockenhausen,49.628384,7.81727
 149145,Rockenhausen,49.628384,7.81727
 236959,Rockenhausen,49.628384,7.81727
-585673,Rockenhausen, Bahnhof,49.628056,7.817445
+585673,"Rockenhausen, Bahnhof",49.628056,7.817445
 290461,Rodalben,49.23895,7.632768
 607222,Rodalben,49.23895,7.632768
 630007,Rodalben,49.23895,7.632768
-586466,Rodalben, Bahnhof,49.239117,7.632437
+586466,"Rodalben, Bahnhof",49.239117,7.632437
 54014,Rodenbach (MKK) Bahnhof,50.147274,9.012675
 147789,Rodenbach(Dillkr),50.77399,8.205263
 597625,Rodenbach(Dillkr),50.77399,8.205263
 245863,Rodenbach(b Hanau),50.14707,9.012153
 424360,Rodenbach(b Hanau),50.14707,9.012153
 514682,Rodenbach(b Hanau),50.14707,9.012153
-474502,Rodgau Weiskirchen, Bahnhof Mast 03,50.05257,8.877849
+474502,"Rodgau Weiskirchen, Bahnhof Mast 03",50.05257,8.877849
 591764,Rodgau-Dudenhofen,50.010662,8.884482
 61139,Rodgau-Dudenhofen,50.010662,8.884482
 693030,Rodgau-Dudenhofen,50.010662,8.884482
@@ -2815,11 +2815,11 @@ stop_id,stop_name,stop_lat,stop_lon
 241835,Rosbach(Sieg),50.79677,7.608767
 189808,Rosenberg(Baden),49.457584,9.471425
 622399,Rosenberg(Baden),49.457584,9.471425
-333871,Rosenberg, Bahnhof,49.457462,9.471234
+333871,"Rosenberg, Bahnhof",49.457462,9.471234
 115539,Rot-Malsch,49.243385,8.65221
 124479,Rot-Malsch,49.243385,8.65221
 389307,Rot-Malsch,49.243385,8.65221
-670808,Rot-Malsch, Bahnhof,49.243084,8.652151
+670808,"Rot-Malsch, Bahnhof",49.243084,8.652151
 2113,Rotenhain,50.60162,7.893375
 270475,Rotenhain,50.60162,7.893375
 337953,Rotenhain,50.60162,7.893375
@@ -2827,7 +2827,7 @@ stop_id,stop_name,stop_lat,stop_lon
 394073,Roßbach(Pfalz),49.572113,7.623254
 435055,Roßbach(Pfalz),49.572113,7.623254
 616389,Roßbach(Pfalz),49.572113,7.623254
-9986,Roßbach, Bahnhof,49.572227,7.623256
+9986,"Roßbach, Bahnhof",49.572227,7.623256
 224716,Runkel,50.4053,8.159441
 320124,Runkel,50.4053,8.159441
 336952,Runkel,50.4053,8.159441
@@ -2854,8 +2854,8 @@ stop_id,stop_name,stop_lat,stop_lon
 332436,Rülzheim Freizeitzentrum,49.15159,8.279365
 3870,Rülzheim Freizeitzentrum,49.15159,8.279365
 95052,Rülzheim Freizeitzentrum,49.15159,8.279365
-565320,Rülzheim, Bahnhof,49.160778,8.290255
-209916,Rülzheim, Freizeitzentrum,49.151577,8.279368
+565320,"Rülzheim, Bahnhof",49.160778,8.290255
+209916,"Rülzheim, Freizeitzentrum",49.151577,8.279368
 116908,Rüsselsheim,49.99164,8.413583
 557596,Rüsselsheim,49.99164,8.413583
 606512,Rüsselsheim,49.99164,8.413583
@@ -2873,7 +2873,7 @@ stop_id,stop_name,stop_lat,stop_lon
 16317,Saulheim,49.873806,8.154249
 489882,Saulheim,49.873806,8.154249
 510872,Saulheim,49.873806,8.154249
-169847,Saulheim, Bahnhof,49.873974,8.154502
+169847,"Saulheim, Bahnhof",49.873974,8.154502
 546548,Scheuerfeld Bf,50.79185,7.836597
 126346,Scheuerfeld(Sieg),50.79194,7.837031
 534118,Scheuerfeld(Sieg),50.79194,7.837031
@@ -2883,8 +2883,8 @@ stop_id,stop_name,stop_lat,stop_lon
 33272,Schifferstadt Süd,49.37448,8.376973
 575692,Schifferstadt Süd,49.37448,8.376973
 596339,Schifferstadt Süd,49.37448,8.376973
-175896,Schifferstadt, Bahnhof,49.39283,8.364914
-561416,Schifferstadt, Südbahnhof,49.374542,8.376934
+175896,"Schifferstadt, Bahnhof",49.39283,8.364914
+561416,"Schifferstadt, Südbahnhof",49.374542,8.376934
 21141,Schimborn,50.057762,9.186811
 345895,Schimborn,50.057762,9.186811
 618029,Schimborn,50.057762,9.186811
@@ -2892,8 +2892,8 @@ stop_id,stop_name,stop_lat,stop_lon
 244366,Schlierbach(Schwalm-Eder-Kr.),50.968784,9.201445
 435537,Schlierbach(Schwalm-Eder-Kr.),50.968784,9.201445
 635494,Schlierbach(Schwalm-Eder-Kr.),50.968784,9.201445
-115636,Schlierbach, Orthopädische Kl.,49.410004,8.774932
-565571,Schlierbach-Ziegelhausen, Bhf,49.415333,8.76046
+115636,"Schlierbach, Orthopädische Kl.",49.410004,8.774932
+565571,"Schlierbach-Ziegelhausen, Bhf",49.415333,8.76046
 456023,Schlüchtern,50.34118,9.510039
 660557,Schlüchtern,50.34118,9.510039
 304351,Schlüchtern Bahnhof,50.341328,9.509978
@@ -2905,7 +2905,7 @@ stop_id,stop_name,stop_lat,stop_lon
 316117,Schopp,49.358868,7.687317
 38142,Schopp,49.358868,7.687317
 72274,Schopp,49.358868,7.687317
-534869,Schopp, Bahnhof,49.358917,7.687261
+534869,"Schopp, Bahnhof",49.358917,7.687261
 104416,Schrozberg Bahnhof,49.346893,9.975055
 20021,Schwalbach (Taunus) Limes Bahnhof,50.15459,8.528219
 593437,Schwalbach (Taunus) Nord,50.1598,8.534647
@@ -2924,8 +2924,8 @@ stop_id,stop_name,stop_lat,stop_lon
 275034,Schwetzingen Nordstadt,49.394554,8.571464
 567486,Schwetzingen Nordstadt,49.394554,8.571464
 640139,Schwetzingen Nordstadt,49.394554,8.571464
-692674,Schwetzingen, Bahnhof,49.38373,8.578462
-451314,Schwetzingen, Nordstadt,49.394554,8.571464
+692674,"Schwetzingen, Bahnhof",49.38373,8.578462
+451314,"Schwetzingen, Nordstadt",49.394554,8.571464
 132335,Schwetzingen-Hirschacker,49.4061,8.557187
 178015,Schwetzingen-Hirschacker,49.406815,8.556309
 272679,Schwetzingen-Hirschacker,49.4061,8.557187
@@ -2950,7 +2950,7 @@ stop_id,stop_name,stop_lat,stop_lon
 327628,Seckach,49.44116,9.338469
 358689,Seckach,49.44116,9.338469
 90109,Seckach,49.44116,9.338469
-73051,Seckach, Bahnhof,49.441105,9.338446
+73051,"Seckach, Bahnhof",49.441105,9.338446
 603676,Seligenstadt Bahnhof,50.041615,8.967458
 299630,Seligenstadt(Hess),50.04146,8.967472
 311461,Seligenstadt(Hess),50.04146,8.967472
@@ -2958,7 +2958,7 @@ stop_id,stop_name,stop_lat,stop_lon
 681085,Selters (Taunus)-Niederselters Bahnhof,50.332577,8.230277
 580324,Sennfeld,49.37876,9.380518
 686574,Sennfeld,49.37876,9.380518
-404017,Sennfeld, Bahnhof,49.37892,9.38116
+404017,"Sennfeld, Bahnhof",49.37892,9.38116
 226072,Seulberg,50.241905,8.646005
 595629,Seulberg,50.241905,8.646005
 91141,Seulberg,50.241905,8.646005
@@ -2984,8 +2984,8 @@ stop_id,stop_name,stop_lat,stop_lon
 138992,Sinsheim(Elsenz) Hbf,49.250355,8.8751
 160246,Sinsheim(Elsenz) Hbf,49.250355,8.8751
 567703,Sinsheim(Elsenz) Hbf,49.250355,8.8751
-259844,Sinsheim, Hauptbahnhof,49.25037,8.875068
-59050,Sinsheim, Museum/Arena,49.241642,8.899313
+259844,"Sinsheim, Hauptbahnhof",49.25037,8.875068
+59050,"Sinsheim, Museum/Arena",49.241642,8.899313
 252876,Solms,50.54568,8.406585
 5355,Solms,50.54568,8.406585
 659050,Solms,50.54568,8.406585
@@ -2994,19 +2994,19 @@ stop_id,stop_name,stop_lat,stop_lon
 490434,Sondernheim,49.19498,8.360272
 651298,Sondernheim,49.19498,8.360272
 74791,Sondernheim,49.19498,8.360272
-424132,Sondernheim, Bahnhof,49.195244,8.360306
+424132,"Sondernheim, Bahnhof",49.195244,8.360306
 146942,Speyer Hbf,49.32412,8.427949
 504676,Speyer Hbf,49.32412,8.427949
 66965,Speyer Hbf,49.32412,8.427949
 200367,Speyer Nord-West,49.33359,8.419263
 573170,Speyer Nord-West,49.33359,8.419263
 665281,Speyer Nord-West,49.33359,8.419263
-568245,Speyer, Hbf/ZOB,49.324585,8.427976
-20009,Speyer, Nord/West,49.333157,8.420044
+568245,"Speyer, Hbf/ZOB",49.324585,8.427976
+20009,"Speyer, Nord/West",49.333157,8.420044
 306831,Sprendlingen(Rheinhess),49.858948,7.981795
 325624,Sprendlingen(Rheinhess),49.858948,7.981795
 439769,Sprendlingen(Rheinhess),49.858948,7.981795
-93686,Sprendlingen, Bahnhof,49.85911,7.981531
+93686,"Sprendlingen, Bahnhof",49.85911,7.981531
 304280,Spöck Richard-Hecht-Schule,49.112812,8.505114
 460971,Spöck Richard-Hecht-Schule,49.11276,8.504989
 527889,Spöck Richard-Hecht-Schule,49.112812,8.505114
@@ -3015,7 +3015,7 @@ stop_id,stop_name,stop_lat,stop_lon
 29339,St Ilgen-Sandhausen,49.341267,8.668715
 650833,St Ilgen-Sandhausen,49.341267,8.668715
 272708,St. Goar Bahnhof,50.15013,7.714561
-442420,St. Ilgen, Bahnhof,49.341328,8.668716
+442420,"St. Ilgen, Bahnhof",49.341328,8.668716
 172240,Stadtallendorf,50.825207,9.015296
 656377,Stadtallendorf,50.825207,9.015296
 413480,Stadtallendorf Bahnhof,50.82571,9.01364
@@ -3025,11 +3025,11 @@ stop_id,stop_name,stop_lat,stop_lon
 150241,Staudernheim,49.780582,7.693103
 19410,Staudernheim,49.780582,7.693103
 347882,Staudernheim,49.780582,7.693103
-417503,Staudernheim, Bahnhof,49.780727,7.693891
+417503,"Staudernheim, Bahnhof",49.780727,7.693891
 252428,Steinalben,49.31624,7.651613
 560061,Steinalben,49.31624,7.651613
 630529,Steinalben,49.31624,7.651613
-612488,Steinalben, Bahnhof,49.316257,7.651661
+612488,"Steinalben, Bahnhof",49.316257,7.651661
 445186,Steinau an der Straße Bahnhof,50.314045,9.443931
 144473,Steinau(Straße),50.31435,9.443162
 376685,Steinau(Straße),50.31435,9.443162
@@ -3043,7 +3043,7 @@ stop_id,stop_name,stop_lat,stop_lon
 163750,Steinsfurt,49.23582,8.907978
 530436,Steinsfurt,49.23582,8.907978
 625854,Steinsfurt,49.23582,8.907978
-344153,Steinsfurt, Bahnhof,49.236023,8.907784
+344153,"Steinsfurt, Bahnhof",49.236023,8.907784
 490005,Sterbfritz,50.312866,9.625417
 636146,Sterbfritz,50.312866,9.625417
 148952,Sterzhausen,50.861553,8.708698
@@ -3078,11 +3078,11 @@ stop_id,stop_name,stop_lat,stop_lon
 418020,Sulzbach(Taunus)Nord,50.13877,8.51758
 632785,Sulzbach(Taunus)Nord,50.13877,8.51758
 63684,Sulzbach(Taunus)Nord,50.13877,8.51758
-362807,Sulzbach, Bahnhof,49.576206,8.656112
+362807,"Sulzbach, Bahnhof",49.576206,8.656112
 389643,Sulzbachtal,49.522743,7.663672
 496349,Sulzbachtal,49.522743,7.663672
 527527,Sulzbachtal,49.522743,7.663672
-586384,Sulzbachtal, Bahnhof,49.52259,7.66368
+586384,"Sulzbachtal, Bahnhof",49.52259,7.66368
 364421,Sulzfeld (Baden),49.108185,8.852583
 259282,Sulzfeld(Baden),49.108173,8.852544
 444366,Sulzfeld(Baden),49.108173,8.852544
@@ -3096,18 +3096,18 @@ stop_id,stop_name,stop_lat,stop_lon
 689075,Sülzbach Schule,49.144833,9.351532
 392743,Tauberbischofsheim,49.62363,9.658294
 596110,Tauberbischofsheim,49.62363,9.658294
-169990,Tauberbischofsheim, Bahnhof,49.623734,9.658551
+169990,"Tauberbischofsheim, Bahnhof",49.623734,9.658551
 575027,Thaleischweiler-Fröschen,49.26126,7.578673
 614944,Thaleischweiler-Fröschen,49.26126,7.578673
 659547,Thaleischweiler-Fröschen,49.26126,7.578673
-381451,Thaleischweiler-Fröschen, Bf,49.26129,7.578502
+381451,"Thaleischweiler-Fröschen, Bf",49.26129,7.578502
 400802,Thüngersheim,49.877983,9.840298
 434920,Thüngersheim,49.877987,9.840298
 87887,Thüngersheim,49.877983,9.840298
 148399,Trechtingshausen,50.00904,7.852359
 290421,Trechtingshausen,50.00904,7.852359
 508639,Trechtingshausen,50.00904,7.852359
-230210,Trechtingshausen, Bahnhof,50.00899,7.852389
+230210,"Trechtingshausen, Bahnhof",50.00899,7.852389
 383235,Treysa,50.91066,9.185673
 607310,Treysa,50.91066,9.185673
 683851,Treysa,50.91066,9.185673
@@ -3130,7 +3130,7 @@ stop_id,stop_name,stop_lat,stop_lon
 39716,Uhlerborn,50.010674,8.142584
 426889,Uhlerborn,50.010674,8.142584
 639070,Uhlerborn,50.010674,8.142584
-224879,Uhlerborn, Bahnhof,50.01094,8.142986
+224879,"Uhlerborn, Bahnhof",50.01094,8.142986
 107446,Untergriesheim,49.265102,9.222779
 139851,Untergriesheim,49.265102,9.222779
 244318,Untergriesheim,49.264626,9.222931
@@ -3173,7 +3173,7 @@ stop_id,stop_name,stop_lat,stop_lon
 110653,Wachenheim(Pfalz),49.4393,8.191152
 287699,Wachenheim(Pfalz),49.4393,8.191152
 638513,Wachenheim(Pfalz),49.4393,8.191152
-656491,Wachenheim/Wstr, Bahnhof,49.439285,8.191135
+656491,"Wachenheim/Wstr, Bahnhof",49.439285,8.191135
 359459,Wackershofen,49.13725,9.697115
 423528,Wackershofen,49.13725,9.697115
 557359,Wackershofen Bahnhof (Freilandmuseum),49.13721,9.69734
@@ -3185,16 +3185,16 @@ stop_id,stop_name,stop_lat,stop_lon
 135580,Wahlheim,49.719105,8.09992
 384963,Wahlheim,49.719105,8.09992
 488881,Wahlheim,49.719105,8.09992
-220097,Wahlheim, Bahnhof,49.719154,8.100064
+220097,"Wahlheim, Bahnhof",49.719154,8.100064
 192648,Waibstadt,49.30094,8.919354
 256863,Waibstadt,49.30094,8.919354
 626944,Waibstadt,49.30094,8.919354
-399132,Waibstadt, Bahnhof,49.30103,8.919067
+399132,"Waibstadt, Bahnhof",49.30103,8.919067
 561798,Waldfischbach,49.288338,7.651516
 684895,Waldfischbach,49.288338,7.651516
 98598,Waldfischbach,49.288338,7.651516
-3714,Waldfischbach, Bahnhof,49.288345,7.651643
-405184,Waldhof, Bahnhof,49.52582,8.482297
+3714,"Waldfischbach, Bahnhof",49.288345,7.651643
+405184,"Waldhof, Bahnhof",49.52582,8.482297
 542048,Waldsolms-Brandoberndorf,50.43166,8.493549
 223786,Waldsolms-Hasselborn,50.406624,8.495326
 280240,Wallau(Lahn),50.922897,8.47001
@@ -3204,13 +3204,13 @@ stop_id,stop_name,stop_lat,stop_lon
 391837,Walldorf(Hess),50.00134,8.580811
 199612,Walldürn,49.578022,9.367542
 401868,Walldürn,49.578022,9.367542
-408495,Walldürn, Bahnhof,49.578255,9.367434
+408495,"Walldürn, Bahnhof",49.578255,9.367434
 231434,Wallenrod,50.66406,9.331838
 361817,Wallenrod,50.66406,9.331838
 295498,Wallertheim,49.83265,8.049458
 391527,Wallertheim,49.83265,8.049458
 417221,Wallertheim,49.83265,8.049458
-49333,Wallertheim, Bahnhof,49.83268,8.049453
+49333,"Wallertheim, Bahnhof",49.83268,8.049453
 494169,Wartenberg-Angersbach Bahnhof,50.631138,9.446604
 213189,Weckesheim,50.35956,8.843673
 291937,Weckesheim,50.35956,8.843673
@@ -3226,10 +3226,10 @@ stop_id,stop_name,stop_lat,stop_lon
 260375,Weidenthal,49.417496,7.994912
 463566,Weidenthal,49.417496,7.994912
 643689,Weidenthal,49.417496,7.994912
-627083,Weidenthal, Bahnhof,49.4179,7.993281
+627083,"Weidenthal, Bahnhof",49.4179,7.993281
 178549,Weikersheim,49.478462,9.905718
 87195,Weikersheim,49.478462,9.905718
-114453,Weikersheim, Bahnhof,49.478516,9.905947
+114453,"Weikersheim, Bahnhof",49.478516,9.905947
 55429,Weilburg,50.487274,8.268435
 558280,Weilburg,50.487274,8.268435
 57100,Weilburg,50.487274,8.268435
@@ -3245,7 +3245,7 @@ stop_id,stop_name,stop_lat,stop_lon
 365408,Weinheim(Bergstr)Hbf,49.553303,8.665351
 431500,Weinheim(Bergstr)Hbf,49.553303,8.665351
 669071,Weinheim(Bergstr)Hbf,49.553303,8.665351
-194868,Weinheim, Hauptbahnhof,49.55333,8.665697
+194868,"Weinheim, Hauptbahnhof",49.55333,8.665697
 227819,Weinheim-Lützelsachsen,49.528076,8.650173
 315278,Weinheim-Lützelsachsen,49.528076,8.650173
 585004,Weinheim-Lützelsachsen,49.528076,8.650173
@@ -3259,12 +3259,12 @@ stop_id,stop_name,stop_lat,stop_lon
 285249,Weisenheim(Sand),49.51393,8.249874
 360294,Weisenheim(Sand),49.51393,8.249874
 7556,Weisenheim(Sand),49.51393,8.249874
-441575,Weisenheim/S, Bahnhof,49.513866,8.250056
+441575,"Weisenheim/S, Bahnhof",49.513866,8.250056
 131477,Weiterstadt,49.909706,8.579385
 240739,Weiterstadt,49.909706,8.579385
 391337,Weiterstadt,49.909706,8.579385
 141907,Weiterstadt Bahnhof,49.910206,8.578705
-141857,Welgesheim, Bahnhof,49.878582,7.956666
+141857,"Welgesheim, Bahnhof",49.878582,7.956666
 430867,Welgesheim-Zotzenheim,49.878574,7.956653
 486243,Welgesheim-Zotzenheim,49.878574,7.956653
 588133,Welgesheim-Zotzenheim,49.878574,7.956653
@@ -3275,7 +3275,7 @@ stop_id,stop_name,stop_lat,stop_lon
 633822,Werdorf,50.59283,8.417263
 150904,Wertheim,49.762024,9.513095
 604151,Wertheim,49.762024,9.513095
-286989,Wertheim, Bahnhof,49.761837,9.51306
+286989,"Wertheim, Bahnhof",49.761837,9.51306
 44309,Wertheim-Bestenheid,49.786182,9.499932
 644926,Wertheim-Bestenheid,49.786182,9.499932
 663812,Westheim-Langendorf,50.125774,9.932748
@@ -3317,11 +3317,11 @@ stop_id,stop_name,stop_lat,stop_lon
 179200,Wiesloch-Walldorf,49.29135,8.664146
 295542,Wiesloch-Walldorf,49.29135,8.664146
 45288,Wiesloch-Walldorf,49.29135,8.664146
-458602,Wiesloch-Walldorf, Bf,49.29107,8.664224
+458602,"Wiesloch-Walldorf, Bf",49.29107,8.664224
 173472,Wilgartswiesen,49.209435,7.883823
 362738,Wilgartswiesen,49.209435,7.883823
 674028,Wilgartswiesen,49.209435,7.883823
-527242,Wilgartswiesen, Bahnhof,49.209198,7.883103
+527242,"Wilgartswiesen, Bahnhof",49.209198,7.883103
 111288,Wilhelmsdorf,50.350147,8.480809
 348427,Wilhelmsdorf,50.350147,8.480809
 599956,Wilhelmsdorf,50.350147,8.480809
@@ -3340,13 +3340,13 @@ stop_id,stop_name,stop_lat,stop_lon
 134615,Winnweiler,49.57055,7.855955
 389634,Winnweiler,49.57055,7.855955
 452113,Winnweiler,49.57055,7.855955
-486250,Winnweiler, Bahnhof,49.570362,7.85636
+486250,"Winnweiler, Bahnhof",49.570362,7.85636
 103821,Wirtheim,50.22603,9.256539
 386386,Wirtheim,50.22603,9.256539
 549065,Wirtheim,50.22603,9.256539
 372156,Wittighausen,49.618404,9.846243
 621396,Wittighausen,49.618404,9.846243
-75884,Wittighausen, Bahnhof,49.618343,9.846254
+75884,"Wittighausen, Bahnhof",49.618343,9.846254
 144837,Wolfgang(Kr Hanau),50.123463,8.958101
 553735,Wolfgang(Kr Hanau),50.123463,8.958101
 62524,Wolfgang(Kr Hanau),50.123463,8.958101
@@ -3356,11 +3356,11 @@ stop_id,stop_name,stop_lat,stop_lon
 232079,Wolfstein,49.58428,7.610287
 256221,Wolfstein,49.58428,7.610287
 340524,Wolfstein,49.58428,7.610287
-260928,Wolfstein, Bahnhof,49.58418,7.610527
+260928,"Wolfstein, Bahnhof",49.58418,7.610527
 141666,Worms Hbf,49.63494,8.356448
 277642,Worms Hbf,49.63494,8.356448
 413736,Worms Hbf,49.63494,8.356448
-312313,Worms, Hauptbahnhof,49.635113,8.356955
+312313,"Worms, Hauptbahnhof",49.635113,8.356955
 241787,Worms-Pfeddersheim,49.634632,8.279654
 433249,Worms-Pfeddersheim,49.634632,8.279654
 569958,Worms-Pfeddersheim,49.634632,8.279654
@@ -3376,7 +3376,7 @@ stop_id,stop_name,stop_lat,stop_lon
 445438,Wörrstadt,49.846252,8.114712
 474828,Wörrstadt,49.846252,8.114712
 577570,Wörrstadt,49.846252,8.114712
-127127,Wörrstadt, Bahnhof,49.846153,8.114302
+127127,"Wörrstadt, Bahnhof",49.846153,8.114302
 195692,Wörsdorf,50.24475,8.249323
 223791,Wörsdorf,50.24475,8.249323
 448546,Wörsdorf,50.24475,8.249323
@@ -3397,12 +3397,12 @@ stop_id,stop_name,stop_lat,stop_lon
 160325,Wörth(Rhein) Zügelstraße,49.052975,8.262016
 226957,Wörth(Rhein) Zügelstraße,49.052975,8.262016
 66980,Wörth(Rhein) Zügelstraße,49.052975,8.262016
-257162,Wörth, Badallee,49.055946,8.249885
-532652,Wörth, Badepark,49.058567,8.244037
-375227,Wörth, Bürgerpark,49.050858,8.254574
-231459,Wörth, Mozartstraße,49.05503,8.252059
-654182,Wörth, Zügelstr.,49.052975,8.262003
-625525,Wörth/Rh, Rathaus,49.052353,8.249777
+257162,"Wörth, Badallee",49.055946,8.249885
+532652,"Wörth, Badepark",49.058567,8.244037
+375227,"Wörth, Bürgerpark",49.050858,8.254574
+231459,"Wörth, Mozartstraße",49.05503,8.252059
+654182,"Wörth, Zügelstr.",49.052975,8.262003
+625525,"Wörth/Rh, Rathaus",49.052353,8.249777
 258159,Zaisenhausen,49.104755,8.816664
 26239,Zaisenhausen,49.104755,8.816664
 263362,Zaisenhausen,49.10475,8.81665
@@ -3420,27 +3420,27 @@ stop_id,stop_name,stop_lat,stop_lon
 360601,Zimmern(Main-Tauber),49.595356,9.79051
 130056,Zimmern(b Seckach),49.430412,9.371975
 410738,Zimmern(b Seckach),49.430412,9.371975
-133043,Zimmern, Bahnhof,49.430668,9.371279
-276812,Zimmern, Bahnhof,49.595303,9.790675
+133043,"Zimmern, Bahnhof",49.430668,9.371279
+276812,"Zimmern, Bahnhof",49.595303,9.790675
 176577,Zimmersrode,51.008144,9.225195
 578255,Zimmersrode,51.008144,9.225195
 628717,Zimmersrode,51.008144,9.225195
 397547,Zotzenbach,49.609367,8.75322
 472235,Zotzenbach,49.609367,8.75322
 78259,Zotzenbach,49.609367,8.75322
-242506,Zotzenbach, Bahnhof,49.609592,8.75331
+242506,"Zotzenbach, Bahnhof",49.609592,8.75331
 143168,Zuzenhausen,49.297394,8.821439
 276922,Zuzenhausen,49.297394,8.821439
 8087,Zuzenhausen,49.297394,8.821439
-605169,Zuzenhausen, Bahnhof,49.29743,8.821447
+605169,"Zuzenhausen, Bahnhof",49.29743,8.821447
 243375,Zwingenberg(Baden),49.41603,9.04283
 524214,Zwingenberg(Baden),49.41603,9.04283
 532927,Zwingenberg(Baden),49.41603,9.04283
 175987,Zwingenberg(Bergstr),49.725903,8.609119
 523913,Zwingenberg(Bergstr),49.725903,8.609119
 565623,Zwingenberg(Bergstr),49.725903,8.609119
-123668,Zwingenberg, Bahnhof,49.725887,8.608924
-5525,Zwingenberg/Bd, Bahnhof,49.415916,9.042945
+123668,"Zwingenberg, Bahnhof",49.725887,8.608924
+5525,"Zwingenberg/Bd, Bahnhof",49.415916,9.042945
 107109,Züttlingen,49.291656,9.329117
 355679,Züttlingen,49.291656,9.329117
 444142,Züttlingen,49.291656,9.329117
