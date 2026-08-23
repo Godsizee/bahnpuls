@@ -1,0 +1,4 @@
+stop_name,parent_station,stop_id,stop_lat,stop_lon,location_type,platform_code
+Vorderpfalz Nord,,S1,49.5100,8.4000,,
+Doppelstunden-Halt,,S2,49.5500,8.3500,,
+Hinterpfalz Sued,,S3,49.6000,8.3000,,
