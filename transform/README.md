@@ -269,7 +269,12 @@ steht als vierter Halt im Unit-Test `int_de_der_name_entscheidet_die_gebietszuge
 mit der alten Regel schlägt er fehl.
 
 Die Zahl, um die es ging, ist an Produktionsdaten bestätigt: `halte_gebietsfremd` liegt am
-19.–21.08. bei **43,1 / 42,4 / 42,3 %** — die Stichprobe hatte 43,3 % gemessen.
+19.–21.08. bei **44,3 / 43,6 / 43,5 %** — die Stichprobe hatte 43,3 % gemessen. (Mit der
+alten, gleichrangigen Regel waren es 43,1 / 42,4 / 42,3 %: die Nummernkollisionen hatten
+gebietsfremde Halte als Gebietshalte gezählt.) Gegenprobe am ausgelieferten Stand: **keine
+einzige** benannte Bezeichnung in `mart_engpassknoten` steht außerhalb der Gebietsliste,
+`Klandorf` und `Pernink` sind weg, und die Spitze der Rangliste ist wieder die Frankfurter
+Stammstrecke.
 
 `assert_de_namensquote_bricht_nicht_ein` sieht sich lokal **keinen einzigen Tag** an: er
 verlangt mindestens 1.000 Halte je Betriebstag, und so groß ist keine Fixture. Grün heißt
