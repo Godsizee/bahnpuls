@@ -26,6 +26,7 @@ import (
 	"bahnpuls/internal/gtfsrt"
 	"bahnpuls/internal/health"
 	"bahnpuls/internal/scope"
+	"bahnpuls/internal/static"
 	"bahnpuls/internal/writer"
 )
 
@@ -40,7 +41,8 @@ const dedupIdleWindow = 2 * time.Hour
 
 func main() {
 	feedURL := flag.String("feed-url", envOr("BAHNPULS_FEED_URL", "https://realtime.gtfs.de/realtime-free.pb"), "GTFS-RT feed URL")
-	scopePath := flag.String("scope-config", envOr("BAHNPULS_SCOPE_CONFIG", "config/scope_stops.csv"), "path to the target-area stop-list CSV")
+	scopePath := flag.String("scope-config", envOr("BAHNPULS_SCOPE_CONFIG", "config/scope_stops.csv"), "fallback target-area stop-list CSV, used until the static loader has derived one")
+	staticDir := flag.String("static-dir", envOr("BAHNPULS_STATIC_DIR", "data/static"), "directory of the versioned timetables; its derived stop list wins over -scope-config")
 	dataDir := flag.String("data-dir", envOr("BAHNPULS_DATA_DIR", "data/raw"), "base directory for partitioned Parquet output (Persistent Volume in production)")
 	heartbeatPath := flag.String("heartbeat-path", envOr("BAHNPULS_HEARTBEAT_PATH", "data/heartbeat.json"), "path to the heartbeat status file")
 	pollInterval := flag.Duration("poll-interval", envDurationOr("BAHNPULS_POLL_INTERVAL", defaultPollInterval), "how often to poll the feed")
@@ -53,11 +55,12 @@ func main() {
 
 	log.SetFlags(log.LstdFlags | log.Lmicroseconds)
 
-	scopeFilter, err := scope.LoadCSV(*scopePath)
+	gebietsliste := gebietslistePfad(*staticDir, *scopePath)
+	scopeFilter, err := scope.LoadCSV(gebietsliste)
 	if err != nil {
 		log.Fatalf("collector: load scope config: %v", err)
 	}
-	log.Printf("collector: scope loaded from %s, %d stops", *scopePath, scopeFilter.Len())
+	log.Printf("collector: scope loaded from %s, %d stops", gebietsliste, scopeFilter.Len())
 
 	if *pollInterval <= 0 {
 		log.Printf("collector: ignoring poll-interval %s, using %s: must be positive", *pollInterval, defaultPollInterval)
@@ -95,6 +98,14 @@ func main() {
 
 		case <-flushTimer.C:
 			flushBuffer(rawWriter)
+
+			// Die Gebietsliste zur selben Gelegenheit neu lesen. Sie aendert
+			// sich, wenn der Static-Loader eine Veroeffentlichung nachtraegt --
+			// und bis dahin sammelt der Collector gegen IDs, die es nicht mehr
+			// gibt (BPULS-073). Ohne das Neulesen wirkte die Ableitung erst beim
+			// naechsten Deploy, also im Zweifel gar nicht.
+			gebietsliste, scopeFilter = scopeNeuLaden(*staticDir, *scopePath, gebietsliste, scopeFilter)
+
 			// Gegen die naechste Stundengrenze zuruecksetzen, nicht "in einer
 			// Stunde": Flush und Poll teilen sich diesen Loop, ein blockierender
 			// Fetch verschiebt das Feuern nach hinten. Mit time.Hour bliebe die
@@ -293,6 +304,48 @@ func fetchFeed(ctx context.Context, client *http.Client, url string) ([]byte, er
 		return nil, fmt.Errorf("read body: %w", err)
 	}
 	return body, nil
+}
+
+// gebietslistePfad waehlt zwischen der abgeleiteten Liste auf dem Volume und
+// der mitgelieferten im Image.
+//
+// Die abgeleitete gewinnt, wenn es sie gibt -- eine Regel, kein Sonderfall. Die
+// Liste im Image kann nur ein Rebuild aendern, und genau daran ist sie am
+// 2026-08-22 veraltet: von 1.916 IDs standen nach der Veroeffentlichung noch 48
+// im Fahrplan, ohne dass ein Alarm anschlug (BPULS-073).
+func gebietslistePfad(staticDir, fallback string) string {
+	abgeleitet := static.GebietslistePfad(staticDir)
+	if _, err := os.Stat(abgeleitet); err == nil {
+		return abgeleitet
+	}
+	return fallback
+}
+
+// scopeNeuLaden sucht die Gebietsliste erneut und liest sie neu; bei jedem
+// Problem bleibt der bisherige Filter stehen.
+//
+// Der Pfad wird jedes Mal neu bestimmt, nicht nur beim Start: die abgeleitete
+// Liste entsteht erst mit dem ersten Static-Load nach diesem Deploy. Wuerde sie
+// nur beim Start gesucht, liefe der Collector bis zum naechsten Neustart weiter
+// gegen die Kopie im Image -- also gegen genau die Liste, die veraltet.
+//
+// Fehlerrichtung mit Bedacht: eine halb geschriebene oder kurz fehlende Datei
+// darf den Collector nicht blind machen. Weiterzusammeln mit der alten Liste
+// kostet schlimmstenfalls eine Stunde neuer Halte; mit einer leeren Liste
+// weiterzulaufen kostet eine Stunde **aller** Halte (Regel 3).
+func scopeNeuLaden(staticDir, fallback, bisherPfad string, bisher *scope.Filter) (string, *scope.Filter) {
+	pfad := gebietslistePfad(staticDir, fallback)
+	neu, err := scope.LoadCSV(pfad)
+	if err != nil {
+		log.Printf("collector: scope reload from %s failed, keeping %d stops from %s: %v",
+			pfad, bisher.Len(), bisherPfad, err)
+		return bisherPfad, bisher
+	}
+	if pfad != bisherPfad || neu.Len() != bisher.Len() {
+		log.Printf("collector: scope reloaded from %s, %d stops (was %d from %s)",
+			pfad, neu.Len(), bisher.Len(), bisherPfad)
+	}
+	return pfad, neu
 }
 
 func flushBuffer(w *writer.Writer) {
