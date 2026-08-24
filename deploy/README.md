@@ -67,18 +67,9 @@ nicht:
 Zum Nachsehen, ohne etwas zu ändern:
 `/app/statictool -gebietsliste-pruefen -static-dir /data/static`.
 
-### Der Static-Load gehört täglich, nicht wöchentlich
-
-**gtfs.de veröffentlicht samstags, der Task lief montags.** Genau in dieser Lücke lag der
-22./23.08.: der Namensraum wechselte am Samstagvormittag, nachgezogen worden wäre er erst
-am Montag — anderthalb Tage, in denen der Collector Nahverkehr statt Bahn eingesammelt hat.
-
-Ein täglicher Lauf um 03:30 UTC kostet nichts: eine vorhandene Version wird nie
-überschrieben (Regel 1), der Task erkennt sie und lädt nicht. **Er zieht die Gebietsliste
-trotzdem nach** — sie ist keine Datei *in* der Version, sondern eine Ableitung *aus* ihr,
-und das Nachtragen ist idempotent (zweiter Lauf: 0 neue IDs). Damit repariert sich eine
-fehlgeschlagene Ableitung am nächsten Morgen von selbst, statt bis zur nächsten
-Veröffentlichung stillzuliegen.
+Damit die Ableitung überhaupt regelmäßig läuft, muss der `static-load` **täglich** laufen
+und nicht wöchentlich — Takt, Begründung und der Rest der Scheduled Tasks stehen weiter
+unten unter „Monitoring".
 
 ---
 
@@ -348,13 +339,45 @@ Der Check prüft ausschließlich das Alter des Heartbeats (Grenze 300 s, über
 denn der Heartbeat wird bei jedem Poll geschrieben, auch bei Fehlern. Das ist Absicht: ein
 Neustart behebt keinen Feed-Ausfall, kostet aber den offenen Stundenpuffer (Regel 3 und 4).
 
+### Die Scheduled Tasks im Überblick
+
+Sie leben ausschließlich in der Coolify-Oberfläche (Application `bahnpuls-collector` →
+**Scheduled Tasks**), nicht im Repo. **Deshalb stehen sie hier**: der Takt des
+Static-Loads stand jahrelang in keinem Text, nur in einem Formularfeld — und genau
+darum ist niemandem aufgefallen, dass er zwei Tage hinter der Veröffentlichung
+herlief (siehe unten).
+
+| Name | Frequency | Command |
+|---|---|---|
+| `fachliche-pruefung` | `0 * * * *` | `/bin/sh /app/deploy/pruefung.sh` |
+| `static-load` | `30 3 * * *` | `/app/statictool -static-dir /data/static` |
+
+Wer einen davon ändert, ändert ihn bitte **hier mit**. Auslesen ohne Oberfläche:
+`GET /api/v1/applications/<uuid>/scheduled-tasks` (lesend, mit dem Coolify-Token).
+
+### Static-Load — täglich, nicht wöchentlich
+
+Der Task stand bis zum 24.08.2026 auf `30 3 * * 1`, also montags. **gtfs.de
+veröffentlicht aber samstags.** Dazwischen liegen die anderthalb Tage, in denen der
+Collector am 22./23.08. gegen einen abgelösten Nummernkreis filterte und Nahverkehr statt
+Bahn einsammelte — rund die Hälfte beider Betriebstage, endgültig verloren.
+
+Täglich kostet nichts: eine vorhandene Version wird nie überschrieben (Regel 1), der Task
+erkennt sie und lädt nicht. Er zieht dann nur die Gebietsliste nach, und das ist
+idempotent — ein zweiter Lauf bringt null neue IDs. Der Nebeneffekt ist der eigentliche
+Gewinn: eine Ableitung, die beim Laden fehlschlug, repariert sich am nächsten Morgen von
+selbst, statt bis zur nächsten Veröffentlichung stillzuliegen.
+
+Der Command trägt keine `-gebietsliste-vorlage`. Ihr Default ist der **relative** Pfad
+`config/scope_stops.csv` und hängt damit am Arbeitsverzeichnis des Task-Aufrufs. Das ist
+folgenlos, solange `/data/static/scope_stops.csv` existiert — die Vorlage wird nur für den
+allerersten Lauf gebraucht. Wer sichergehen will, hängt
+`-gebietsliste-vorlage /app/config/scope_stops.csv` an.
+
 ### Fachliche Prüfung
 
-In Coolify unter der Application → **Scheduled Tasks** anlegen:
-
-- Name `fachliche-pruefung`
-- Command `/bin/sh /app/deploy/pruefung.sh`
-- Frequency `0 * * * *` (stündlich; seltener verzögert nur den Befund)
+Stündlich, weil ein seltenerer Takt den Befund nur verzögert — die Prüfung liest Dateien
+und einen Heartbeat, sie kostet nichts.
 
 Schwellwerte stehen als Konstanten oben im Skript, jede mit Begründung. Der wichtigste ist
 der **Scope-Anteil in Promille**, nicht die absolute Zahl: nachts schrumpft der ganze Feed
