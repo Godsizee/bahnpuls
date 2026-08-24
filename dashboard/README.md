@@ -91,6 +91,30 @@ zeigt wieder `32,126.0`.
 Evidence fängt den Fehler ab und fällt auf eine andere Darstellung zurück. Auf den Seiten
 steht deshalb `fmt='dd"."mm"."yyyy'`.
 
+## Bahnhofsseiten: warum eine Liste in `svelte.config.js` steht
+
+`pages/bahnhof/[bahnhof].md` ist **eine** Datei und wird zu einer Seite je Knoten
+(BPULS-061). Welche das sind, steht in `dashboard/svelte.config.js` als
+`kit.prerender.entries` — Evidence mischt eine solche Datei aus dem Projektwurzelverzeichnis
+in seine eigene SvelteKit-Konfiguration (`loadUserConfiguration`).
+
+**Ohne diese Liste bliebe jede Bahnhofsseite ungebaut, und niemand erführe es.** SvelteKit
+findet parametrierte Seiten nur über Links im **vorgerenderten** HTML. Gemessen am Bau:
+`build/bahnhoefe/index.html` enthält **null** `href` auf `/bahnhof/…` — die Tabelle dort
+entsteht erst im Browser aus DuckDB-WASM. `<Value>` und `<BigValue>` rendern dagegen schon
+serverseitig; die Unterscheidung ist nicht offensichtlich und war der eigentliche Befund
+dieser Aufgabe. Der Adapter läuft mit `strict: false`, ein Fehlschlag wäre also stumm.
+
+Die Liste kommt aus `transform/seeds/knoten.csv` — **derselben Datei**, aus der
+`mart_bahnhof.ist_knoten` entsteht. Eine zweite Aufzählung liefe auseinander, und das
+Ergebnis wären Seiten ohne Zahlen oder Zahlen ohne Seite. Ein neuer Knoten ist damit eine
+Zeile in der CSV; danach ist ein `--full-refresh` fällig, sonst trägt nur der jüngste
+Betriebstag das neue `ist_knoten` (steht in `transform/README.md`).
+
+**Die Seite wird über den `slug` angesprochen, nicht über den Namen.** Er steht ebenfalls im
+Seed, statt aus dem Namen abgeleitet zu werden: die Adresse wird zitiert (BPULS-077) und
+darf sich nicht ändern, weil jemand die Umlautregel anfasst.
+
 ## Warum kein Wasserfall-Diagramm
 
 Der Backlog sah für den Laufweg einen Wasserfall vor. Evidence hat keine

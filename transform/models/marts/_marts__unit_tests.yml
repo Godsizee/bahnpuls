@@ -302,3 +302,55 @@ unit_tests:
       rows:
         - {betriebstag: "2026-08-24", von_stop_id: "M", nach_stop_id: "F", zuege: 1,
            laufzeit_delta_sek_summe: 300, laufzeit_messwerte: 1, laufzeit_delta_sek_je_zug: 300.0}
+
+  # BPULS-061: die drei Zahlen einer Bahnhofsseite muessen auseinandergehalten werden --
+  # **mitgebracht**, **hier entstanden** und **auf dem Weg hierher entstanden**. Sie
+  # kommen aus derselben Zeile und waeren beim Gruppieren leicht zu vertauschen, ohne
+  # dass eine Summe sich aendert.
+  #
+  # Die Fixture ist deshalb bewusst schief gebaut:
+  #   - Fahrt a beginnt in Mannheim. Ihr **erster** Halt traegt eine Haltezeit von 120 s
+  #     -- Bereitstellung, kein Aufenthalt. Zaehlte sie mit, waere Mannheims Wert nicht
+  #     leer, sondern erfunden.
+  #   - Fahrt b haelt in Heidelberg mit `abschnitt_im_gebiet: false`: die Haltezeit
+  #     zaehlt (der Halt liegt im Gebiet), die Laufzeit des Zulaufs nicht. Beide Filter
+  #     sind damit einzeln geprueft, nicht nur gemeinsam.
+  #   - Hockenheim steht **nicht** in der Knotenliste und muss `ist_knoten: false` und
+  #     `verbund: null` tragen -- eine Bahnhofsseite darf es dafuer nicht geben.
+  #   - Die Verspaetungen (0, 120, 300 s) liegen so, dass sich die Zahl der puenktlichen
+  #     Halte zwischen den Schwellen aendert. Bei gleichem Wert waere eine verdrehte
+  #     Schwelle nicht zu sehen.
+  - name: mart_bahnhof_trennt_mitgebracht_von_hier_entstanden
+    model: mart_bahnhof
+    overrides:
+      macros:
+        is_incremental: false
+    given:
+      - input: ref('mart_zuglauf')
+        rows:
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', trip_key: 'a', halt_nr: 1, stop_name: 'Mannheim Hbf', delay_an_sek: 60, haltezeit_delta_sek: 120, laufzeit_delta_sek: 30, abschnitt_direkt: false, abschnitt_im_gebiet: false, halt_im_gebiet: true, halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, erhebung_vollstaendig: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', trip_key: 'a', halt_nr: 2, stop_name: 'Heidelberg Hbf', delay_an_sek: 120, haltezeit_delta_sek: 30, laufzeit_delta_sek: 60, abschnitt_direkt: true, abschnitt_im_gebiet: true, halt_im_gebiet: true, halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, erhebung_vollstaendig: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', trip_key: 'a', halt_nr: 3, stop_name: 'Hockenheim', delay_an_sek: 300, haltezeit_delta_sek: 10, laufzeit_delta_sek: 180, abschnitt_direkt: true, abschnitt_im_gebiet: true, halt_im_gebiet: true, halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, erhebung_vollstaendig: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', trip_key: 'b', halt_nr: 1, stop_name: 'Mannheim Hbf', delay_an_sek: 0, haltezeit_delta_sek: 0, laufzeit_delta_sek: 0, abschnitt_direkt: false, abschnitt_im_gebiet: false, halt_im_gebiet: true, halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, erhebung_vollstaendig: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', trip_key: 'b', halt_nr: 2, stop_name: 'Heidelberg Hbf', delay_an_sek: 0, haltezeit_delta_sek: 90, laufzeit_delta_sek: 20, abschnitt_direkt: true, abschnitt_im_gebiet: false, halt_im_gebiet: true, halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, erhebung_vollstaendig: true}
+      - input: ref('knoten')
+        rows:
+          - {bahnhof: 'Mannheim Hbf',   verbund: 'VRN', slug: 'mannheim-hbf'}
+          - {bahnhof: 'Heidelberg Hbf', verbund: 'VRN', slug: 'heidelberg-hbf'}
+    expect:
+      rows:
+        - {bahnhof: 'Heidelberg Hbf', schwelle_sek: 60, ist_knoten: true, verbund: 'VRN', zuege: 2, halte_mit_ankunft: 2, halte_gemessen: 2, halte_puenktlich: 1, verspaetung_an_sek_je_halt: 60.0, haltezeit_delta_sek_je_halt: 60.0, laufzeit_delta_sek_je_halt: 60.0}
+        - {bahnhof: 'Heidelberg Hbf', schwelle_sek: 180, ist_knoten: true, verbund: 'VRN', zuege: 2, halte_mit_ankunft: 2, halte_gemessen: 2, halte_puenktlich: 2, verspaetung_an_sek_je_halt: 60.0, haltezeit_delta_sek_je_halt: 60.0, laufzeit_delta_sek_je_halt: 60.0}
+        - {bahnhof: 'Heidelberg Hbf', schwelle_sek: 360, ist_knoten: true, verbund: 'VRN', zuege: 2, halte_mit_ankunft: 2, halte_gemessen: 2, halte_puenktlich: 2, verspaetung_an_sek_je_halt: 60.0, haltezeit_delta_sek_je_halt: 60.0, laufzeit_delta_sek_je_halt: 60.0}
+        - {bahnhof: 'Heidelberg Hbf', schwelle_sek: 900, ist_knoten: true, verbund: 'VRN', zuege: 2, halte_mit_ankunft: 2, halte_gemessen: 2, halte_puenktlich: 2, verspaetung_an_sek_je_halt: 60.0, haltezeit_delta_sek_je_halt: 60.0, laufzeit_delta_sek_je_halt: 60.0}
+        - {bahnhof: 'Heidelberg Hbf', schwelle_sek: 3600, ist_knoten: true, verbund: 'VRN', zuege: 2, halte_mit_ankunft: 2, halte_gemessen: 2, halte_puenktlich: 2, verspaetung_an_sek_je_halt: 60.0, haltezeit_delta_sek_je_halt: 60.0, laufzeit_delta_sek_je_halt: 60.0}
+        - {bahnhof: 'Hockenheim', schwelle_sek: 60, ist_knoten: false, verbund: null, zuege: 1, halte_mit_ankunft: 1, halte_gemessen: 1, halte_puenktlich: 0, verspaetung_an_sek_je_halt: 300.0, haltezeit_delta_sek_je_halt: 10.0, laufzeit_delta_sek_je_halt: 180.0}
+        - {bahnhof: 'Hockenheim', schwelle_sek: 180, ist_knoten: false, verbund: null, zuege: 1, halte_mit_ankunft: 1, halte_gemessen: 1, halte_puenktlich: 0, verspaetung_an_sek_je_halt: 300.0, haltezeit_delta_sek_je_halt: 10.0, laufzeit_delta_sek_je_halt: 180.0}
+        - {bahnhof: 'Hockenheim', schwelle_sek: 360, ist_knoten: false, verbund: null, zuege: 1, halte_mit_ankunft: 1, halte_gemessen: 1, halte_puenktlich: 1, verspaetung_an_sek_je_halt: 300.0, haltezeit_delta_sek_je_halt: 10.0, laufzeit_delta_sek_je_halt: 180.0}
+        - {bahnhof: 'Hockenheim', schwelle_sek: 900, ist_knoten: false, verbund: null, zuege: 1, halte_mit_ankunft: 1, halte_gemessen: 1, halte_puenktlich: 1, verspaetung_an_sek_je_halt: 300.0, haltezeit_delta_sek_je_halt: 10.0, laufzeit_delta_sek_je_halt: 180.0}
+        - {bahnhof: 'Hockenheim', schwelle_sek: 3600, ist_knoten: false, verbund: null, zuege: 1, halte_mit_ankunft: 1, halte_gemessen: 1, halte_puenktlich: 1, verspaetung_an_sek_je_halt: 300.0, haltezeit_delta_sek_je_halt: 10.0, laufzeit_delta_sek_je_halt: 180.0}
+        - {bahnhof: 'Mannheim Hbf', schwelle_sek: 60, ist_knoten: true, verbund: 'VRN', zuege: 2, halte_mit_ankunft: 0, halte_gemessen: 0, halte_puenktlich: 0, verspaetung_an_sek_je_halt: null, haltezeit_delta_sek_je_halt: null, laufzeit_delta_sek_je_halt: null}
+        - {bahnhof: 'Mannheim Hbf', schwelle_sek: 180, ist_knoten: true, verbund: 'VRN', zuege: 2, halte_mit_ankunft: 0, halte_gemessen: 0, halte_puenktlich: 0, verspaetung_an_sek_je_halt: null, haltezeit_delta_sek_je_halt: null, laufzeit_delta_sek_je_halt: null}
+        - {bahnhof: 'Mannheim Hbf', schwelle_sek: 360, ist_knoten: true, verbund: 'VRN', zuege: 2, halte_mit_ankunft: 0, halte_gemessen: 0, halte_puenktlich: 0, verspaetung_an_sek_je_halt: null, haltezeit_delta_sek_je_halt: null, laufzeit_delta_sek_je_halt: null}
+        - {bahnhof: 'Mannheim Hbf', schwelle_sek: 900, ist_knoten: true, verbund: 'VRN', zuege: 2, halte_mit_ankunft: 0, halte_gemessen: 0, halte_puenktlich: 0, verspaetung_an_sek_je_halt: null, haltezeit_delta_sek_je_halt: null, laufzeit_delta_sek_je_halt: null}
+        - {bahnhof: 'Mannheim Hbf', schwelle_sek: 3600, ist_knoten: true, verbund: 'VRN', zuege: 2, halte_mit_ankunft: 0, halte_gemessen: 0, halte_puenktlich: 0, verspaetung_an_sek_je_halt: null, haltezeit_delta_sek_je_halt: null, laufzeit_delta_sek_je_halt: null}

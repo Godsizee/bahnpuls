@@ -454,6 +454,163 @@ models:
           arguments:
             combination_of_columns: ['betriebstag', 'quelle', 'route_kurzname', 'schwelle_sek']
 
+  - name: mart_bahnhof
+    description: >
+      A5 je Bahnhof statt je Linie (BPULS-061). Korn: Betriebstag × Quelle × Bahnhof ×
+      Schwelle. Grundlage der vorgerenderten Bahnhofsseiten.
+
+      **Geschlüsselt über den Namen, nicht über die stop_id** — die Namensräume rotieren
+      zwischen Fahrplan-Versionen (BPULS-073), über die ID zerfiele ein Bahnhof in
+      mehrere Zeilen mit je einem Bruchteil seiner Züge. Halte ohne Namen fallen heraus,
+      statt unter ihrer Nummer zu erscheinen.
+
+      Die Einordnung eines Halts ist dieselbe wie in `mart_puenktlichkeit` und steht
+      genau einmal, im Makro `halt_zustand()`. Was hier dazukommt, ist die Trennung aus
+      A1: **mitgebracht** (`verspaetung_an_sek_je_halt`) neben **hier entstanden**
+      (`haltezeit_delta_sek_je_halt`).
+
+      **Über Schwellen nie summieren** — jede Zeile ist eine eigene Auswertung derselben
+      Grundmenge; die zählbaren Spalten wiederholen sich fünfmal.
+    columns:
+      - name: betriebstag
+        tests:
+          - not_null
+      - name: quelle
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['de_gtfsrt']
+      - name: bahnhof
+        description: >
+          `stop_name` des Halts. Bahnsteiggruppen bleiben getrennt, weil der Feed sie
+          getrennt führt — `Frankfurt(Main)Hbf` und `Frankfurt Hbf (tief)` sind zwei
+          Zeilen.
+        tests:
+          - not_null
+      - name: schwelle_sek
+        description: Ankunftsverspätung in Sekunden, ab der ein Halt nicht mehr als pünktlich zählt.
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: [60, 180, 360, 900, 3600]
+                quote: false
+      - name: ist_knoten
+        description: >
+          Steht der Bahnhof im Seed `knoten` und bekommt damit eine eigene Seite? Aus
+          der Konfiguration, nicht aus den Daten.
+        tests:
+          - not_null
+      - name: verbund
+        description: >
+          VRN oder RMV aus dem Seed, nur für die Gruppierung der Übersichtsseite. NULL
+          für jeden Bahnhof außerhalb der Knotenliste — das ist keine Aussage über
+          seinen Verbund, sondern heißt „nicht ausgewählt".
+      - name: slug
+        description: >
+          Der Teil der URL, unter dem die Bahnhofsseite steht. NULL für jeden Bahnhof
+          ohne eigene Seite.
+      - name: zuege
+        description: >
+          Zahl unterschiedlicher Fahrten, die an diesem Bahnhof beobachtet wurden —
+          einschließlich derer, die hier beginnen und deshalb keine planmäßige Ankunft
+          haben. Nicht der Nenner der Quoten, das ist `halte_mit_ankunft`.
+        tests:
+          - not_null
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 1
+                inclusive: true
+      - name: halte_mit_ankunft
+        description: >
+          Nenner der ehrlichen Quote: alle Halte, an denen planmäßig ein Zug ankommen
+          sollte. Der erste Halt eines Laufs ist nicht dabei — dort kommt planmäßig
+          nichts an.
+        tests:
+          - not_null
+      - name: halte_gemessen
+        description: >
+          Nenner der üblichen Quote: Halte mit einer Ankunftsverspätung.
+        tests:
+          - not_null
+      - name: halte_puenktlich
+        tests:
+          - not_null
+      - name: halte_ausgefallen
+        tests:
+          - not_null
+      - name: halte_unbedienter_lauf
+        tests:
+          - not_null
+      - name: halte_verkuerzt
+        tests:
+          - not_null
+      - name: halte_ausgelassen
+        tests:
+          - not_null
+      - name: halte_mehrdeutig
+        tests:
+          - not_null
+      - name: halte_ohne_meldung
+        tests:
+          - not_null
+      - name: quote_gemessen
+        description: >
+          `halte_puenktlich / halte_gemessen` — die übliche Quote. NULL, wenn nichts
+          gemessen wurde; das ist keine Pünktlichkeit von 0.
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1
+      - name: quote_planmaessig
+        description: >
+          `halte_puenktlich / halte_mit_ankunft` — die ehrliche Quote. Liegt nie über
+          `quote_gemessen`.
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: 0
+                max_value: 1
+      - name: verspaetung_an_sek_je_halt
+        description: >
+          Mitgebracht: mittlere Ankunftsverspätung über die gemessenen Halte. Züge vor
+          der Zeit gehen negativ ein — das ist Absicht, sonst sähe ein Bahnhof besser
+          aus, weil dort viele Züge zu früh sind. Über mehrere Tage aus Summe und Zähler
+          neu rechnen, nicht mitteln.
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: -86400
+                max_value: 86400
+                inclusive: true
+      - name: haltezeit_delta_sek_je_halt
+        description: >
+          Hier entstanden: mittlere Differenz zwischen Abfahrts- und Ankunftsverspätung
+          an diesem Halt (A1). Positiv heißt, der Aufenthalt hat Zeit gekostet.
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: -86400
+                max_value: 86400
+                inclusive: true
+      - name: laufzeit_delta_sek_je_halt
+        description: >
+          Auf dem Weg hierher entstanden — gehört dem Abschnitt davor, nicht dem
+          Bahnhof. Nur über lückenlose Abschnitte im Gebiet, wie in
+          `mart_verspaetungsentstehung`.
+        tests:
+          - dbt_utils.accepted_range:
+              arguments:
+                min_value: -86400
+                max_value: 86400
+                inclusive: true
+    tests:
+      - dbt_utils.unique_combination_of_columns:
+          arguments:
+            combination_of_columns: ['betriebstag', 'quelle', 'bahnhof', 'schwelle_sek']
+
   - name: mart_engpassknoten
     description: >
       A4 (BPULS-033): A1 über die Zeit aggregiert. Korn: Betriebstag × Quelle ×

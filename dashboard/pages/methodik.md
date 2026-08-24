@@ -1,7 +1,7 @@
 ---
 title: Methodik
 description: Wie die Kennzahlen gerechnet werden — und was sie bewusst nicht behaupten
-sidebar_position: 7
+sidebar_position: 8
 ---
 
 Eine Zahl ohne offengelegte Definition ist eine Behauptung. Diese Seite beschreibt jede
@@ -484,6 +484,54 @@ in der eigenen Schublade „kein Halt bedient" und gehen in `quote_planmaessig` 
 Vorher wurden sie als „Halt ausgelassen" gezählt: dieselbe Zahl, nur ohne erkennbaren
 Grund. Eine Fahrt, über die der
 Feed gar nichts meldet, bleibt dagegen unsichtbar; wie häufig das ist, ist offen.
+
+## Bahnhöfe — dieselbe Rechnung, nach Ort statt nach Linie
+
+Die [Bahnhofsseiten](/bahnhoefe) beantworten die Pünktlichkeitsfrage für einen Ort. Die
+Einordnung eines Halts ist **exakt dieselbe** wie bei den Quoten je Linie — sieben
+einander ausschließende Zustände, dieselbe Rangfolge, dieselben fünf Schwellen. Sie steht
+im Code an genau einer Stelle und wird von beiden Auswertungen benutzt; zwei Formulierungen
+derselben Regel liefen mit der Zeit auseinander.
+
+Der Schlüssel eines Bahnhofs ist sein **Name**, nicht seine Nummer. Die Haltestellennummern
+im Fahrplan rotieren mit jeder Veröffentlichung; über die Nummer zerfiele ein Bahnhof in
+mehrere Einträge mit je einem Bruchteil seiner Züge. Halte, für die kein Name bekannt ist,
+haben keine Seite — eine Seite über eine Kennnummer beantwortet keine Frage.
+
+**Ein Bahnhof ist, was der Fahrplan einen Halt nennt.** Wo Fern- und S-Bahn-Ebene getrennt
+geführt werden — etwa `Frankfurt(Main)Hbf` und `Frankfurt Hbf (tief)` —, stehen sie auch
+hier als zwei Einträge. Sie zusammenzufassen wäre eine Entscheidung über Bahnsteige, die
+die Daten nicht hergeben.
+
+### Drei Größen, die sich nicht addieren
+
+Jede Bahnhofsseite weist drei Zahlen nebeneinander aus. Sie sind keine Teile einer Summe:
+
+- **Mitgebracht** — der Verspätungsstand bei der Ankunft, gemittelt über die Halte, an
+  denen er gemessen wurde. Züge vor der Zeit gehen negativ ein; sonst sähe ein Bahnhof
+  besser aus, nur weil dort viele Züge zu früh sind.
+- **Hier entstanden** — die Differenz zwischen Abfahrts- und Ankunftsverspätung an diesem
+  Halt. Positiv heißt, der Aufenthalt hat Zeit gekostet. Der **erste** Halt eines Laufs
+  zählt nicht mit: die Bereitstellung im Ausgangsbahnhof ist etwas anderes als ein
+  Aufenthalt unterwegs.
+- **Auf dem Weg hierher entstanden** — der Laufzeitanteil des letzten Abschnitts vor der
+  Einfahrt. Er gehört dem Abschnitt, nicht dem Bahnhof, und steht nur daneben, weil erst
+  beide Zahlen die Frage beantworten, ob ein Zug seinen Rückstand mitbringt oder hier
+  aufsammelt.
+
+Über mehrere Betriebstage werden diese Werte aus Summe und Zähler neu gerechnet, nie aus
+Tagesmittelwerten gemittelt — sonst zählte ein ruhiger Sonntag so viel wie ein Werktag.
+
+### Warum eine Auswahl und nicht jeder Halt
+
+Der Feed nennt im Zielgebiet mehrere hundert Betriebsstellen beim Namen. Eine eigene Seite
+hat eine Auswahl davon, und welche das sind, steht als Liste im Projekt — nicht als
+Rangliste in den Daten. Zwei Gründe: eine Auswahl nach Verkehrsmenge läge fast vollständig in Frankfurt und
+zeigte nicht das Gebiet, und die Adresse einer Bahnhofsseite soll zitierbar bleiben, statt
+zu verschwinden, sobald ihr Bahnhof aus einer Rangliste fällt.
+
+Die Kennzahlen selbst kennen diese Auswahl nicht: sie werden für **jede** benannte
+Betriebsstelle im Gebiet gerechnet. Ausgewählt ist nur, wofür eine Seite gebaut wird.
 
 ## Die Erhebung selbst
 

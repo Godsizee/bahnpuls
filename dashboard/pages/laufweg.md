@@ -1,7 +1,7 @@
 ---
 title: Laufweg einer Fahrt
 description: Der Verspätungsverlauf einer einzelnen Fahrt, zerlegt in Laufzeit- und Haltezeitanteil
-sidebar_position: 3
+sidebar_position: 4
 ---
 
 Eine einzelne Fahrt, von Halt zu Halt nachgezeichnet. Statt einer Zahl am Ende — „zwölf

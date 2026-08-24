@@ -1,7 +1,7 @@
 ---
 title: Impressum
 description: Anbieterkennzeichnung nach § 5 DDG und § 18 Abs. 2 MStV
-sidebar_position: 10
+sidebar_position: 11
 ---
 
 ## Angaben gemäß § 5 DDG

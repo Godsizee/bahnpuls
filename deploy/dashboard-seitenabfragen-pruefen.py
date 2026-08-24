@@ -38,6 +38,10 @@ SEITEN = pathlib.Path(sys.argv[2] if len(sys.argv) > 2 else "/app/dashboard/page
 # ```sql name ... ``` -- der Name ist optional, Evidence erlaubt auch namenlose Bloecke.
 BLOCK = re.compile(r"^```sql[ \t]*([A-Za-z_][A-Za-z0-9_]*)?[^\n]*\n(.*?)^```", re.M | re.S)
 EINGABE = re.compile(r"\$\{\s*inputs\.[^}]*\}")
+# Seitenparameter einer vorgerenderten Seite (`pages/bahnhof/[bahnhof].md`,
+# BPULS-061). Fuer die Bindung ist der Wert genauso egal wie bei einem Auswahlfeld --
+# geprueft wird, ob die Abfrage ihre Spalten findet, nicht welcher Bahnhof herauskommt.
+SEITENPARAMETER = re.compile(r"\$\{\s*params\.[^}]*\}")
 ABFRAGE = re.compile(r"\$\{\s*([A-Za-z_][A-Za-z0-9_]*)\s*\}")
 REST = re.compile(r"\$\{[^}]*\}")
 
@@ -45,6 +49,10 @@ REST = re.compile(r"\$\{[^}]*\}")
 TAG = re.compile(r"</([A-Za-z][A-Za-z0-9]*)>|<([A-Z][A-Za-z0-9]*)\b([^>]*?)(/?)>", re.S)
 ATTR = re.compile(r"([A-Za-z][A-Za-z0-9_]*)\s*=\s*(\{[^}]*\}|\"[^\"]*\"|'[^']*'|[^\s>]+)")
 NUR_NAME = re.compile(r"^[A-Za-z_][A-Za-z0-9_]*$")
+# `y={["a", "b"]}` -- ein Spaltenattribut darf mehrere Spalten nennen (LineChart mit zwei
+# Reihen). Ohne diese Form geprueft zu bekommen, waere die zweite Reihe genau die stille
+# Luecke, gegen die dieses Skript gebaut ist.
+SPALTENLISTE = re.compile(r"^\{\s*\[(.*)\]\s*\}$", re.S)
 
 # Attribute, deren Wert ein Spaltenname der zugehoerigen Abfrage ist. `sort` steht
 # bewusst nicht dabei: in Evidence schaltet es die Sortierung ein oder aus, es benennt
@@ -110,6 +118,7 @@ def quellen_aus_manifest():
 
 def einsetzen(sql):
 	sql = EINGABE.sub(PLATZHALTER, sql)
+	sql = SEITENPARAMETER.sub(PLATZHALTER, sql)
 	sql = ABFRAGE.sub(lambda m: '"' + m.group(1) + '"', sql)
 	offen = REST.search(sql)
 	if offen:
@@ -117,6 +126,16 @@ def einsetzen(sql):
 		# Syntaxfehler durchschlagen oder -- schlimmer -- zufaellig binden.
 		return sql, f"unbekannter Ausdruck {offen.group(0)}, das Skript kennt ihn nicht"
 	return sql, None
+
+
+def spaltennamen(wert):
+	"""Die Spalten, die ein Attribut nennt -- eine, oder mehrere als Liste."""
+	wert = wert.strip()
+	liste = SPALTENLISTE.match(wert)
+	if liste:
+		namen = [teil.strip().strip('"').strip("'") for teil in liste.group(1).split(",")]
+		return [name for name in namen if name]
+	return [wert.strip('"').strip("'")]
 
 
 def komponenten_pruefen(text, spalten, benannt, kennung_seite):
@@ -171,14 +190,14 @@ def komponenten_pruefen(text, spalten, benannt, kennung_seite):
 		for attribut, wert in attribute.items():
 			if attribut not in SPALTEN_ATTRIBUTE:
 				continue
-			bezuege += 1
-			wert = wert.strip().strip('"').strip("'")
-			if not NUR_NAME.match(wert):
-				# Ausdruck statt Spaltenname -- nicht stillschweigend uebergehen.
-				befunde.append(f"{kennung_seite} / <{name} {attribut}=…>: {wert} ist kein einfacher Spaltenname, das Skript kennt die Form nicht")
-				continue
-			if wert.lower() not in spalten[abfrage]:
-				befunde.append(f"{kennung_seite} / <{name} {attribut}={wert}>: die Abfrage {abfrage} liefert diese Spalte nicht")
+			for einzeln in spaltennamen(wert):
+				bezuege += 1
+				if not NUR_NAME.match(einzeln):
+					# Ausdruck statt Spaltenname -- nicht stillschweigend uebergehen.
+					befunde.append(f"{kennung_seite} / <{name} {attribut}=…>: {einzeln} ist kein einfacher Spaltenname, das Skript kennt die Form nicht")
+					continue
+				if einzeln.lower() not in spalten[abfrage]:
+					befunde.append(f"{kennung_seite} / <{name} {attribut}={einzeln}>: die Abfrage {abfrage} liefert diese Spalte nicht")
 
 	return bezuege
 

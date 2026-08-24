@@ -214,6 +214,13 @@ anfasst. Nach jeder Änderung an dieser Datei also einmal `--full-refresh`. Wer 
 erfährt es: `assert_marts_ohne_unvollstaendige_erhebung` hält die Aggregate frisch gegen
 den Seed und meldet genau diesen Fall.
 
+**Und für den Seed `knoten`** (BPULS-061): ein neu eingetragener Bahnhof bekommt sein
+`ist_knoten` in `mart_bahnhof` erst mit einem `--full-refresh`, weil der inkrementelle Lauf
+die alten Betriebstage nicht mehr anfasst. Der Effekt ist eine Bahnhofsseite, die für die
+letzten Tage Zahlen zeigt und davor leer bleibt — plausibel genug, um nicht aufzufallen.
+`assert_knoten_kommen_in_den_daten_vor` meldet den umgekehrten Fall (ein Knoten ohne jede
+Zeile) als Warnung.
+
 **Produktiv ist das zurzeit kein Handgriff:** `deploy/dashboard-entrypoint.sh` und der
 stündliche `deploy/dashboard-rebuild.sh` rufen dbt ohnehin mit `--full-refresh` auf. Der
 Test bleibt trotzdem die Absicherung — er merkt es, falls diese Voraussetzung einmal

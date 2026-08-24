@@ -1,7 +1,7 @@
 ---
 title: Engpässe im Netz
 description: Wo je Zug die meiste Verspätung neu entsteht — nach Abschnitt, Tagesstunde und Fahrtrichtung
-sidebar_position: 4
+sidebar_position: 5
 ---
 
 Die Seite [Laufweg einer Fahrt](/laufweg) zeigt eine Fahrt. Diese hier legt viele

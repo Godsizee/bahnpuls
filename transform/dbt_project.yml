@@ -46,6 +46,14 @@ seeds:
         betriebstag_bis: date
         grund: varchar
         referenz: varchar
+    knoten:
+      +column_types:
+        # Explizit varchar: die Spalte wird gegen mart_zuglauf.stop_name gejoint. Eine
+        # abgeleitete Typisierung ist hier zwar immer varchar -- der Eintrag steht
+        # trotzdem, damit der Join nicht von einer Ableitung abhaengt.
+        bahnhof: varchar
+        verbund: varchar
+        slug: varchar
     scope_stops:
       +column_types:
         # varchar, nicht der abgeleitete BIGINT: im Feed ist die stop_id eine

@@ -1,7 +1,7 @@
 ---
 title: Fahrplanreserve
 description: Wo Zuschläge wirken, wo sie fehlen und wo sie brachliegen
-sidebar_position: 5
+sidebar_position: 6
 ---
 
 In jedem Fahrplan steckt Reserve. Die Fahrzeit zwischen zwei Bahnhöfen ist bewusst etwas

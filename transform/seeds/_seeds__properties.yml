@@ -26,6 +26,59 @@ seeds:
         tests:
           - not_null
 
+  - name: knoten
+    description: >
+      Die Bahnhöfe, für die es eine eigene, vorgerenderte Seite gibt (BPULS-061) — eine
+      **Auswahl**, keine Rangliste, und deshalb Konfiguration statt Abfrage.
+
+      Warum nicht datengetrieben: eine Bestenliste nach Verkehrsmenge bestünde heute zu
+      rund zwei Dritteln aus der Frankfurter Stammstrecke, und ein Link, der in einer
+      Bewerbung zitiert wird, liefe ins Leere, sobald ein Bahnhof aus den Top 40 fällt
+      (BPULS-077 verlangt das Gegenteil). Die Auswahl ist über das Gebiet gestreut und
+      hält sich an die Knoten, die jemand nachschlägt.
+
+      **Der Name ist der Schlüssel** und muss auf das Zeichen genau der Schreibweise im
+      Feed entsprechen (`Frankfurt(Main)Hbf`, nicht `Frankfurt (Main) Hbf`). Ein
+      Tippfehler wäre eine Seite ohne Zahlen; `assert_knoten_kommen_in_den_daten_vor`
+      meldet genau das als Warnung — als Fehler nicht, weil an einem einzelnen
+      Betriebstag ein kleiner Knoten legitim leer sein kann.
+
+      Halte außerhalb von VRN und RMV gehören nicht hinein (CLAUDE.md Regel 15): der
+      Feed liefert VRN und RNN gebündelt, Bad Kreuznach und Bingen liegen im RNN.
+    columns:
+      - name: bahnhof
+        description: >
+          `stop_name`, wie ihn der Fahrplan schreibt. Bahnsteiggruppen bleiben getrennt,
+          weil der Feed sie getrennt führt — `Frankfurt(Main)Hbf` (oben) und
+          `Frankfurt Hbf (tief)` (S-Bahn) sind zwei Knoten.
+        tests:
+          - not_null
+          - unique
+      - name: verbund
+        description: >
+          VRN oder RMV, nach **Heimatverbund** (BPULS-074) — nur zur Gruppierung auf der
+          Übersichtsseite. Die Kennzahlen hängen nicht daran; der Gebietsfilter läuft
+          über die Haltestellenliste, nie über den Verbund (CLAUDE.md Regel 7).
+        tests:
+          - not_null
+          - accepted_values:
+              arguments:
+                values: ['VRN', 'RMV']
+      - name: slug
+        description: >
+          Der Teil der URL, unter dem die Seite des Bahnhofs steht
+          (`/bahnhof/mannheim-hbf/`). Steht hier und wird **nicht** aus dem Namen
+          abgeleitet: der Link wird zitiert, und eine Ableitung änderte ihn stillschweigend
+          mit, sobald jemand die Umlautregel anfasst. Umlaute als `ae/oe/ue/ss`, sonst
+          Kleinbuchstaben, Ziffern und Bindestrich.
+        tests:
+          - not_null
+          - unique
+          - dbt_utils.expression_is_true:
+              arguments:
+                # Spaltenebene: dbt_utils setzt den Spaltennamen davor.
+                expression: "~ '^[a-z0-9]+(-[a-z0-9]+)*$'"
+
   - name: erhebungsluecken
     description: >
       Betriebstage, an denen die Erhebung **nachweislich unvollständig** war
