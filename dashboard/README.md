@@ -45,6 +45,52 @@ Verzeichnis zeigt.
 Peer-Dependency; ohne den Pin löst npm `typescript` als `latest` auf und die Installation
 bricht mit `ERESOLVE` ab.
 
+## Deutsche Zahlen — und warum dafür in `node_modules` gefasst wird
+
+`32,126.0` liest ein deutscher Leser nicht nur ungewohnt, sondern falsch: als
+zweiunddreißig Komma eins. Die Seite wird in Bewerbungen verlinkt; eine im ersten Blick
+falsch gelesene Zahl ist teurer als eine fehlende Seite (BPULS-080).
+
+**Über `fmt` ist das nicht zu erreichen.** Evidence formatiert jede Zahl — BigValue,
+DataTable, Diagrammachse, Tooltip — über `ssf` (SheetJS), und `ssf` kennt keine Locale:
+Gruppierungs- und Dezimaltrenner sind fest englisch verdrahtet. Gemessen an Evidence
+40.1.8, der zum Zeitpunkt der Umsetzung neuesten Fassung: `[$-407]#,##0.0` wird als
+Währungsangabe missverstanden (`$12,345.7`), `#.##0,0` als kaputter Code (`12345.678`).
+Einen Locale-Haken hat Evidence nicht.
+
+Der naheliegende Ausweg — die Zahlen in SQL mit `format()` zu Zeichenketten machen —
+kostet mehr als er bringt: Zeichenketten kämen ohne Sortierung in die Tabellen und
+überhaupt nicht an die Diagrammachsen, die ihre Werte selbst formatieren. Die Prosa
+deutsch und die Achse daneben englisch wäre schlechter als der einheitlich englische
+Zustand vorher.
+
+Deshalb setzt `tools/zahlen-auf-deutsch-einbauen.mjs` an der einen Stelle an, durch die
+alle Zahlen laufen: es biegt die drei `ssf`-Importe in
+`@evidence-dev/component-utilities` auf `tools/ssf-de.js` um und pinnt den einen
+`toLocaleString`-Aufruf in `autoFormatting.js` auf `de-DE`. `ssf-de.js` reicht jeden
+Aufruf an `ssf` durch und tauscht danach die Trenner — nur innerhalb zusammenhängender
+Ziffernläufe, damit ein Literal wie `#,##0 "Min."` seinen Punkt behält, und nur bei
+Zahlen, damit Datumsangaben (`24.08.2026`) unangetastet bleiben.
+
+**Das Skript läuft als `pre`-Schritt vor `sources`, `build`, `build:strict` und `dev`,
+nicht als `postinstall`:** `node_modules` wird im Image in einer eigenen Stufe installiert
+und danach nur kopiert — ein `postinstall`-Haken dort sähe die Datei gar nicht. Es ist
+wiederholbar und meldet beim zweiten Lauf `zahlen: schon deutsch`. Findet es einen
+Ankerpunkt nicht, **bricht es ab**, statt still zu überspringen; ein übersprungener
+Einbau baute eine grüne Seite mit englischen Zahlen.
+
+`npm run test:formatierung` prüft die Fälle einzeln (Tausendertrenner, Nachkommastellen,
+negative Werte, Prozent, Literal im Formatcode, Datum, Text, Spalten ganz ohne
+Formatangabe). **Nach jedem Evidence-Update gehört beides gemacht:** die Tests laufen
+lassen *und* eine Zahl auf der gebauten Seite ansehen. Ein Ankerpunkt kann weiterbestehen,
+während die Formatierung längst woanders sitzt — dann meldet das Skript grün und die Seite
+zeigt wieder `32,126.0`.
+
+**Der Datumscode muss gequotet werden.** `fmt="dd.mm.yyyy"` wirft in `ssf`
+`bad second format` — es liest den Punkt hinter `mm` als Bruchteil einer Sekunde —, und
+Evidence fängt den Fehler ab und fällt auf eine andere Darstellung zurück. Auf den Seiten
+steht deshalb `fmt='dd"."mm"."yyyy'`.
+
 ## Warum kein Wasserfall-Diagramm
 
 Der Backlog sah für den Laufweg einen Wasserfall vor. Evidence hat keine

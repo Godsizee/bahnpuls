@@ -2,11 +2,16 @@
   "name": "bahnpuls-dashboard",
   "version": "0.0.1",
   "scripts": {
+    "prebuild": "node tools/zahlen-auf-deutsch-einbauen.mjs",
     "build": "evidence build",
+    "prebuild:strict": "node tools/zahlen-auf-deutsch-einbauen.mjs",
     "build:strict": "evidence build:strict",
+    "predev": "node tools/zahlen-auf-deutsch-einbauen.mjs",
     "dev": "evidence dev --open /",
     "test": "evidence build",
+    "presources": "node tools/zahlen-auf-deutsch-einbauen.mjs",
     "sources": "evidence sources",
+    "test:formatierung": "node --test tools/ssf-de.test.mjs",
     "sources:strict": "evidence sources --strict",
     "preview": "evidence preview",
     "serve": "sirv build --host 0.0.0.0 --port 3000 --single --dev --quiet"

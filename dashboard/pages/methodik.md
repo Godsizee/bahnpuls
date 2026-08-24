@@ -47,6 +47,18 @@ Fälle, die sie geprüft hat — Fahrt über Mitternacht, Ausfall, ausgelassener
 der Zeitumstellung — prüfen jetzt Testdaten im deutschen Format, außerhalb des
 Dashboards.
 
+## Wie die Zahlen geschrieben sind
+
+Deutsche Schreibweise: **der Punkt trennt Tausender, das Komma die Nachkommastellen.**
+`32.126,0` sind also zweiunddreißigtausend, nicht zweiunddreißig. Datumsangaben stehen als
+`24.08.2026`, Uhrzeiten als `18:07`.
+
+Wo eine große Zahl abgekürzt steht, meint **`k` Tausend und `M` Millionen** — `32,1k` ist
+dieselbe Zahl wie `32.126`, nur gerundet. Zeitangaben tragen ihre Einheit in der
+Spaltenüberschrift; „Min." heißt Minuten, „s" Sekunden. Sekundenwerte je Halt oder
+Abschnitt sind bewusst nicht in Minuten umgerechnet: die Beträge liegen im einstelligen
+Sekundenbereich, und `0,1 Min.` liest sich schlechter als `5,84 s`.
+
 ## Was eine Zeile ist
 
 Alles hier rechnet mit einer einzigen Grundeinheit: **ein Zug an einem Bahnhof.** Nicht

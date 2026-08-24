@@ -111,7 +111,7 @@ ein Ausreißer schnell dabei.
 
 <DataTable data={top_abschnitte} rows=10>
     <Column id=abschnitt title="Von — nach" />
-    <Column id=betriebstag title="Tag" fmt="dd.mm.yyyy" />
+    <Column id=betriebstag title="Tag" fmt='dd"."mm"."yyyy' />
     <Column id=zuege title="Züge" />
     <Column id=messbar title="davon messbar" />
     <Column id=unterwegs_min title="Unterwegs (Min. je Zug)" fmt="#,##0.0" contentType=colorscale colorScale=negative />
@@ -157,7 +157,7 @@ gibt es eine Stunde doppelt, die Rechnung ist dann nicht eindeutig) — oder es 
 drei sind Betrieb und gehören zum Bild.
 
 <DataTable data={abdeckung} rows=10>
-    <Column id=betriebstag title="Tag" />
+    <Column id=betriebstag title="Tag" fmt='dd"."mm"."yyyy' />
     <Column id=halte title="Halte" />
     <Column id=gemessen_an title="Ankunft gemessen %" fmt="#,##0.0" />
     <Column id=gemessen_ab title="Abfahrt gemessen %" fmt="#,##0.0" />
