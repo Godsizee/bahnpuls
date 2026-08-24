@@ -2,6 +2,7 @@
 title: Bahnhof
 description: Wie zuverlässig ein Zug an diesem Bahnhof ankommt — und wie viel Verspätung der Halt selbst kostet
 sidebar_link: false
+hide_title: true
 ---
 
 <!--
@@ -42,6 +43,13 @@ from bahnpuls.bahnhof
 where slug = '${params.bahnhof}'
   and schwelle_sek = 360
 ```
+
+<!--
+    `hide_title: true` unterdrückt die Überschrift aus dem Frontmatter, damit hier der
+    Bahnhofsname als einzige h1 steht. Der **Titel im Browser-Tab** bleibt trotzdem
+    statisch: Evidence baut sein eigenes `<svelte:head>` in jede Seite, und Svelte lässt
+    genau eines je Komponente zu — ein zweites bricht den Bau ab (geprüft, nicht vermutet).
+-->
 
 # <Value data={kennzahl} column=bahnhof/>
 

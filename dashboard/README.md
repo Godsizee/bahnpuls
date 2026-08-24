@@ -111,6 +111,14 @@ Ergebnis wären Seiten ohne Zahlen oder Zahlen ohne Seite. Ein neuer Knoten ist 
 Zeile in der CSV; danach ist ein `--full-refresh` fällig, sonst trägt nur der jüngste
 Betriebstag das neue `ist_knoten` (steht in `transform/README.md`).
 
+**Der Titel im Browser-Tab bleibt statisch, die Überschrift nicht.** Evidence baut aus dem
+Frontmatter ein eigenes `<svelte:head>` in jede Seite, und Svelte lässt genau eines je
+Komponente zu — ein zweites bricht den Bau ab (`A component can only have one
+<svelte:head> tag`, am Bau geprüft). Der Bahnhofsname steht deshalb über `<Value>` als
+einzige `h1` auf der Seite, und `hide_title: true` unterdrückt die Überschrift aus dem
+Frontmatter, damit nicht zwei dastehen. Im Tab steht für alle 44 Seiten „Bahnhof"; wer das
+ändern will, kommt an `handle-og.cjs` in `@evidence-dev/preprocess` nicht vorbei.
+
 **Die Seite wird über den `slug` angesprochen, nicht über den Namen.** Er steht ebenfalls im
 Seed, statt aus dem Namen abgeleitet zu werden: die Adresse wird zitiert (BPULS-077) und
 darf sich nicht ändern, weil jemand die Umlautregel anfasst.
