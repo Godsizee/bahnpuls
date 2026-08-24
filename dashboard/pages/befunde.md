@@ -31,9 +31,9 @@ from bahnpuls.puenktlichkeit
 **Grundlage:** <Value data={fenster} column=tage/> Betriebstage, vom
 <Value data={fenster} column=von/> bis
 <Value data={fenster} column=bis/>, aus eigener Mitschrift des
-Echtzeit-Feeds für VRN und RMV. Zwei Betriebstage (22./23.08.2026) sind darin **nicht**
-enthalten — an ihnen hat die Sammlung nachweislich schief gegriffen, Einzelheiten auf der
-[Methodik-Seite](/methodik).
+Echtzeit-Feeds für VRN und RMV. Zwei Betriebstage (22./23.08.2026) sind darin
+<strong>nicht</strong> enthalten — an ihnen hat die Sammlung nachweislich schief
+gegriffen, Einzelheiten auf der <a href="/methodik">Methodik-Seite</a>.
 
 Für Aussagen über eine einzelne Linie oder einen bestimmten Bahnhof ist das noch zu kurz.
 Für die drei Befunde unten reicht es, weil sie über das ganze Gebiet rechnen.
@@ -118,8 +118,8 @@ order by reihenfolge
 **Die Zahl:** An <Value data={befund_puenktlich} column=nicht_im_nenner fmt='#,##0'/>
 Halten sollte planmäßig ein Zug ankommen, ohne dass je einer gemessen wurde — das sind
 <Value data={befund_puenktlich} column=nicht_im_nenner_anteil fmt='#,##0.0'/> % aller
-planmäßigen Ankünfte. In der üblichen Pünktlichkeitsquote kommen sie **nicht vor**, weder
-im Zähler noch im Nenner.
+planmäßigen Ankünfte. In der üblichen Pünktlichkeitsquote kommen sie
+<strong>nicht vor</strong>, weder im Zähler noch im Nenner.
 
 Rechnet man sie mit, waren
 <Value data={befund_puenktlich} column=quote_planmaessig fmt='#,##0.0'/> % der planmäßigen
@@ -193,8 +193,8 @@ select 'im Bahnhof, während des Halts', haltezeit_sek_je_halt from ${befund_ort
 **Die Zahl:** Je gefahrenem Abschnitt kamen im Mittel
 <Value data={befund_ort} column=laufzeit_sek_je_abschnitt fmt='#,##0.0'/> Sekunden dazu,
 je Halt <Value data={befund_ort} column=haltezeit_sek_je_halt fmt='#,##0.0'/> Sekunden.
-Mehr entsteht damit **<Value data={befund_ort} column=ueberwiegt/>** — und das ist die
-Stelle, an der sich diese Auswertung von einer gewöhnlichen unterscheidet, denn eine
+Mehr entsteht damit <strong><Value data={befund_ort} column=ueberwiegt/></strong> — und
+das ist die Stelle, an der sich diese Auswertung von einer gewöhnlichen unterscheidet, denn eine
 Ankunftsverspätung allein sagt darüber nichts. Ein negativer Wert bedeutet, dass dort unter
 dem Strich Reserve genutzt und Verspätung abgebaut wurde.
 
