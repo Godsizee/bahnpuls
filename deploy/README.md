@@ -16,7 +16,8 @@ gemountet ist:
 | Variable | Default | Produktiv (Beispiel) |
 |---|---|---|
 | `BAHNPULS_FEED_URL` | `https://realtime.gtfs.de/realtime-free.pb` | unverändert |
-| `BAHNPULS_SCOPE_CONFIG` | `config/scope_stops.csv` | unverändert (liegt im Image) |
+| `BAHNPULS_SCOPE_CONFIG` | `config/scope_stops.csv` | unverändert — **nur noch Rückfallebene**, siehe unten |
+| `BAHNPULS_STATIC_DIR` | `data/static` | `/data/static` |
 | `BAHNPULS_DATA_DIR` | `data/raw` | `/data/raw` |
 | `BAHNPULS_HEARTBEAT_PATH` | `data/heartbeat.json` | `/data/heartbeat.json` |
 
@@ -30,6 +31,56 @@ nur deren Default, damit sich der Wert in Coolify ändern lässt, ohne das Image
 wird geloggt und ignoriert — der Collector startet trotzdem, statt in eine Restart-Schleife
 zu laufen (Regel 3). Der Fetch-Timeout deckt **das Lesen des Bodys** mit ab, nicht nur den
 Verbindungsaufbau: mit 15 s liefen im ersten 24 h-Lauf 1,96 % der Polls in einen Timeout.
+
+## Die Gebietsliste liegt auf dem Volume, nicht im Image (BPULS-073)
+
+Die Liste, gegen die der Collector filtert, ist eine **stop_id**-Liste — und diese IDs
+rotieren zwischen zwei Veröffentlichungen von gtfs.de fast vollständig. Am 22.08.2026 um
+08:41 UTC erschien eine neue Version; von den 1.916 IDs, mit denen der Collector lief,
+standen danach noch **48** im Fahrplan. Bis zum Abend des 23.08. kamen deshalb **69 statt
+703** Schienenfahrten an — den Rest der Treffer machten Bushaltestellen aus, die zufällig
+dieselbe Nummer trugen. Kein Alarm ging los: der Anteil im Scope blieb unauffällig, weil
+Nahverkehr die Lücke füllte.
+
+Deshalb gilt jetzt:
+
+1. **`statictool` leitet die Liste nach jedem Laden neu ab** — aus den *Namen* der
+   bekannten Stationen gegen die `stops.txt` der neuen Version. Ein Bahnhof wechselt nicht
+   das Gebiet, weil er eine neue Nummer bekommt. Ergänzend, nie ersetzend: eine zu früh
+   entfernte ID kostet Historie (Regel 3), eine überzählige nur Fremdverkehr, den dbt
+   ausschließt.
+2. **Sie landet unter `<static-dir>/scope_stops.csv`**, also auf dem Persistent Volume.
+   Der Collector nimmt diese Datei, sobald es sie gibt, und liest sie **bei jedem
+   Stundenflush neu** — eine neue Fahrplanversion wirkt damit ohne Deploy. `config/`
+   im Image ist nur noch die Vorlage für den allerersten Lauf.
+3. **`pruefung.sh` zählt stündlich mit**, wie viele IDs der Liste die jüngste Version
+   kennt (`gebietsliste: 1843 von 3449 IDs in v=2026-08-22`) und meldet unter 500 einen
+   Befund. Am 22.08. hätte das binnen einer Stunde angeschlagen.
+
+Einmalig nach dem ersten Deploy dieser Änderung — die Datei existiert auf dem Volume noch
+nicht:
+
+```sh
+/app/statictool -gebietsliste-nachtragen -static-dir /data/static -gebietsliste-vorlage /app/config/scope_stops.csv
+```
+
+Zum Nachsehen, ohne etwas zu ändern:
+`/app/statictool -gebietsliste-pruefen -static-dir /data/static`.
+
+### Der Static-Load gehört täglich, nicht wöchentlich
+
+**gtfs.de veröffentlicht samstags, der Task lief montags.** Genau in dieser Lücke lag der
+22./23.08.: der Namensraum wechselte am Samstagvormittag, nachgezogen worden wäre er erst
+am Montag — anderthalb Tage, in denen der Collector Nahverkehr statt Bahn eingesammelt hat.
+
+Ein täglicher Lauf um 03:30 UTC kostet nichts: eine vorhandene Version wird nie
+überschrieben (Regel 1), der Task erkennt sie und lädt nicht. **Er zieht die Gebietsliste
+trotzdem nach** — sie ist keine Datei *in* der Version, sondern eine Ableitung *aus* ihr,
+und das Nachtragen ist idempotent (zweiter Lauf: 0 neue IDs). Damit repariert sich eine
+fehlgeschlagene Ableitung am nächsten Morgen von selbst, statt bis zur nächsten
+Veröffentlichung stillzuliegen.
+
+---
 
 ## `BAHNPULS_STOP_FILTER` — erst messen, dann verwerfen (BPULS-074)
 

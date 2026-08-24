@@ -12,6 +12,8 @@ set -u
 
 HB="${BAHNPULS_HEARTBEAT_PATH:-data/heartbeat.json}"
 DATA_DIR="${BAHNPULS_DATA_DIR:-data/raw}"
+STATIC_DIR="${BAHNPULS_STATIC_DIR:-data/static}"
+STATICTOOL="${BAHNPULS_STATICTOOL:-./statictool}"
 
 MAX_HEARTBEAT_AGE=600
 MAX_FEED_AGE=300
@@ -30,6 +32,14 @@ MIN_SCOPE_PROMILLE=10
 MAX_DATEI_ALTER=7200
 MIN_FREI_MB=2048
 WARN_FREI_MB=10240
+# gtfs.de veroeffentlicht woechentlich. Zehn Tage lassen einen ausgefallenen
+# Lauf zu, ohne dass die Gebietsliste in einem Nummernkreis haengenbleibt, den
+# der Echtzeit-Feed nicht mehr verwendet (BPULS-073).
+MAX_VERSION_ALTER_TAGE=10
+# Wie viele IDs der Gebietsliste die juengste Version noch kennt. Das Gebiet hat
+# rund 1.700 Stationen; am 2026-08-23 waren es 1.843. Am 22.08., als der Filter
+# ins Leere lief, waren es **48** -- die Schwelle trennt beides mit Abstand.
+MIN_IDS_IN_VERSION=500
 
 befund=0
 melde() { echo "BEFUND: $1"; befund=1; }
@@ -89,6 +99,39 @@ if [ -n "$ausserhalb" ]; then
 		echo "gebietsfremde Halte: ${ausserhalb} verworfen"
 	else
 		echo "gebietsfremde Halte: ${ausserhalb} gezaehlt (nicht verworfen)"
+	fi
+fi
+
+# --- Greift die Gebietsliste noch im aktuellen Fahrplan? -------------------
+# Die Luecke, die den 22.08. gekostet hat (BPULS-073): die Liste steht in den
+# stop_id-Werten **einer** Veroeffentlichung, und die rotieren fast vollstaendig.
+# Ab dem Wechsel traf sie nur noch, was zufaellig dieselbe Nummer im
+# Nahverkehrsfeed hatte -- 69 statt 703 Schienenfahrten, und die Promille-Zahl
+# oben blieb dabei unauffaellig, weil Busse die Luecke fuellten. Ein Anteil sagt
+# hier nichts; gezaehlt wird, wie viele IDs der Liste der Fahrplan noch kennt.
+gebietsliste="$STATIC_DIR/scope_stops.csv"
+[ -f "$gebietsliste" ] || gebietsliste="${BAHNPULS_SCOPE_CONFIG:-config/scope_stops.csv}"
+
+version=$(find "$STATIC_DIR" -maxdepth 1 -type d -name 'v=*' 2>/dev/null | sort | tail -1)
+if [ -z "$version" ]; then
+	warne "keine Fahrplanversion unter $STATIC_DIR -- Namen und Gebietsliste veralten"
+else
+	version_alter=$(( ($(date +%s) - $(stat -c %Y "$version")) / 86400 ))
+	if [ "$version_alter" -gt "$MAX_VERSION_ALTER_TAGE" ]; then
+		melde "juengste Fahrplanversion $(basename "$version") ist ${version_alter} Tage alt (Grenze ${MAX_VERSION_ALTER_TAGE}) -- 'statictool' laeuft nicht mehr"
+	fi
+
+	if [ ! -f "$gebietsliste" ]; then
+		melde "gebietsliste fehlt: $gebietsliste"
+	# Gezaehlt wird im Binary, nicht mit cut: stops.txt fuehrt die Spalten je
+	# Veroeffentlichung in anderer Reihenfolge (seit v=2026-08-22 steht stop_id
+	# an dritter Stelle), und Bahnhofsnamen tragen selbst Kommas. Eine
+	# Spaltenzahl anzunehmen zaehlte hier lautlos null.
+	elif ! ausgabe=$("$STATICTOOL" -gebietsliste-pruefen -static-dir "$STATIC_DIR" \
+		-gebietsliste "$gebietsliste" -mindest-ids "$MIN_IDS_IN_VERSION" 2>&1); then
+		melde "$(echo "$ausgabe" | sed -n 's/.*statictool: //p' | tr '\n' ' ')"
+	else
+		echo "$ausgabe" | sed -n 's/.*statictool: gebietsliste -- /gebietsliste: /p'
 	fi
 fi
 
