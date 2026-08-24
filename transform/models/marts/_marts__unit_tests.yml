@@ -41,6 +41,11 @@ unit_tests:
              abschnitt_direkt: true, soll_an: "2026-03-29 04:10:00", soll_ab: "2026-03-29 04:12:00",
              delay_an_sek: 150, delay_ab_sek: 140, laufzeit_delta_sek: 60, haltezeit_delta_sek: -10,
              halt_ausgelassen: false, zug_ausgefallen: false, ist_endgueltig: true}
+      # Leer, nicht weggelassen: mart_zuglauf hängt seit BPULS-079 an dieser Tabelle,
+      # und dbt verlangt für jeden ref des geprüften Modells eine Eingabe. Leer heißt
+      # hier "keine Lücke bekannt" — der Normalfall, gegen den dieser Test rechnet.
+      - input: ref('int_erhebungsluecke')
+        rows: []
     expect:
       rows:
         - {trip_key: "t1", halt_nr: 1, delay_ab_sek: 60, laufzeit_delta_sek: null,
@@ -69,11 +74,11 @@ unit_tests:
           - {betriebstag: "2026-08-11", quelle: "de_gtfsrt", trip_key: "a", halt_nr: 2,
              abschnitt_direkt: true, abschnitt_im_gebiet: true, von_stop_id: "A", von_stop_name: "A", stop_id: "B", stop_name: "B",
              laufzeit_delta_sek: 300, haltezeit_delta_sek: 60,
-             zug_ausgefallen: false, halt_ausgelassen: false, zeitumstellung_mehrdeutig: false}
+             zug_ausgefallen: false, halt_ausgelassen: false, zeitumstellung_mehrdeutig: false, erhebung_vollstaendig: true}
           - {betriebstag: "2026-08-11", quelle: "de_gtfsrt", trip_key: "b", halt_nr: 2,
              abschnitt_direkt: true, abschnitt_im_gebiet: true, von_stop_id: "A", von_stop_name: "A", stop_id: "B", stop_name: "B",
              laufzeit_delta_sek: null, haltezeit_delta_sek: null,
-             zug_ausgefallen: true, halt_ausgelassen: false, zeitumstellung_mehrdeutig: false}
+             zug_ausgefallen: true, halt_ausgelassen: false, zeitumstellung_mehrdeutig: false, erhebung_vollstaendig: true}
     expect:
       rows:
         # 300/1, nicht 300/2 — der ausgefallene Zug ist sichtbar (zuege,
@@ -105,48 +110,48 @@ unit_tests:
           # Bedingungen unbemerkt, weil sich dann nur die Etiketten tauschen und die
           # Summen gleich bleiben. Gegengeprüft — mit vertauschter Bedingung schlägt
           # dieser Test fehl.
-          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'a', halt_nr: 1, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true}
-          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'a', halt_nr: 2, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true}
-          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'a', halt_nr: 3, delay_an_sek: 100,  halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true}
-          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'a', halt_nr: 4, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true}
-          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'a', halt_nr: 5, delay_an_sek: 400,  halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true}
-          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'a', halt_nr: 6, delay_an_sek: null, halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true}
-          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'a', halt_nr: 7, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'a', halt_nr: 1, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true, erhebung_vollstaendig: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'a', halt_nr: 2, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true, erhebung_vollstaendig: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'a', halt_nr: 3, delay_an_sek: 100,  halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true, erhebung_vollstaendig: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'a', halt_nr: 4, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true, erhebung_vollstaendig: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'a', halt_nr: 5, delay_an_sek: 400,  halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true, erhebung_vollstaendig: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'a', halt_nr: 6, delay_an_sek: null, halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true, erhebung_vollstaendig: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'a', halt_nr: 7, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true, erhebung_vollstaendig: true}
           # Fahrt B: vollständig ausgefallen.
-          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'b', halt_nr: 1, delay_an_sek: null, halt_ausgelassen: false, zug_ausgefallen: true,  zeitumstellung_mehrdeutig: false, halt_im_gebiet: true}
-          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'b', halt_nr: 2, delay_an_sek: null, halt_ausgelassen: false, zug_ausgefallen: true,  zeitumstellung_mehrdeutig: false, halt_im_gebiet: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'b', halt_nr: 1, delay_an_sek: null, halt_ausgelassen: false, zug_ausgefallen: true,  zeitumstellung_mehrdeutig: false, halt_im_gebiet: true, erhebung_vollstaendig: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'b', halt_nr: 2, delay_an_sek: null, halt_ausgelassen: false, zug_ausgefallen: true,  zeitumstellung_mehrdeutig: false, halt_im_gebiet: true, erhebung_vollstaendig: true}
           # Fahrt C: ein Halt in der Umstellungsstunde — nicht bestimmbar, nicht unpünktlich.
-          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'c', halt_nr: 1, delay_an_sek: null, halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true}
-          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'c', halt_nr: 2, delay_an_sek: null, halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: true, halt_im_gebiet: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'c', halt_nr: 1, delay_an_sek: null, halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true, erhebung_vollstaendig: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'c', halt_nr: 2, delay_an_sek: null, halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: true, halt_im_gebiet: true, erhebung_vollstaendig: true}
           # Fahrt D: **kein einziger Halt bedient** — die Form, in der ein
           # vollständiger Ausfall in diesem Feed ankommt (BPULS-064). Bewusst vier
           # Halte, damit die Zahl (3 zählende) sich von 'verkuerzt' (2) und
           # 'ausgelassen' (1) unterscheidet: bei gleicher Zahl bliebe eine
           # Verwechslung der Bedingungen unbemerkt. Gegengeprüft — ohne den eigenen
           # Zweig fallen diese drei nach 'ausgelassen' und der Test schlägt fehl.
-          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'd', halt_nr: 1, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true}
-          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'd', halt_nr: 2, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true}
-          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'd', halt_nr: 3, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true}
-          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'd', halt_nr: 4, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'd', halt_nr: 1, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true, erhebung_vollstaendig: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'd', halt_nr: 2, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true, erhebung_vollstaendig: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'd', halt_nr: 3, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true, erhebung_vollstaendig: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'd', halt_nr: 4, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true, erhebung_vollstaendig: true}
           # Fahrt E: ebenfalls **kein** bedienter Halt — und **nicht prüfbar**, weil
           # ihre trip_id in keiner gültigen Fahrplan-Version steht (BPULS-066). Der
           # Unterschied zu F ist der ganze Punkt: E ist nicht widerlegt, sondern
           # ungeprüft.
-          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'e', halt_nr: 1, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true}
-          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'e', halt_nr: 2, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true}
-          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'e', halt_nr: 3, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'e', halt_nr: 1, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true, erhebung_vollstaendig: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'e', halt_nr: 2, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true, erhebung_vollstaendig: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'e', halt_nr: 3, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true, erhebung_vollstaendig: true}
           # Fahrt F: geprüft und **widerlegt** — der Fahrplan sieht mehr Halte vor, als
           # beobachtet wurden. Sie ist der Fall, für den die Spalte ursprünglich
           # gedacht war, und muss von E unterscheidbar bleiben.
-          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'f', halt_nr: 1, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true}
-          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'f', halt_nr: 2, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'f', halt_nr: 1, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true, erhebung_vollstaendig: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'f', halt_nr: 2, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true, erhebung_vollstaendig: true}
           # Fahrt G: zweite nicht prüfbare Fahrt, damit die drei Zahlen sich
           # unterscheiden (4 unbedient, davon 1 belegt und 2 nicht prüfbar). Bei
           # gleicher Zahl bliebe eine Verwechslung der Spalten unbemerkt — derselbe
           # Grund wie bei D gegen E.
-          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'g', halt_nr: 1, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true}
-          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'g', halt_nr: 2, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true}
-          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'g', halt_nr: 3, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'g', halt_nr: 1, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true, erhebung_vollstaendig: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'g', halt_nr: 2, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true, erhebung_vollstaendig: true}
+          - {betriebstag: '2026-08-13', quelle: 'de_gtfsrt', route_kurzname: 'RE 1', trip_key: 'g', halt_nr: 3, delay_an_sek: null, halt_ausgelassen: true,  zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true, erhebung_vollstaendig: true}
       - input: ref('int_de_soll_laufweg')
         rows:
           # D deckt ihren Soll-Laufweg vollständig ab, F nicht — beide sind geprüft.
@@ -191,12 +196,12 @@ unit_tests:
              abschnitt_direkt: true, abschnitt_im_gebiet: false,
              von_stop_id: "K", von_stop_name: "Köln Hbf", stop_id: "M", stop_name: "Mainz Hbf",
              laufzeit_delta_sek: 300, haltezeit_delta_sek: 60,
-             zug_ausgefallen: false, halt_ausgelassen: false, zeitumstellung_mehrdeutig: false}
+             zug_ausgefallen: false, halt_ausgelassen: false, zeitumstellung_mehrdeutig: false, erhebung_vollstaendig: true}
           - {betriebstag: "2026-08-23", quelle: "de_gtfsrt", trip_key: "ice", halt_nr: 3,
              abschnitt_direkt: true, abschnitt_im_gebiet: true,
              von_stop_id: "M", von_stop_name: "Mainz Hbf", stop_id: "F", stop_name: "Frankfurt Hbf",
              laufzeit_delta_sek: 300, haltezeit_delta_sek: 60,
-             zug_ausgefallen: false, halt_ausgelassen: false, zeitumstellung_mehrdeutig: false}
+             zug_ausgefallen: false, halt_ausgelassen: false, zeitumstellung_mehrdeutig: false, erhebung_vollstaendig: true}
     expect:
       rows:
         - {betriebstag: "2026-08-23", von_stop_id: "M", nach_stop_id: "F", zuege: 1,
@@ -219,11 +224,11 @@ unit_tests:
     given:
       - input: ref('mart_zuglauf')
         rows:
-          - {betriebstag: '2026-08-23', quelle: 'de_gtfsrt', route_kurzname: 'ICE 690', trip_key: 'ice', halt_nr: 1, delay_an_sek: null, halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: false}
-          - {betriebstag: '2026-08-23', quelle: 'de_gtfsrt', route_kurzname: 'ICE 690', trip_key: 'ice', halt_nr: 2, delay_an_sek: 900,  halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true}
-          - {betriebstag: '2026-08-23', quelle: 'de_gtfsrt', route_kurzname: 'ICE 690', trip_key: 'ice', halt_nr: 3, delay_an_sek: 0,    halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true}
-          - {betriebstag: '2026-08-23', quelle: 'de_gtfsrt', route_kurzname: 'ICE 690', trip_key: 'nord', halt_nr: 1, delay_an_sek: null, halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: false}
-          - {betriebstag: '2026-08-23', quelle: 'de_gtfsrt', route_kurzname: 'ICE 690', trip_key: 'nord', halt_nr: 2, delay_an_sek: 60,   halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: false}
+          - {betriebstag: '2026-08-23', quelle: 'de_gtfsrt', route_kurzname: 'ICE 690', trip_key: 'ice', halt_nr: 1, delay_an_sek: null, halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: false, erhebung_vollstaendig: true}
+          - {betriebstag: '2026-08-23', quelle: 'de_gtfsrt', route_kurzname: 'ICE 690', trip_key: 'ice', halt_nr: 2, delay_an_sek: 900,  halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true, erhebung_vollstaendig: true}
+          - {betriebstag: '2026-08-23', quelle: 'de_gtfsrt', route_kurzname: 'ICE 690', trip_key: 'ice', halt_nr: 3, delay_an_sek: 0,    halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: true, erhebung_vollstaendig: true}
+          - {betriebstag: '2026-08-23', quelle: 'de_gtfsrt', route_kurzname: 'ICE 690', trip_key: 'nord', halt_nr: 1, delay_an_sek: null, halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: false, erhebung_vollstaendig: true}
+          - {betriebstag: '2026-08-23', quelle: 'de_gtfsrt', route_kurzname: 'ICE 690', trip_key: 'nord', halt_nr: 2, delay_an_sek: 60,   halt_ausgelassen: false, zug_ausgefallen: false, zeitumstellung_mehrdeutig: false, halt_im_gebiet: false, erhebung_vollstaendig: true}
       - input: ref('int_de_soll_laufweg')
         rows: []
     expect:
@@ -235,3 +240,65 @@ unit_tests:
         - {schwelle_sek: 360,  halte_mit_ankunft: 2, halte_gemessen: 2, halte_puenktlich: 1, fahrten: 1}
         - {schwelle_sek: 900,  halte_mit_ankunft: 2, halte_gemessen: 2, halte_puenktlich: 1, fahrten: 1}
         - {schwelle_sek: 3600, halte_mit_ankunft: 2, halte_gemessen: 2, halte_puenktlich: 2, fahrten: 1}
+
+  # BPULS-079, die Kennzeichnungsseite. Der Fall lässt sich an keiner Fixture zeigen:
+  # ob ein Betriebstag schief erhoben wurde, steht nicht in den Daten dieses Tages —
+  # sie sehen aus wie ein ruhiger Tag. Genau deshalb ein Unit-Test.
+  #
+  # Geprüft wird beides: die Zeile bleibt stehen (entwerten, nicht löschen), und der
+  # Nachbartag bleibt unangetastet — ein Bereich, der über seine Grenzen läuft, fiele
+  # sonst nirgends auf.
+  - name: mart_zuglauf_kennzeichnet_unvollstaendige_erhebung
+    model: mart_zuglauf
+    overrides:
+      macros:
+        is_incremental: false
+    given:
+      - input: ref('int_segment_delta')
+        rows:
+          - {betriebstag: "2026-08-22", trip_key: "t1", quelle: "de_gtfsrt", nach_stop_sequence: 2,
+             abschnitt_direkt: true, soll_an: "2026-08-22 08:10:00", soll_ab: "2026-08-22 08:12:00",
+             delay_an_sek: 120, delay_ab_sek: 100, laufzeit_delta_sek: 60, haltezeit_delta_sek: -20,
+             halt_ausgelassen: false, zug_ausgefallen: false, ist_endgueltig: true}
+          - {betriebstag: "2026-08-24", trip_key: "t2", quelle: "de_gtfsrt", nach_stop_sequence: 2,
+             abschnitt_direkt: true, soll_an: "2026-08-24 08:10:00", soll_ab: "2026-08-24 08:12:00",
+             delay_an_sek: 120, delay_ab_sek: 100, laufzeit_delta_sek: 60, haltezeit_delta_sek: -20,
+             halt_ausgelassen: false, zug_ausgefallen: false, ist_endgueltig: true}
+      - input: ref('int_erhebungsluecke')
+        rows:
+          - {betriebstag: "2026-08-22", grund: "Gebietsliste veraltet", referenz: "BPULS-073"}
+    expect:
+      rows:
+        # Die Zeile des schief erhobenen Tages bleibt — mit ihren Werten. Entwertet
+        # wird der Tag als Ganzes in den Aggregaten, nicht der einzelne Messwert:
+        # gemessen wurde richtig, nur eben zu wenig und nicht repräsentativ.
+        - {trip_key: "t1", halt_nr: 2, laufzeit_delta_sek: 60, erhebung_vollstaendig: false}
+        - {trip_key: "t2", halt_nr: 2, laufzeit_delta_sek: 60, erhebung_vollstaendig: true}
+
+  # Die Ausschlussseite desselben Befunds. Ein Betriebstag mit unvollständiger Erhebung
+  # darf in keinem Aggregat auftauchen — auch nicht mit kleinen Zahlen, denn die kleine
+  # Zahl ist genau die Täuschung: sie sieht aus wie ein ruhiger Tag.
+  - name: mart_verspaetungsentstehung_laesst_unvollstaendige_tage_aus
+    model: mart_verspaetungsentstehung
+    overrides:
+      macros:
+        is_incremental: false
+    given:
+      - input: ref('mart_zuglauf')
+        rows:
+          - {betriebstag: "2026-08-22", quelle: "de_gtfsrt", trip_key: "schief", halt_nr: 2,
+             abschnitt_direkt: true, abschnitt_im_gebiet: true,
+             von_stop_id: "M", von_stop_name: "Mainz Hbf", stop_id: "F", stop_name: "Frankfurt Hbf",
+             laufzeit_delta_sek: 900, haltezeit_delta_sek: 60,
+             zug_ausgefallen: false, halt_ausgelassen: false, zeitumstellung_mehrdeutig: false,
+             erhebung_vollstaendig: false}
+          - {betriebstag: "2026-08-24", quelle: "de_gtfsrt", trip_key: "sauber", halt_nr: 2,
+             abschnitt_direkt: true, abschnitt_im_gebiet: true,
+             von_stop_id: "M", von_stop_name: "Mainz Hbf", stop_id: "F", stop_name: "Frankfurt Hbf",
+             laufzeit_delta_sek: 300, haltezeit_delta_sek: 60,
+             zug_ausgefallen: false, halt_ausgelassen: false, zeitumstellung_mehrdeutig: false,
+             erhebung_vollstaendig: true}
+    expect:
+      rows:
+        - {betriebstag: "2026-08-24", von_stop_id: "M", nach_stop_id: "F", zuege: 1,
+           laufzeit_delta_sek_summe: 300, laufzeit_messwerte: 1, laufzeit_delta_sek_je_zug: 300.0}

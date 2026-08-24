@@ -102,7 +102,12 @@ select
     zuglauf.haltezeit_delta_sek,
     zuglauf.halt_ausgelassen,
     zuglauf.zug_ausgefallen,
-    zuglauf.zeitumstellung_mehrdeutig
+    zuglauf.zeitumstellung_mehrdeutig,
+
+    -- War die Erhebung an diesem Betriebstag vollstaendig (BPULS-079)? Der Tag bleibt
+    -- waehlbar -- eine einzelne Fahrt ist richtig aufgezeichnet, schief ist die
+    -- **Auswahl** der Fahrten --, aber die Betriebstagsliste sagt es dazu.
+    zuglauf.erhebung_vollstaendig
 
 from mart_zuglauf as zuglauf
 join fahrten

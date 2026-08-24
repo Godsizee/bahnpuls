@@ -101,9 +101,15 @@ with zuglauf as (
 
     select *
     from {{ ref('mart_zuglauf') }}
+    -- Keine Betriebstage mit bekannt unvollstaendiger Erhebung (BPULS-079). Der Grund
+    -- trifft ausgerechnet diese Kennzahl am haertesten: was am 22./23.08.2026 durchkam,
+    -- war ueberproportional Fernverkehr ueber grosse Knoten -- eine Quote darueber
+    -- beschreibt diesen Rest und nicht das Gebiet. Der Tag bleibt in mart_zuglauf und
+    -- in mart_datenqualitaet sichtbar, er geht nur in keine Quote ein.
+    where erhebung_vollstaendig
 
     {% if is_incremental() %}
-    where betriebstag >= (
+    and betriebstag >= (
         select coalesce(max(betriebstag), date '1900-01-01') from {{ this }}
     )
     {% endif %}

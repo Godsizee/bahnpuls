@@ -23,6 +23,10 @@ with detail as (
     -- Abweichung, den er nicht pruefen soll.
     where abschnitt_direkt
       and abschnitt_im_gebiet
+      -- Und dieselbe dritte Bedingung: mart_zuglauf traegt die Betriebstage mit
+      -- unvollstaendiger Erhebung weiterhin (BPULS-079), das Aggregat nicht. Ohne
+      -- diese Zeile meldete der Test genau den Ausschluss als Abweichung.
+      and erhebung_vollstaendig
     group by all
 
 ),

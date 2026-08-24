@@ -30,11 +30,16 @@ viel Verspätung er zu jedem Zeitpunkt insgesamt mit sich trug.
 -- dann leer — ohne Fehlermeldung, nur mit leerer Seite.
 select
     strftime(betriebstag, '%Y-%m-%d')  as tag,
-    strftime(betriebstag, '%d.%m.%Y')  as beschriftung,
+    -- Ein Tag mit unvollstaendiger Erhebung bleibt waehlbar und sagt es in der
+    -- Beschriftung (BPULS-079). Die einzelne Fahrt ist richtig aufgezeichnet; schief
+    -- ist, welche Fahrten an diesem Tag ueberhaupt aufgezeichnet wurden.
+    strftime(max(betriebstag), '%d.%m.%Y')
+        || case when bool_and(erhebung_vollstaendig) then ''
+                else ' — Erhebung unvollständig' end as beschriftung,
     max(betriebstag)                   as sortierung,
     count(distinct trip_key)           as fahrten
 from bahnpuls.zuglauf_auswahl
-group by tag, beschriftung
+group by strftime(betriebstag, '%Y-%m-%d')
 order by sortierung desc
 ```
 
@@ -113,6 +118,12 @@ Schnitt über alle Fahrten hinweg wäre einfacher gewesen und hätte den Linienf
 darüber wertlos gemacht — er kennte dann die halben Linien gar nicht. Aus demselben Grund
 ist die Fahrt eines Tages, die hier fehlt, **nicht** als „nicht aufgezeichnet" zu lesen:
 sie ist nur nicht in dieser Auswahl.
+
+Steht hinter einem Betriebstag **„Erhebung unvollständig"**, hat die Sammlung an diesem
+Tag nicht alle Züge erwischt — die hier gezeigten Fahrten sind trotzdem richtig
+aufgezeichnet, denn schief ist die Auswahl, nicht die Messung. In den Kennzahlen auf den
+übrigen Seiten kommen diese Tage nicht vor; warum, steht auf der
+[Methodik-Seite](/methodik) unter „Zwei Betriebstage, die nicht mitzählen“.
 
 </Alert>
 

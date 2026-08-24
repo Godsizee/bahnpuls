@@ -37,6 +37,17 @@ models:
           mart_pufferbilanz) — zusammen mit `abschnitt_direkt`.
         tests:
           - not_null
+      - name: erhebung_vollstaendig
+        description: >
+          War die Erhebung an diesem Betriebstag vollständig (BPULS-079)? Dieselbe
+          Behandlung wie beim Gebiet: der Laufweg bleibt lückenlos lesbar, die
+          Aggregate lassen den Tag aus. `false` heißt nicht „wenig Verkehr", sondern
+          **schief erhoben** — am 22./23.08.2026 kam durch, was die Rotation der
+          Haltestellennummern zufällig überlebt hatte, also überproportional große
+          Bahnhöfe und Fernverkehr. Die Liste der Tage steht im Seed
+          `erhebungsluecken`, der Grund in `mart_datenqualitaet.erhebung_grund`.
+        tests:
+          - not_null
       - name: quelle
         tests:
           - not_null
@@ -236,6 +247,22 @@ models:
           - dbt_utils.accepted_range:
               arguments:
                 min_value: 0
+      - name: erhebung_vollstaendig
+        description: >
+          War die Erhebung an diesem Betriebstag vollständig (BPULS-079)? Ist sie es
+          nicht, steht der Tag **hier** weiterhin, geht aber in keine der vier
+          Kennzahl-Marts ein. Das ist der Sinn dieser Spalte: fiele der Tag auch aus dem
+          Abdeckungsprotokoll, wäre eine Schieflage in der Erhebung von einem
+          stillstehenden Collector nicht mehr zu unterscheiden.
+        tests:
+          - not_null
+      - name: erhebung_grund
+        description: >
+          Was die Erhebung an diesem Tag verzerrt hat, in einem Satz mit Zahlen. NULL an
+          einem Tag ohne Befund — nicht ein leerer Text, sonst sähe „kein Befund" wie
+          „Grund unbekannt" aus.
+      - name: erhebung_referenz
+        description: Die Aufgabe, unter der der Vorfall aufgeklärt ist (Präfix BPULS).
       - name: abdeckung_an
         description: >
           Anteil der Halte mit planmäßiger Ankunft, für die eine Ankunftsverspätung

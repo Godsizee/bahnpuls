@@ -347,3 +347,31 @@ models:
       - dbt_utils.unique_combination_of_columns:
           arguments:
             combination_of_columns: ['trip_key', 'stop_sequence']
+
+
+  - name: int_erhebungsluecke
+    description: >
+      Ein Betriebstag je Zeile, an dem die Erhebung nachweislich unvollständig war
+      (BPULS-079) — die Bereiche aus dem Seed `erhebungsluecken`, entfaltet, damit die
+      Marts über Gleichheit joinen statt über `between`.
+
+      Der Anlass ist der 22./23.08.2026: der Collector sammelte gegen eine veraltete
+      Gebietsliste (BPULS-073), und durch kam, was die Rotation der Haltestellennummern
+      zufällig überlebt hat — überproportional große Bahnhöfe und Fernverkehr. Das ist
+      keine Lücke, sondern eine **Schieflage**: eine Quote über diesen Zeitraum
+      beschreibt diesen Rest, nicht das Gebiet.
+    columns:
+      - name: betriebstag
+        description: >
+          Betroffener Betriebstag. Eindeutig, auch wenn sich zwei Bereiche im Seed
+          überlappen — sonst vervielfachte ein Join auf diese Tabelle die Zeilen des
+          Marts, und zwar lautlos.
+        tests:
+          - not_null
+          - unique
+      - name: grund
+        tests:
+          - not_null
+      - name: referenz
+        tests:
+          - not_null

@@ -207,6 +207,18 @@ dbt build --full-refresh
 Im laufenden Betrieb ist das nicht nötig und auch nicht erwünscht — dort ist genau das
 Vorwärtsladen gewollt.
 
+**Derselbe Fallstrick gilt für den Seed `erhebungsluecken`** (BPULS-079). Ein Betriebstag,
+der nachträglich als unvollständig erhoben eingetragen wird, liegt in den Marts längst
+fertig gerechnet — und liegt dort weiter, weil der inkrementelle Lauf ihn nicht mehr
+anfasst. Nach jeder Änderung an dieser Datei also einmal `--full-refresh`. Wer es vergisst,
+erfährt es: `assert_marts_ohne_unvollstaendige_erhebung` hält die Aggregate frisch gegen
+den Seed und meldet genau diesen Fall.
+
+**Produktiv ist das zurzeit kein Handgriff:** `deploy/dashboard-entrypoint.sh` und der
+stündliche `deploy/dashboard-rebuild.sh` rufen dbt ohnehin mit `--full-refresh` auf. Der
+Test bleibt trotzdem die Absicherung — er merkt es, falls diese Voraussetzung einmal
+wegfällt.
+
 ## Lauf gegen die Fixtures
 
 ```bash
@@ -216,9 +228,9 @@ dbt build --vars '{"de_gtfsrt_glob": "tests/fixtures/de/*.parquet", "de_static_d
 Ohne `de_static_dir` bricht `stg_de_static` ab — es sucht dann unter `../data/static/`
 nach einem Fahrplanarchiv, das lokal niemand hat.
 
-Erwartung: `PASS=235 WARN=4 ERROR=0` von 239 (Stand 2026-08-23 nach BPULS-075 — vorher
-214 von 218: dazu kamen der Seed, `stg_de_gebietshalt`, vier Unit-Tests und der
-Abschlusstest `assert_marts_ohne_gebietsfremde_abschnitte`). Alle vier Warnungen tragen
+Erwartung: `PASS=253 WARN=4 ERROR=0` von 257 (Stand 2026-08-24 nach BPULS-079 — vorher
+235 von 239: dazu kamen der Seed `erhebungsluecken`, `int_erhebungsluecke`, deren Tests,
+zwei Unit-Tests und der Abschlusstest `assert_marts_ohne_unvollstaendige_erhebung`). Alle vier Warnungen tragen
 `severity: warn` und sind gewollt — sie beschreiben Eigenschaften der Quelle, keine
 Modellfehler, und dürfen deshalb den Seitenbau nicht anhalten:
 
@@ -388,7 +400,7 @@ rm -f "$OHNE"/v=*/*/stop_times.parquet
 dbt build --full-refresh --vars "{\"de_gtfsrt_glob\": \"tests/fixtures/de/*.parquet\", \"de_static_dir\": \"$OHNE\"}"
 ```
 
-Erwartung: `PASS=213 WARN=5 ERROR=0` von 218 (Stand 2026-08-23) — die fünfte Warnung ist
+Erwartung: `PASS=252 WARN=5 ERROR=0` von 257 (Stand 2026-08-24) — die fünfte Warnung ist
 `assert_de_ausfaelle_aufgeloest`. Lässt man `fahrplanhalt_dateien()` stattdessen fest `1`
 zurückgeben, endet derselbe Lauf mit `ERROR=1` und übersprungenem Downstream; genau daran
 hängt der Nutzen der Prüfung.

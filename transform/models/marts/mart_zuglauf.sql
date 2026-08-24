@@ -78,6 +78,17 @@ select
     von_halt_im_gebiet,
     nach_halt_im_gebiet as halt_im_gebiet,
     abschnitt_im_gebiet,
+
+    -- War die Erhebung an diesem Betriebstag vollstaendig (BPULS-079)? Dieselbe
+    -- Behandlung wie beim Gebiet eine Zeile darueber: der Laufweg bleibt lesbar, die
+    -- Aggregate lassen den Tag aus. `not exists` statt Join -- eine Zeile darf sich
+    -- nicht vervielfachen, wenn spaeter zwei Luecken denselben Tag nennen.
+    not exists (
+        select 1
+        from {{ ref('int_erhebungsluecke') }} as luecke
+        where luecke.betriebstag = mit_vorhalt.betriebstag
+    ) as erhebung_vollstaendig,
+
     soll_an,
     soll_ab,
 

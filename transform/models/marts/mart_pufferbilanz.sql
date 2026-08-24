@@ -62,6 +62,11 @@ with zuglauf as (
     -- Bedingung stuenden Abschnitte in der Rangliste, die das Zielgebiet nie beruehren.
     where abschnitt_direkt
       and abschnitt_im_gebiet
+      -- Und keine Betriebstage mit bekannt unvollstaendiger Erhebung (BPULS-079). Am
+      -- 22./23.08.2026 kam durch, was die Rotation der Haltestellennummern zufaellig
+      -- ueberlebt hat -- ueberproportional grosse Bahnhoefe und Fernverkehr. Eine
+      -- Rangliste ueber diesen Rest beschreibt nicht das Gebiet.
+      and erhebung_vollstaendig
 
     {% if is_incremental() %}
     and betriebstag >= (

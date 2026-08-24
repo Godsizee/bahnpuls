@@ -28,6 +28,10 @@ Zwei Einschränkungen gehören dazu, bevor irgendeine Zahl gelesen wird:
 
 - **Die Sammlung ist jung.** Für Aussagen über eine einzelne Linie oder einen bestimmten
   Bahnhof reichen wenige Tage nicht; man sieht Tage, keine Regelmäßigkeit.
+- **Zwei Betriebstage zählen nicht mit.** Am 22. und 23.08.2026 hat die Sammlung
+  nachweislich schief gegriffen; beide Tage gehen in keine Kennzahl ein und stehen
+  gekennzeichnet daneben — Einzelheiten unter
+  „Zwei Betriebstage, die nicht mitzählen“ weiter unten.
 - **Wo statt eines Bahnhofsnamens eine Nummer steht**, kannte keine Fahrplan-Version
   diesen Halt — der Echtzeit-Feed selbst enthält keine Namen.
 
@@ -176,6 +180,43 @@ Was hier noch **nicht** erfasst ist: Lücken in der Sammlung der deutschen Echtz
 selbst, also Zeiträume, in denen kein Abruf zustande kam. Die sind aus den Ist-Daten
 nicht sichtbar; sie werden ergänzt, sobald die deutsche Quelle angeschlossen ist. Bis
 dahin gilt die Abdeckung ausdrücklich nur für das, was in der Quelle stand.
+
+## Zwei Betriebstage, die nicht mitzählen
+
+Am **22. und 23. August 2026** ist die Erhebung schiefgelaufen, und zwar hier und nicht
+bei der Quelle. Gesammelt wird über eine Liste von Bahnhofsnummern im Zielgebiet. Am
+22.08. um 08:41 Uhr veröffentlichte der Datenanbieter einen neuen Fahrplan-Datensatz und
+vergab dabei die Nummern neu: von den 1.916 Nummern, mit denen die Sammlung lief, standen
+danach noch **48** im Fahrplan. Ab diesem Moment wurde nicht mehr der Bahnverkehr im
+Gebiet mitgeschrieben, sondern das, was zufällig dieselbe Nummer trug.
+
+Aufgezeichnet sind an diesen beiden Tagen **3.381 und 2.456 Schienenfahrten**, während der
+Fahrplan für das Gebiet 6.710 und 6.183 vorsieht. Rund die Hälfte fehlt — und weil
+Echtzeitdaten nirgends archiviert werden, ist sie endgültig weg.
+
+**Entscheidend ist aber nicht, wie viel fehlt, sondern welcher Teil.** Durchgekommen ist,
+was die Neuvergabe zufällig überlebt hat: überwiegend große Knotenbahnhöfe und
+Fernverkehr. Das ist keine zufällige Stichprobe, sondern eine Schieflage. Eine
+Pünktlichkeitsquote über diese beiden Tage beschriebe diesen Rest und nicht das Gebiet —
+und sie sähe nicht offensichtlich falsch aus, sondern einfach nach zwei ruhigen Tagen.
+Genau deshalb steht dieser Abschnitt hier.
+
+Für diese beiden Tage gilt deshalb:
+
+- Sie gehen in **keine** Kennzahl ein — weder in die Pünktlichkeit noch in die
+  Abschnittsauswertungen.
+- Sie bleiben **sichtbar**: in der Tabelle „Wie verlässlich ist das?" auf der Startseite
+  stehen sie weiterhin, gekennzeichnet, und die Einzelfahrten dieser Tage lassen sich
+  weiterhin ansehen. Ein Tag, der spurlos verschwindet, wäre von einem Tag ohne Sammlung
+  nicht zu unterscheiden.
+- Die **Rohdaten bleiben unangetastet**. Korrigiert wird nur in der Auswertung, nie in der
+  Mitschrift.
+
+Die Ursache ist seit dem 24.08.2026 behoben: Die Liste wird nicht mehr über Nummern
+gepflegt, sondern aus den **Stationsnamen** abgeleitet und nach jeder
+Fahrplanveröffentlichung neu erzeugt — ein Bahnhof wechselt nicht das Gebiet, weil er eine
+neue Nummer bekommt. Eine stündliche Prüfung meldet außerdem, wenn die Liste nicht mehr
+zum aktuellen Fahrplan passt; am 22.08. hätte sie binnen einer Stunde angeschlagen.
 
 ## Was aussortiert wird — und warum es trotzdem gezählt steht
 

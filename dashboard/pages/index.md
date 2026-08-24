@@ -137,7 +137,8 @@ select
     ausgefallene_halte,
     ausgelassene_halte,
     halte_gebietsfremd,
-    fahrten_gebietsfremd
+    fahrten_gebietsfremd,
+    case when erhebung_vollstaendig then '' else 'unvollständig' end as erhebung
 from bahnpuls.mart_datenqualitaet
 order by betriebstag desc
 ```
@@ -162,6 +163,7 @@ drei sind Betrieb und gehören zum Bild.
     <Column id=ausgelassene_halte title="ausgelassen" />
     <Column id=halte_gebietsfremd title="Halte außerhalb" />
     <Column id=fahrten_gebietsfremd title="aussortiert" />
+    <Column id=erhebung title="Erhebung" />
 </DataTable>
 
 **Halte außerhalb** sind Halte in den Daten, die nicht in VRN oder RMV liegen. Sie kommen
@@ -182,6 +184,16 @@ Erkennen lässt sich das nur an der ganzen Fahrt: gehen mehr ihrer Halte im Nahv
 auf als im Bahnfahrplan, ist es keine Bahnfahrt im Gebiet. Steht hier eine 0, wurde
 entweder nichts aussortiert — oder die Vergleichsliste fehlt gerade; dann sagt das der
 Bauprotokoll-Eintrag, nicht diese Tabelle.
+
+Steht in der Spalte **Erhebung** ein „unvollständig", hat die Sammlung an diesem Tag
+nachweislich schief gegriffen. Der Tag steht deshalb hier, geht aber in **keine** Kennzahl
+auf diesen Seiten ein. Betroffen sind der 22. und 23.08.2026: Der Datenanbieter vergab an
+diesem Wochenende die Bahnhofsnummern neu, und die Sammlung lief danach gegen eine
+veraltete Liste. Aufgezeichnet ist an beiden Tagen rund die Hälfte der planmäßigen
+Fahrten — und zwar nicht irgendeine Hälfte, sondern überwiegend Fernverkehr über große
+Knoten. Eine Quote darüber beschriebe diesen Rest und nicht das Gebiet, ohne dabei falsch
+auszusehen. Warum der Tag trotzdem stehen bleibt und was seither anders läuft, steht auf
+der [Methodik-Seite](/methodik) unter „Zwei Betriebstage, die nicht mitzählen“.
 
 ### Und hat der Sammler durchgehalten?
 

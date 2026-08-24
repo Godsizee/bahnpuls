@@ -150,6 +150,15 @@ select
     -- im Lauf, wenn die Liste fehlt.
     coalesce(aussortiert.fahrten_gebietsfremd, 0) as fahrten_gebietsfremd,
 
+    -- Der Tag mit bekannt unvollstaendiger Erhebung bleibt hier stehen -- und zwar
+    -- gerade hier (BPULS-079). Aus den Aggregaten ist er ausgeschlossen; faellt er
+    -- auch aus dem Abdeckungsprotokoll, ist eine Schieflage in der Erhebung von einem
+    -- stillstehenden Collector nicht mehr zu unterscheiden. Das ist derselbe Grund,
+    -- aus dem fahrten_gebietsfremd und halte_gebietsfremd danebenstehen.
+    luecke.betriebstag is null as erhebung_vollstaendig,
+    luecke.grund               as erhebung_grund,
+    luecke.referenz            as erhebung_referenz,
+
     -- Die Abdeckungsquote, um die es geht. Nenner sind ausschliesslich die
     -- planmaessig vorhandenen Ereignisse -- sonst driftet die Quote mit dem Anteil
     -- der Start- und Endbahnhoefe, also mit der Laenge der Laufwege.
@@ -161,3 +170,5 @@ from gezaehlt
 left join aussortiert
   on  aussortiert.betriebstag = gezaehlt.betriebstag
   and aussortiert.quelle      = gezaehlt.quelle
+left join {{ ref('int_erhebungsluecke') }} as luecke
+  on  luecke.betriebstag = gezaehlt.betriebstag

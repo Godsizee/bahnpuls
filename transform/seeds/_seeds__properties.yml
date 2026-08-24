@@ -25,3 +25,50 @@ seeds:
       - name: stop_name
         tests:
           - not_null
+
+  - name: erhebungsluecken
+    description: >
+      Betriebstage, an denen die Erhebung **nachweislich unvollständig** war
+      (BPULS-079) — je Zeile ein Bereich von…bis, ein Grund und die Aufgabe, unter der
+      der Vorfall aufgeklärt ist.
+
+      Ein Tag mit unvollständiger Erhebung ist nicht ein Tag mit wenig Verkehr. Die
+      Rohdaten bleiben unangetastet (CLAUDE.md Regel 1); entwertet wird in der
+      Transformationsschicht, genau wie bei Ausfällen (Regel 8) und gebietsfremden
+      Halten (BPULS-075): `int_erhebungsluecke` entfaltet die Bereiche auf Betriebstage,
+      `mart_zuglauf` und `mart_datenqualitaet` behalten den Tag mit Kennzeichnung, die
+      vier Aggregate schließen ihn aus.
+
+      **Nach jeder Änderung an dieser Datei ist ein `--full-refresh` fällig.** Die Marts
+      sind inkrementell; ein neu eingetragener Tag liegt sonst weiterhin fertig
+      gerechnet in den alten Partitionen. Produktiv ist das kein Handgriff — Entrypoint
+      und stündlicher Rebuild laufen ohnehin so —, lokal schon.
+      `assert_marts_ohne_unvollstaendige_erhebung` meldet genau diesen Fall, falls die
+      Voraussetzung einmal wegfällt.
+    columns:
+      - name: betriebstag_von
+        description: Erster betroffener Betriebstag, einschließlich.
+        tests:
+          - not_null
+          - unique
+      - name: betriebstag_bis
+        description: >
+          Letzter betroffener Betriebstag, einschließlich. Für einen einzelnen Tag
+          derselbe Wert wie `betriebstag_von` — kein NULL, sonst hieße „ein Tag" und
+          „bis auf Weiteres" dasselbe.
+        tests:
+          - not_null
+      - name: grund
+        description: >
+          Was die Erhebung an diesen Tagen verzerrt hat, in einem Satz mit Zahlen. Steht
+          so auf der Methodik-Seite und in `mart_datenqualitaet.erhebung_grund`.
+        tests:
+          - not_null
+      - name: referenz
+        description: Die Aufgabe, unter der der Vorfall aufgeklärt ist (Präfix BPULS).
+        tests:
+          - not_null
+    tests:
+      - dbt_utils.expression_is_true:
+          arguments:
+            expression: "betriebstag_bis >= betriebstag_von"

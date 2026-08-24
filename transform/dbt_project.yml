@@ -36,6 +36,16 @@ vars:
 
 seeds:
   bahnpuls:
+    erhebungsluecken:
+      +column_types:
+        # Explizit date: die Spalten sind die Grenzen eines Betriebstagsbereichs und
+        # werden gegen `betriebstag` gejoint. Als varchar abgeleitet verglichen sie
+        # lautlos Zeichenketten -- richtig fuer ISO-Daten, falsch, sobald jemand ein
+        # anderes Format eintraegt.
+        betriebstag_von: date
+        betriebstag_bis: date
+        grund: varchar
+        referenz: varchar
     scope_stops:
       +column_types:
         # varchar, nicht der abgeleitete BIGINT: im Feed ist die stop_id eine
