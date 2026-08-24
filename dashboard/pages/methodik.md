@@ -1,7 +1,7 @@
 ---
 title: Methodik
 description: Wie die Kennzahlen gerechnet werden — und was sie bewusst nicht behaupten
-sidebar_position: 6
+sidebar_position: 7
 ---
 
 Eine Zahl ohne offengelegte Definition ist eine Behauptung. Diese Seite beschreibt jede
@@ -493,6 +493,33 @@ ausgerechnet aus der, die sie zeigen soll.
 gebracht haben. Ein Abruf ohne jede Änderung hinterlässt nichts. Und sie kann über 100 %
 liegen, weil beim Ausrollen kurz zwei Sammler gleichzeitig laufen; der Wert wird nicht
 gedeckelt, weil ein gedeckelter Wert wie eine normale Stunde aussähe.
+
+## Die Befundseite — worauf ihre drei Zahlen stehen
+
+Die [Befundseite](/befunde) trifft drei Aussagen. Sie rechnet dabei nichts Neues, sondern
+schneidet vorhandene Kennzahlen anders zu — drei Festlegungen gehören dazu.
+
+**Alle drei Befunde stehen auf demselben Zeitraum.** Das ist keine Selbstverständlichkeit:
+Die Quellabfragen dieses Dashboards schneiden unterschiedlich zu — Pünktlichkeit und
+Engpässe auf je 30 Betriebstage, die Entstehungssicht gar nicht. Drei Befunde auf drei
+verschiedenen Fenstern wären drei Aussagen, die sich nicht aufeinander beziehen lassen.
+Maßgeblich ist deshalb das Fenster der Pünktlichkeitsquelle, und es steht oben auf der
+Seite. Betriebstage mit unvollständiger Erhebung sind darin nicht enthalten.
+
+**„Halte, die in der üblichen Quote nicht vorkommen"** ist die Differenz zwischen allen
+Halten mit planmäßiger Ankunft und den Halten, für die eine Ankunftsverspätung vorlag. Das
+sind gestrichene Halte, Halte gestrichener Läufe, ausgelassene Halte, Halte ohne
+Ist-Meldung und Halte aus der Umstellungsstunde zusammen. Sie werden hier **nur für diese
+eine Aussage** summiert; im Abdeckungsprotokoll stehen sie einzeln und werden dort nie
+addiert, weil sich die Gründe überschneiden können. Hier ist das unbedenklich, denn die
+sieben Zustände der Pünktlichkeitsrechnung schließen einander aus.
+
+**Die Engpass-Rangliste verlangt mindestens 100 messbare Fahrten** je Abschnitt im
+Zeitraum. Ohne eine solche Untergrenze steht der Abschnitt mit drei Zügen an der Spitze,
+von denen einer gestört war. Die Grenze ist bewusst niedrig gewählt: Die Quelle liefert
+ohnehin nur die 200 meistbefahrenen Abschnitte und greift damit schon vor. Sie steht
+trotzdem in der Abfrage, weil diese Vorauswahl eine Eigenschaft der Quelle ist und keine
+der Seite.
 
 ## Was diese Zahlen nicht sind
 

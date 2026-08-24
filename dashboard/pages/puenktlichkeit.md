@@ -1,7 +1,7 @@
 ---
 title: Pünktlichkeit und Ausfälle
 description: Zwei Quoten nebeneinander — die übliche und die, in der Ausfälle nicht verschwinden
-sidebar_position: 5
+sidebar_position: 6
 ---
 
 Ein ausgefallener Zug ist nie verspätet. Das klingt wie ein Wortspiel, hat aber eine

@@ -14,6 +14,10 @@ Ankunftsverspätung kennt, kann sie nicht auseinanderhalten.
 
 Bahnpuls rechnet genau das aus.
 
+**Wer nur das Ergebnis will:** Auf der Seite [Befunde](/befunde) stehen drei Aussagen aus
+den Daten — jede mit einer Zahl, einer Grafik und dem, was sie betrieblich bedeutet. Alles
+Übrige auf diesen Seiten sind Werkzeuge, um sie nachzuprüfen.
+
 ## Wie das funktioniert
 
 Für jeden Halt wird zweierlei festgehalten: **wie viel Verspätung ein Zug beim Ankommen

@@ -1,7 +1,7 @@
 ---
 title: Datenschutz
 description: Welche Daten beim Aufruf dieser Seite anfallen — und welche nicht
-sidebar_position: 10
+sidebar_position: 11
 ---
 
 Diese Seite kommt ohne Nutzerkonten, ohne Tracking und ohne Werbung aus. Trotzdem fallen

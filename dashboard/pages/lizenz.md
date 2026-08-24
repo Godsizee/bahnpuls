@@ -1,7 +1,7 @@
 ---
 title: Lizenz und Quellen
 description: Woher die Daten stammen, unter welchen Bedingungen sie hier stehen und was das für die Weiterverwendung heißt
-sidebar_position: 8
+sidebar_position: 9
 ---
 
 Zwei Dinge auf diesen Seiten haben zwei verschiedene Lizenzen: die **Daten**, die
