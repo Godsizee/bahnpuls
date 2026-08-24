@@ -123,6 +123,75 @@ Frontmatter, damit nicht zwei dastehen. Im Tab steht für alle 44 Seiten „Bahn
 Seed, statt aus dem Namen abgeleitet zu werden: die Adresse wird zitiert (BPULS-077) und
 darf sich nicht ändern, weil jemand die Umlautregel anfasst.
 
+## Was eine Seite im Browser kostet — gemessen, nicht geschätzt
+
+`deploy/dashboard-ladezeit-messen.js` laedt jede Seite in einem echten Chrome (headless,
+ueber das DevTools-Protokoll, ohne zusaetzliche Abhaengigkeit) und liest danach die
+**Ressourcen-Zeitleiste des Browsers** aus. Aufruf:
+
+```bash
+node deploy/dashboard-ladezeit-messen.js                       # gegen die Produktionsseite
+node deploy/dashboard-ladezeit-messen.js --langsam             # 1,6 Mbit/s, 150 ms RTT
+node deploy/dashboard-ladezeit-messen.js http://localhost:3000 # gegen einen lokalen Bau
+```
+
+**Messung vom 2026-08-24** gegen `bahnpuls.dasdann.jetzt`, kalter Cache, je Seite einmal
+vollstaendig durchgescrollt:
+
+| | schnelle Leitung | gedrosselt (1,6 Mbit/s) |
+|---|---|---|
+| Uebertragen je Seite | 1,5–3,7 MB | 3,6–3,7 MB |
+| davon Parquet | **0,00 MB** | **0,00 MB** |
+| davon vorgerechnete `.arrow` | ≤ 0,09 MB | ≤ 0,09 MB |
+| Text steht (DOMContentLoaded) | 0,2–0,9 s | ~1,6 s |
+| alles nachgeladen | 0,8–8,0 s | ~19 s |
+| groesste einzelne Datei | 1,88 MB (JS) | 1,88 MB (JS) |
+
+**Der Befund ist ein anderer als erwartet.** Die Sorge aus BPULS-056 war die Datenmenge —
+gemessen wird beim Aufruf aber **keine einzige Parquet-Datei** geholt. Evidence liefert die
+beim Bau vorgerechneten Abfrageergebnisse aus (`/api/prerendered_queries/*.arrow`, wenige
+Kilobyte), und die Zahlen stehen ohnehin schon im vorgerenderten HTML. Selbst das
+Umstellen des Betriebstags auf der Laufweg-Seite loeste **null** zusaetzliche Anfragen aus.
+Die Grenzen der Quellen (3 Tage x 6 Fahrten, 200 Abschnitte, 30 Tage) sind damit derzeit
+nicht der Engpass — **das JavaScript ist es**: rund 3 MB je Seite, davon 1,88 MB in einem
+einzigen Bundle.
+
+Fuer eine Vorfuehrung heisst das: die Seite ist gedrosselt nach knapp zwei Sekunden lesbar,
+weil der Text und die Zahlen vorgerendert sind; die Diagramme kommen nach. Was **nicht**
+gemessen ist: eine Auswahl, die es beim Bau nicht gab (etwa ein Betriebstag, den die
+vorgerechneten Ergebnisse nicht abdecken) — dort muesste DuckDB-WASM tatsaechlich laden.
+Diese Grenze steht als offener Punkt an BPULS-078.
+
+**Drei Dinge, an denen die Messung zuerst gescheitert ist** — sie stehen hier, damit sie
+niemand noch einmal sucht:
+
+1. **Nicht scrollen heisst nicht messen.** Evidence laedt die Diagrammbibliothek erst, wenn
+   ein Diagramm ins Bild kommt. Ohne Scrollen meldete dieselbe Seite 1,5 statt 3,6 MB.
+2. **Eigene Buchfuehrung ueber Netzwerkereignisse geht schief.** Weiterleitungen melden
+   `requestWillBeSent` zweimal, und fuer Anfragen aus einem spaet angehaengten Worker fehlt
+   die URL. Die Zeitleiste des Browsers kennt beides richtig.
+3. **Ein `element.click()` bedient kein `cmdk`-Auswahlfeld.** Die Auswahl blieb stehen, die
+   Messung meldete "0 Anfragen" und sah wie ein gutes Ergebnis aus. Jetzt laeuft es ueber
+   Tastatur (`ArrowDown`, `Enter` **mit** `char`-Ereignis), und das Skript prueft danach,
+   ob sich der Wert wirklich geaendert hat — sonst meldet es einen Befund.
+
+## Feste Einstiegspunkte (BPULS-077)
+
+Die Laufweg-Seite oeffnet nicht mehr auf dem neuesten, sondern auf dem **juengsten
+vollstaendig erhobenen** Betriebstag (Abfrage `standard`). Sonst begaenne eine Vorfuehrung
+im schlechtesten Fall mit einer Fussnote statt mit einem Zug.
+
+Die Auswahl laesst sich zusaetzlich in der Adresse mitgeben
+(`/laufweg?tag=…&linie=…&fahrt=…`). **Die Parameter werden ueber `window.location` gelesen,
+nicht ueber `$page.url.searchParams`:** SvelteKit verbietet den Zugriff darauf in einer
+vorgerenderten Seite und bricht den Bau mit einem 500er ab. Beim Vorrendern gibt es kein
+`window`, dann gilt die Vorauswahl.
+
+Faellt eine verlinkte Fahrt aus dem Fenster der letzten drei Betriebstage, waehlt die Seite
+**nichts** aus — deshalb steht dort ein sichtbarer Hinweis mit dem Weg zurueck auf den
+aktuellen Stand. Ein Link ohne Parameter altert nicht; ein Bahnhofslink
+(`/bahnhof/<slug>/`) ohnehin nicht, seine Adresse kommt aus dem Seed.
+
 ## Warum kein Wasserfall-Diagramm
 
 Der Backlog sah für den Laufweg einen Wasserfall vor. Evidence hat keine

@@ -256,7 +256,8 @@ liest, soll sehen können, ob sie auf lückenloser Beobachtung beruhen.
 Wie es an einem bestimmten Bahnhof aussieht — und ob die Verspätung dort ankommt oder dort
 entsteht —, steht auf den [Bahnhofsseiten](/bahnhoefe) — je eine für die größeren
 Knoten in VRN und Rhein-Main. Wie eine einzelne Fahrt Halt für Halt verläuft, zeigt die Seite
-[Laufweg einer Fahrt](/laufweg). Ob es Stellen im Netz gibt, an denen es immer wieder
+[Laufweg einer Fahrt](/laufweg) — sie öffnet mit einer Fahrt des jüngsten vollständig
+erhobenen Betriebstags, ohne dass man erst etwas auswählen müsste. Ob es Stellen im Netz gibt, an denen es immer wieder
 klemmt, beantwortet [Engpässe im Netz](/engpaesse); wo der Fahrplan zu knappe oder zu
 großzügige Zuschläge enthält, zeigt [Fahrplanreserve](/puffer). Was passiert, wenn ein Zug gar nicht
 erst fährt — und warum Pünktlichkeitsquoten dadurch besser werden —, steht unter

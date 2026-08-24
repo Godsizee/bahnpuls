@@ -96,13 +96,50 @@ join gefiltert as ziel
 order by grenzen.ab_soll nulls last, bezeichnung
 ```
 
-<Dropdown data={tage} name=tag value=tag label=beschriftung title="Betriebstag" />
+```sql standard
+-- Womit die Seite aufgeht, wenn niemand etwas ausgewaehlt hat (BPULS-077): der **juengste
+-- vollstaendig erhobene** Betriebstag. Ohne diese Vorauswahl stuende hier der neueste Tag,
+-- und der kann derjenige sein, an dem die Erhebung schief lag -- eine Vorfuehrung begaenne
+-- dann mit einer Fussnote statt mit einem Zug.
+select strftime(max(betriebstag), '%Y-%m-%d') as tag
+from bahnpuls.zuglauf_auswahl
+where erhebung_vollstaendig
+```
 
-<Dropdown data={linien} name=linie value=linie title="Linie">
+<!--
+    Die Adressparameter werden ueber `window.location` gelesen, nicht ueber
+    `$page.url.searchParams`: SvelteKit verbietet den Zugriff darauf in einer
+    vorgerenderten Seite und bricht den Bau mit einem 500er ab (BPULS-077, am Bau
+    gesehen). Beim Vorrendern gibt es kein `window`, dann bleibt es bei der Vorauswahl aus
+    `standard` -- die Auswahl entsteht also erst im Browser, und genau dort steht sie auch.
+-->
+
+<Dropdown data={tage} name=tag value=tag label=beschriftung title="Betriebstag"
+    defaultValue={(typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('tag')) || standard[0]?.tag || []} />
+
+<Dropdown data={linien} name=linie value=linie title="Linie"
+    defaultValue={(typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('linie')) || []}>
     <DropdownOption value="%" valueLabel="alle Linien" />
 </Dropdown>
 
-<Dropdown data={fahrten} name=fahrt value=trip_key label=bezeichnung title="Fahrt" />
+<Dropdown data={fahrten} name=fahrt value=trip_key label=bezeichnung title="Fahrt"
+    defaultValue={(typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('fahrt')) || []} />
+
+{#if typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('fahrt') && inputs.fahrt?.value !== new URLSearchParams(window.location.search).get('fahrt')}
+<Alert status=warning>
+
+**Die verlinkte Fahrt steht nicht mehr zur Auswahl.** Sie ist aus dem Fenster gelaufen, das
+diese Seite anbietet — die letzten drei aufgezeichneten Betriebstage. Oben steht deshalb
+eine andere Fahrt; der Link auf [diese Seite ohne Vorauswahl](/laufweg) trifft immer den
+aktuellen Stand.
+
+</Alert>
+{/if}
+
+**Diese Seite lässt sich verlinken.** Die getroffene Auswahl steht in der Adresse
+(`?tag=…&linie=…&fahrt=…`) und kann so zitiert werden. Wer den Link ohne Anhang aufruft,
+bekommt immer den jüngsten vollständig erhobenen Betriebstag — das ist der Einstieg, der
+nicht altert.
 
 <Alert status=info>
 
