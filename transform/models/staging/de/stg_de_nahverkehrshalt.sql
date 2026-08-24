@@ -3,11 +3,16 @@
 -- Halte des Nahverkehrsfeeds, vereinigt ueber alle Versionen (BPULS-070).
 --
 -- **Wozu:** nicht als Fahrplan, sondern als Negativliste. Der Echtzeit-Feed fuehrt seit
--- dem 2026-08-22 Nahverkehr aus dem ganzen Bundesgebiet; dessen stop_id-Nummernkreis
--- kollidiert mit dem des Bahnfahrplans, und der Scope-Filter des Collectors kann beides
--- nicht auseinanderhalten -- er sieht nur eine Nummer, die auf seiner Liste steht.
--- Gemessen an einem Nachmittag: von 3.842 unbekannten IDs loesen 116 im Bahnfahrplan
--- auf und 3.756 hier.
+-- dem 2026-08-22 Nahverkehr aus dem ganzen Bundesgebiet, und der Scope-Filter des
+-- Collectors kann beides nicht auseinanderhalten -- er sieht nur eine Nummer, die auf
+-- seiner Liste steht. Gemessen an einem Nachmittag: von 3.842 unbekannten IDs loesen 116
+-- im Bahnfahrplan auf und 3.756 hier.
+--
+-- Bahn- und Nahverkehrsfeed teilen sich **denselben** Nummernkreis, und innerhalb einer
+-- Veroeffentlichung widerspruchsfrei (Beleg in int_de_gebietsfremd). Diese Liste trennt
+-- also nicht zwei Namensraeume, sondern beantwortet eine Frage: kennt der Nahverkehr
+-- diese Nummer, und der Bahnfahrplan nicht? Gefaehrlich wird es zwischen Versionen --
+-- eine Nummer von letzter Woche steht heute fuer eine andere Haltestelle.
 --
 -- **Warum ueber Versionen vereinigt und nicht die neueste:** dieselbe Rotation wie bei
 -- den Bahn-Halten (Q6). Ein Halt, der unter einer alten Nummer weitergemeldet wird,

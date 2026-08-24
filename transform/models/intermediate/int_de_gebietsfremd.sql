@@ -4,11 +4,28 @@
 --
 -- **Das Problem:** der Scope-Filter des Collectors ist eine stop_id-Liste aus dem
 -- Bahnfahrplan. Seit dem 2026-08-22 fuehrt der Echtzeit-Feed auch Nahverkehr aus dem
--- ganzen Bundesgebiet, dessen Nummernkreis zahlenmaessig mit unserem kollidiert -- eine
--- Hannoveraner Bushaltestelle traegt zufaellig die Nummer eines Bahnhofs im Gebiet. Der
--- Filter sieht einen Treffer, die Fahrt ist 300 km entfernt. Von aussen sind die Fahrten
--- nicht zu unterscheiden: sie tragen ueber dieselbe Kollision auf der trip_id sogar
--- plausible Linienbezeichnungen (`RB42` mit 70 Halten, davon 68 nur im Nahverkehr).
+-- ganzen Bundesgebiet, und eine Bushaltestelle in Hannover traegt dann die Nummer eines
+-- Bahnhofs im Gebiet. Der Filter sieht einen Treffer, die Fahrt ist 300 km entfernt. Von
+-- aussen sind die Fahrten nicht zu unterscheiden: sie tragen ueber dieselbe Kollision auf
+-- der trip_id sogar plausible Linienbezeichnungen (`RB42` mit 70 Halten, davon 68 nur im
+-- Nahverkehr).
+--
+-- **Die Kollision ist eine zwischen Versionen, nicht zwischen Feeds** -- nachgemessen am
+-- 2026-08-23 und anders, als es hier zuerst stand. Innerhalb **einer** Veroeffentlichung
+-- teilen sich Bahn- und Nahverkehrsfeed denselben Nummernkreis widerspruchsfrei: von
+-- 16.459 rv-Halten stehen 5.092 auch im Nahverkehrsfeed, und **alle 5.092** tragen dort
+-- denselben Namen -- es ist derselbe Bahnhof, nicht ein zufaelliger Namensvetter.
+-- Kollisionen entstehen erst, wenn eine alte Nummer auf eine neue Version trifft: die
+-- stop_id-Werte rotieren zwischen Veroeffentlichungen fast vollstaendig, und der
+-- Nahverkehrsfeed besetzt mit 683.872 von rund 695.000 moeglichen Nummern praktisch den
+-- ganzen Raum. Eine Bahn-ID von letzter Woche ist deshalb heute fast sicher eine
+-- Bushaltestelle.
+--
+-- Genau das ist am 2026-08-22 passiert, und es kam nicht von hier: der Collector sammelte
+-- bis zum 23.08. abends gegen eine Liste, von der nach der Veroeffentlichung noch 48 von
+-- 1.916 IDs im Fahrplan standen. Was hereinkam, war zu 92 % Nahverkehr -- die 84 bis 93 %
+-- gebietsfremder Fahrten in der Bilanz waren das **richtige** Urteil ueber falsch
+-- eingesammelte Daten, kein Fehler dieses Modells (BPULS-073).
 --
 -- **Warum die Entscheidung ueber die ganze Fahrt faellt und nicht ueber den Halt:** eine
 -- einzelne Nummer kann in beiden Nummernkreisen etwas bedeuten. Erst das Verhaeltnis

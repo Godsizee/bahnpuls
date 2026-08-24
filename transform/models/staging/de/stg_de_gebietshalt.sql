@@ -16,9 +16,10 @@
 -- aendert sich dadurch nicht. Waere die ID der einzige Schluessel, fiele ein Gebietshalt
 -- allein deshalb heraus, weil er eine neue Nummer bekommen hat.
 --
--- Warum die ID nicht gleichrangig danebenstehen darf: die Nummernkreise kollidieren
--- (BPULS-070). Gleichrangig gepruegt kamen so `Klandorf` (Brandenburg) und `Pernink`
--- (Tschechien) ins Gebiet -- gemessen am 2026-08-23 an Produktionsdaten.
+-- Warum die ID nicht gleichrangig danebenstehen darf: eine ID aus einer aelteren
+-- Veroeffentlichung steht heute fuer eine andere Haltestelle (BPULS-070, BPULS-073).
+-- Gleichrangig gepruegt kamen so `Klandorf` (Brandenburg) und `Pernink` (Tschechien) ins
+-- Gebiet -- gemessen am 2026-08-23 an Produktionsdaten.
 --
 -- Der Name stammt aus demselben Feed wie die Namen in stg_de_static und ist deshalb
 -- zeichengleich.
