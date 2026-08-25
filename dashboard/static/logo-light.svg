@@ -1,0 +1,59 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 40" fill="none" height="40">
+  <defs>
+    <linearGradient id="lightPulseGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#0284C7" />
+      <stop offset="45%" stop-color="#0284C7" />
+      <stop offset="60%" stop-color="#E11D48" />
+      <stop offset="75%" stop-color="#0284C7" />
+      <stop offset="100%" stop-color="#059669" />
+    </linearGradient>
+    <linearGradient id="lightBgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#F1F5F9" />
+      <stop offset="100%" stop-color="#E2E8F0" />
+    </linearGradient>
+  </defs>
+
+  <!-- Icon Container -->
+  <g transform="translate(2, 2)">
+    <rect x="0" y="0" width="36" height="36" rx="9" fill="url(#lightBgGrad)" stroke="#CBD5E1" stroke-width="1.2" />
+    
+    <!-- Railway track cross ties (Schwellen) -->
+    <line x1="7" y1="12" x2="7" y2="24" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round" />
+    <line x1="14" y1="12" x2="14" y2="24" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round" />
+    <line x1="29" y1="12" x2="29" y2="24" stroke="#94A3B8" stroke-width="1.5" stroke-linecap="round" />
+
+    <!-- Upper & Lower Rail lines -->
+    <path d="M5 14H31" stroke="#94A3B8" stroke-width="1.2" stroke-linecap="round" opacity="0.8" />
+    <path d="M5 22H31" stroke="#94A3B8" stroke-width="1.2" stroke-linecap="round" opacity="0.8" />
+
+    <!-- Dynamic Railway EKG Pulse Line -->
+    <path d="M5 18 H12 L15 10 L19 27 L23 13 L26 18 H31" 
+          stroke="url(#lightPulseGrad)" 
+          stroke-width="2.2" 
+          stroke-linecap="round" 
+          stroke-linejoin="round" />
+          
+    <!-- Pulse Peak Signal Node -->
+    <circle cx="19" cy="27" r="1.8" fill="#E11D48" />
+    <circle cx="15" cy="10" r="1.8" fill="#0284C7" />
+  </g>
+
+  <!-- Brand Typography -->
+  <g transform="translate(48, 26)">
+    <text x="0" y="0" 
+          font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" 
+          font-size="21" 
+          font-weight="800" 
+          letter-spacing="0.5px" 
+          fill="#0F172A">BAHN</text>
+    <text x="64" y="0" 
+          font-family="system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif" 
+          font-size="21" 
+          font-weight="300" 
+          letter-spacing="1.5px" 
+          fill="#0284C7">PULS</text>
+    <!-- Status Indicator Dot -->
+    <circle cx="132" cy="-6" r="3" fill="#10B981" />
+    <circle cx="132" cy="-6" r="5" fill="#10B981" opacity="0.2" />
+  </g>
+</svg>
