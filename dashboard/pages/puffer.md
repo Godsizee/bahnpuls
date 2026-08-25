@@ -14,6 +14,16 @@ Anschlussverzögerung bis zum Endbahnhof durchschlagen.
 Diese Seite fragt, wo das gelingt, wo die Reserve fehlt und wo sie ungenutzt liegen
 bleibt.
 
+<!--
+Der Wert steht unten als `${inputs.mindestfahrten}` in den Abfragen, **ohne** `.value` --
+anders als bei den Auswahllisten auf der Laufweg-Seite. Das ist kein Tippfehler:
+`Slider` schreibt seinen Wert ueber den veralteten `getInputContext()` roh in den
+Eingabespeicher, ohne die `{value, label}`-Huelle, die `Dropdown` ueber `getInputSetter`
+anlegt. `.value` ist darauf `undefined`; der uebersetzte Seitencode setzt daraufhin
+`noResolve` und fuehrt die Abfrage **nie** aus. Die Seite bleibt dann im gebauten Stand
+bei ihren Ladekaesten stehen -- HTTP 200, richtiger Titel, keine Konsolenmeldung
+(BPULS-084).
+-->
 <Slider
     name=mindestfahrten
     title="Mindestzahl bewertbarer Durchfahrten"
@@ -42,7 +52,7 @@ select
     100.0 * reserve_genutzt / nullif(verspaetet_eingefahren, 0)    as genutzt_anteil,
     100.0 * reserve_ungenutzt / nullif(puenktlich_eingefahren, 0)  as ungenutzt_anteil
 from bahnpuls.pufferbilanz
-where bewertbar >= ${inputs.mindestfahrten.value}
+where bewertbar >= ${inputs.mindestfahrten}
 ```
 
 ## Wo die Fahrzeit zu knapp bemessen ist
@@ -80,7 +90,7 @@ select abschnitt, linie, verspaetet_eingefahren, reserve_genutzt,
        round(genutzt_anteil, 1) as genutzt_anteil, genutzt_min
 from ${abschnitte}
 where genutzt_anteil is not null
-  and verspaetet_eingefahren >= ${inputs.mindestfahrten.value}
+  and verspaetet_eingefahren >= ${inputs.mindestfahrten}
 order by genutzt_anteil desc, genutzt_min desc
 limit 10
 ```
@@ -105,7 +115,7 @@ select abschnitt, linie, puenktlich_eingefahren, reserve_ungenutzt,
        round(ungenutzt_anteil, 1) as ungenutzt_anteil, ungenutzt_min
 from ${abschnitte}
 where ungenutzt_anteil is not null
-  and puenktlich_eingefahren >= ${inputs.mindestfahrten.value}
+  and puenktlich_eingefahren >= ${inputs.mindestfahrten}
 order by ungenutzt_anteil desc, ungenutzt_min desc
 limit 10
 ```
@@ -141,7 +151,7 @@ select
     verspaetet_eingefahren,
     round(bilanz_sek / 60.0, 1) as bilanz_min
 from bahnpuls.puffer_linien
-where bewertbar >= ${inputs.mindestfahrten.value}
+where bewertbar >= ${inputs.mindestfahrten}
   and verspaetet_eingefahren > 0
 order by linie
 ```

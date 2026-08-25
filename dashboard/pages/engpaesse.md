@@ -47,11 +47,16 @@ select
     ausgelassene_halte
 from ${abschnitte}
 where laufzeit_je_zug is not null
-  and zuege >= ${inputs.mindestzuege.value}
+  and zuege >= ${inputs.mindestzuege}
 order by laufzeit_je_zug desc
 limit 10
 ```
 
+<!--
+`${inputs.mindestzuege}` steht in den Abfragen ohne `.value` -- Begruendung siehe
+`puffer.md` an derselben Stelle: der `Slider` legt seinen Wert roh ab, `.value` waere
+`undefined` und die Abfrage liefe nie (BPULS-084).
+-->
 <Slider
     name=mindestzuege
     title="Mindestzahl Züge je Abschnitt"
@@ -102,12 +107,16 @@ having sum(laufzeit_messwerte) > 0
 ```
 
 ```sql heatmap_top
+-- `order by` qualifiziert: beide Seiten des Joins fuehren `abschnitt`, unqualifiziert ist
+-- der Bezug mehrdeutig und DuckDB bricht ab. Aufgefallen ist das erst, als die Abfrage
+-- ueberhaupt zum Laufen kam -- sie haengt ueber `rangliste` an der Schiebereglereingabe
+-- und wurde vorher gar nicht erst ausgefuehrt (BPULS-084).
 select h.*
 from ${heatmap} h
 join (
     select abschnitt from ${rangliste}
 ) auswahl on auswahl.abschnitt = h.abschnitt
-order by abschnitt, stunde
+order by h.abschnitt, h.stunde
 ```
 
 <Heatmap
@@ -156,7 +165,7 @@ select
     round(abs(hin_min - rueck_min), 2) as unterschied_min,
     zuege_schwaechere_richtung
 from ${richtungen}
-where zuege_schwaechere_richtung >= ${inputs.mindestzuege.value}
+where zuege_schwaechere_richtung >= ${inputs.mindestzuege}
 order by abs(hin_min - rueck_min) desc
 limit 10
 ```

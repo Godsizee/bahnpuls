@@ -45,6 +45,37 @@ Verzeichnis zeigt.
 Peer-Dependency; ohne den Pin löst npm `typescript` als `latest` auf und die Installation
 bricht mit `ERESOLVE` ab.
 
+## Ein Slider-Wert steht ohne `.value` in der Abfrage (BPULS-084)
+
+**Das sieht auf beiden Seiten wie ein Tippfehler aus und ist keiner.** Der Wert einer
+Auswahlliste steht als `${inputs.tag.value}` in der Abfrage, der eines Schiebereglers als
+`${inputs.mindestzuege}` — ohne Zugriffspfad.
+
+Der Grund liegt in den Komponenten selbst: `Dropdown` legt seinen Wert über
+`getInputSetter` als `{value, label}` ab, `Slider` schreibt ihn über den veralteten
+`getInputContext()` **roh** in den Eingabespeicher. `.value` ist auf einem Slider deshalb
+`undefined`.
+
+**Der Preis eines `.value` zu viel ist keine Fehlermeldung, sondern eine Seite, die ewig
+lädt.** Ein undefinierter Eingabewert setzt im übersetzten Seitencode `noResolve`, und
+Evidence führt die Abfrage dann **gar nicht erst aus**. Im gebauten Stand fehlt sie
+anschließend in `api/<seite>/<parameter>/all-queries.json`; die Komponente bleibt bei
+ihrem Ladekasten stehen. Von außen ist das nicht von einer gesunden Seite zu
+unterscheiden: HTTP 200, richtiger Titel, keine Konsolenmeldung. Genau so standen
+`/engpaesse` und `/puffer` — drei bzw. vier Skelette, null Tabellen.
+
+Gegengehalten wird das seitdem in `deploy/dashboard-seitenabfragen-pruefen.py`: jeder
+`${inputs.…}`-Bezug wird gegen die Komponente geprüft, die den Namen anlegt. Ein `.value`
+auf einem Slider, ein fehlendes `.value` auf einem Dropdown und ein Name, den keine
+Komponente der Seite anlegt, sind je ein Befund. Der Bindungstest allein konnte das nicht
+sehen — er ersetzt Eingabewerte durch eine Konstante und ist gegen ihre **Form** blind.
+
+**Nachstellen ohne Produktionsdaten geht nicht.** Die Fixtures liefern zu wenige Zeilen,
+als dass eine Mindestzahl-Schwelle (`>= 10`) noch etwas übrig ließe — die Tabellen sind
+dann leer, und zwar zu Recht. Wer diesen Fehler messen will, zieht die ausgelieferten
+Quellen nach `static/data/` (siehe *Lokal starten*) und vergleicht die Seite vorher und
+nachher im Browser, nicht im Compiler.
+
 ## Deutsche Zahlen — und warum dafür in `node_modules` gefasst wird
 
 `32,126.0` liest ein deutscher Leser nicht nur ungewohnt, sondern falsch: als

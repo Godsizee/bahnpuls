@@ -38,6 +38,23 @@ SEITEN = pathlib.Path(sys.argv[2] if len(sys.argv) > 2 else "/app/dashboard/page
 # ```sql name ... ``` -- der Name ist optional, Evidence erlaubt auch namenlose Bloecke.
 BLOCK = re.compile(r"^```sql[ \t]*([A-Za-z_][A-Za-z0-9_]*)?[^\n]*\n(.*?)^```", re.M | re.S)
 EINGABE = re.compile(r"\$\{\s*inputs\.[^}]*\}")
+# Ein einzelner Eingabebezug, zerlegt in Namen und -- falls vorhanden -- Zugriffspfad:
+# `${inputs.tag.value}` -> ("tag", ".value"), `${inputs.mindestzuege}` -> ("mindestzuege", "").
+EINGABE_BEZUG = re.compile(r"\$\{\s*inputs\.([A-Za-z_][A-Za-z0-9_]*)((?:\.[A-Za-z_][A-Za-z0-9_]*)*)\s*\}")
+# `<Slider name=x …>` / `<Dropdown name=x …>` -- welche Komponente den Namen anlegt.
+EINGABE_TAG = re.compile(r"<(Slider|Dropdown|ButtonGroup|TextInput|DateRange|Checkbox)\b([^>]*?)/?>", re.S)
+
+# Welche Form ein Eingabewert in der Abfrage haben muss. `Slider` schreibt seinen Wert
+# ueber den veralteten `getInputContext()` **roh** in den Eingabespeicher (eine Liste),
+# die uebrigen legen ueber `getInputSetter` eine `{value, label}`-Huelle an. `.value` auf
+# einem Slider ist deshalb `undefined` -- und ein undefinierter Eingabewert laesst Evidence
+# die Abfrage gar nicht erst ausfuehren (`noResolve`). Die Seite bleibt im gebauten Stand
+# bei ihren Ladekaesten stehen, mit HTTP 200 und ohne Konsolenmeldung; genau das war
+# BPULS-084. Von aussen ist der Fehler nicht zu sehen, deshalb steht er hier.
+ROHER_WERT = {"Slider"}
+# Erklaerkommentare stehen im Markup und nennen die Bezuege, die sie erklaeren -- ohne
+# sie herauszunehmen meldete ausgerechnet die Dokumentation dieser Regel einen Befund.
+KOMMENTAR = re.compile(r"<!--.*?-->", re.S)
 # Seitenparameter einer vorgerenderten Seite (`pages/bahnhof/[bahnhof].md`,
 # BPULS-061). Fuer die Bindung ist der Wert genauso egal wie bei einem Auswahlfeld --
 # geprueft wird, ob die Abfrage ihre Spalten findet, nicht welcher Bahnhof herauskommt.
@@ -138,6 +155,50 @@ def spaltennamen(wert):
 	return [wert.strip('"').strip("'")]
 
 
+def eingaben_pruefen(text, kennung_seite):
+	"""Haelt jeden `${inputs.…}`-Bezug gegen die Komponente, die den Namen anlegt.
+
+	`einsetzen` ersetzt Eingabewerte durch eine Konstante -- fuer die Bindung ist der Wert
+	egal, und genau deshalb ist dieses Skript gegen die **Form** des Bezugs blind. Ein
+	`.value` zu viel oder zu wenig bindet trotzdem sauber und faellt erst im Browser auf,
+	als Seite, die ewig laedt.
+
+	Gibt die Zahl der geprueften Bezuege zurueck.
+	"""
+	text = KOMMENTAR.sub("", text)
+	quelle = {}
+	for treffer in EINGABE_TAG.finditer(text):
+		komponente, roh = treffer.groups()
+		attribute = dict(ATTR.findall(roh or ""))
+		name = attribute.get("name", "").strip("\"'")
+		if name:
+			quelle[name] = komponente
+
+	bezuege = 0
+	for treffer in EINGABE_BEZUG.finditer(text):
+		name, pfad = treffer.groups()
+		bezuege += 1
+		komponente = quelle.get(name)
+		if komponente is None:
+			# Ein Name ohne Komponente ist derselbe stille Ausfall: der Wert bleibt
+			# ungesetzt, die Abfrage laeuft nie.
+			befunde.append(
+				f"{kennung_seite}: ${{inputs.{name}{pfad}}} -- keine Eingabekomponente dieser Seite legt `{name}` an"
+			)
+			continue
+		if komponente in ROHER_WERT and pfad:
+			befunde.append(
+				f"{kennung_seite}: ${{inputs.{name}{pfad}}} -- <{komponente} name={name}> legt den Wert roh ab, "
+				f"`{pfad.lstrip('.')}` ist darauf undefiniert und die Abfrage laeuft nie (BPULS-084)"
+			)
+		elif komponente not in ROHER_WERT and not pfad:
+			befunde.append(
+				f"{kennung_seite}: ${{inputs.{name}}} -- <{komponente} name={name}> legt `{{value, label}}` ab, "
+				f"hier fehlt `.value`"
+			)
+	return bezuege
+
+
 def komponenten_pruefen(text, spalten, benannt, kennung_seite):
 	"""Haelt `data={abfrage}` und die Spaltenattribute der Komponenten gegeneinander.
 
@@ -212,6 +273,7 @@ if not seiten:
 
 geprueft = 0
 bezuege = 0
+eingabebezuege = 0
 for seite in seiten:
 	text = seite.read_text(encoding="utf-8")
 	bloecke = BLOCK.findall(text)
@@ -251,6 +313,9 @@ for seite in seiten:
 	# (`<` und `>` kommen in Vergleichen vor).
 	benannt = {name for name, _ in bloecke if name}
 	bezuege += komponenten_pruefen(BLOCK.sub("", text), spalten, benannt, seite.name)
+	# Hier dagegen der **ganze** Text: die Bezuege stehen im SQL, die Komponenten, die
+	# sie anlegen, daneben im Markup.
+	eingabebezuege += eingaben_pruefen(text, seite.name)
 	con.close()
 
 if geprueft == 0:
@@ -270,10 +335,12 @@ if befunde:
 	# die es nicht gibt -- und wer nur die letzte Zeile liest, soll nicht falsch suchen.
 	wort = "Befund" if len(befunde) == 1 else "Befunde"
 	abbrechen(
-		f"{len(befunde)} {wort} aus {geprueft} Abfragen und {bezuege} Spaltenangaben"
+		f"{len(befunde)} {wort} aus {geprueft} Abfragen, {bezuege} Spaltenangaben und "
+		f"{eingabebezuege} Eingabebezuegen"
 	)
 
 print(
 	f"seitenabfragen: alle {geprueft} binden gegen die {len(quellen)} ausgelieferten "
-	f"Quellen, {bezuege} Spaltenangaben in den Komponenten stimmen"
+	f"Quellen, {bezuege} Spaltenangaben in den Komponenten stimmen, "
+	f"{eingabebezuege} Eingabebezuege passen zu ihrer Komponente"
 )
