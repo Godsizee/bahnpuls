@@ -35,6 +35,23 @@ theme:
       dark:
         - "#ADD8E6"
         - "#00008B"
+    # Einseitig und bei 0 verankert: fuer Anteile von 0 bis 100 %, wo ein hoher Wert den
+    # unguenstigen Fall beschreibt. Eine divergierende Skala gehoert hier nicht hin --
+    # ein Anteil kann nicht negativ werden.
+    verlust:
+      light:
+        - "#ffffff"
+        - "#8f3d56"
+      dark:
+        - "#09090b"
+        - "#d98aa0"
+    aufholung:
+      light:
+        - "#ffffff"
+        - "#46a485"
+      dark:
+        - "#09090b"
+        - "#46a485"
   colors:
     primary:
       light: "#2563eb"
@@ -57,6 +74,24 @@ theme:
     negative:
       light: "#dc2626"
       dark: "#f87171"
+    # Zeitbilanz: eine Farbe fuer verlorene, eine fuer aufgeholte Zeit -- die
+    # Unterscheidung, um die es auf diesen Seiten geht. Die hellen Toene sind
+    # Balkenfuellungen und stehen hinter Text, der lesbar bleiben muss; die
+    # "-stark"-Toene tragen Linien und Beschriftungen. Evidence legt jede Themenfarbe
+    # zusaetzlich als CSS-Variable an (--verloren, --aufgeholt-stark, ...) -- daraus
+    # nimmt die Skizze auf der Startseite ihre Farben, statt sie zu wiederholen.
+    verloren:
+      light: "#e7c3cd"
+      dark: "#5d2a3b"
+    verloren-stark:
+      light: "#8f3d56"
+      dark: "#d98aa0"
+    aufgeholt:
+      light: "#c5dfeb"
+      dark: "#1d4757"
+    aufgeholt-stark:
+      light: "#236aa4"
+      dark: "#7cc3e0"
 
 plugins:
   components:

@@ -197,13 +197,15 @@ limit 10
     <Column id=von title="letzter Halt davor" />
     <Column id=zuege title="Züge" fmt="#,##0" />
     <Column id=messbar title="davon messbar" fmt="#,##0" />
-    <Column id=laufzeit_sek title="auf dem Abschnitt entstanden (s je Zug)" fmt="#,##0.0" contentType=colorscale colorScale=negative />
+    <Column id=laufzeit_sek title="auf dem Abschnitt entstanden (s je Zug)" fmt="#,##0.0" contentType=bar barColor=verloren negativeBarColor=aufgeholt />
     <Column id=haltezeit_sek title="hier entstanden (s je Halt)" fmt="#,##0.0" />
 </DataTable>
 
-Sortiert danach, was ein Zug auf dem letzten Abschnitt vor der Einfahrt im Durchschnitt
-verliert — nicht danach, wie viel dort insgesamt zusammenkommt. Eine Summe setzte immer
-die dichtest befahrene Zufahrt nach oben, ganz gleich wie gut sie läuft.
+Der Balken zeigt die Richtung mit: nach rechts, was auf dem Abschnitt **dazukam**, nach
+links, was dort **aufgeholt** wurde. Sortiert ist danach, was ein Zug auf dem letzten
+Abschnitt vor der Einfahrt im Durchschnitt verliert — nicht danach, wie viel dort
+insgesamt zusammenkommt. Eine Summe setzte immer die dichtest befahrene Zufahrt nach oben,
+ganz gleich wie gut sie läuft.
 
 ## Was diese Seite nicht sagt
 

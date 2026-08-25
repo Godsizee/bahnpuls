@@ -240,7 +240,7 @@ limit 5
     <Column id=abschnitt title="Abschnitt" />
     <Column id=zuege title="Züge" />
     <Column id=messbar title="davon messbar" />
-    <Column id=laufzeit_min title="unterwegs dazu (Min./Zug)" fmt='#,##0.00' contentType=colorscale scaleColor=negative />
+    <Column id=laufzeit_min title="unterwegs dazu (Min./Zug)" fmt='#,##0.00' contentType=bar barColor=verloren negativeBarColor=aufgeholt />
     <Column id=haltezeit_min title="im Bahnhof dazu (Min./Zug)" fmt='#,##0.00' />
 </DataTable>
 

@@ -60,7 +60,7 @@ limit 10
     <Column id=abschnitt title="Abschnitt" />
     <Column id=linie title="Linie" />
     <Column id=bewertbar title="Durchfahrten" />
-    <Column id=verloren_anteil title="davon mit Zeitverlust (%)" fmt='#,##0.0' contentType=colorscale scaleColor=negative />
+    <Column id=verloren_anteil title="davon mit Zeitverlust (%)" fmt='#,##0.0' contentType=colorscale colorScale=verlust colorMin={0} colorMax={100} />
     <Column id=verlust_min title="verlorene Zeit gesamt (Min.)" fmt='#,##0.0' />
     <Column id=bezeichnung_vollstaendig title="Namen bekannt" />
 </DataTable>
@@ -68,6 +68,10 @@ limit 10
 Verliert auf einem Abschnitt fast jeder Zug Zeit, ist die angesetzte Fahrzeit zu knapp —
 unabhängig davon, ob die Züge verspätet oder pünktlich hineinfahren. Das ist der Befund,
 an dem eine Fahrplanänderung ansetzen würde.
+
+Die Farbe läuft in beiden Tabellen von 0 auf 100 %, nicht vom kleinsten zum größten Wert
+der jeweiligen Liste. Sonst sähe die harmloseste Zeile einer schlechten Liste aus wie ein
+Nullwert, und die beiden Tabellen ließen sich nicht nebeneinanderlegen.
 
 ## Wo Reserve wirkt
 
@@ -86,7 +90,7 @@ limit 10
     <Column id=linie title="Linie" />
     <Column id=verspaetet_eingefahren title="verspätet eingefahren" />
     <Column id=reserve_genutzt title="davon aufgeholt" />
-    <Column id=genutzt_anteil title="Anteil (%)" fmt='#,##0.0' contentType=colorscale scaleColor=positive />
+    <Column id=genutzt_anteil title="Anteil (%)" fmt='#,##0.0' contentType=colorscale colorScale=aufholung colorMin={0} colorMax={100} />
     <Column id=genutzt_min title="abgebaute Verspätung (Min.)" fmt='#,##0.0' />
 </DataTable>
 

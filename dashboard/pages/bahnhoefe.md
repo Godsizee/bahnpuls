@@ -36,8 +36,13 @@ order by verbund, bahnhof
     <Column id=zuege title="Züge" fmt="#,##0" />
     <Column id=halte title="Halte mit Ankunft" fmt="#,##0" />
     <Column id=quote_planmaessig title="pünktlich (6 Min.) %" fmt="#,##0.0" />
-    <Column id=hier_sek title="im Bahnhof entstanden (s je Halt)" fmt="#,##0.0" contentType=colorscale colorScale=negative />
+    <Column id=hier_sek title="im Bahnhof entstanden (s je Halt)" fmt="#,##0.0" contentType=bar barColor=verloren negativeBarColor=aufgeholt />
 </DataTable>
+
+**So liest sich die letzte Spalte.** Der Balken läuft nach rechts, wenn der Aufenthalt
+Zeit **gekostet** hat, und nach links, wenn der Zug am Bahnsteig welche **aufgeholt** hat.
+Die Null liegt in jeder Zeile an derselben Stelle — eine aufgeholte halbe Minute sieht
+damit anders aus als eine verlorene, nicht nur blasser.
 
 ## Warum eine Auswahl und nicht jeder Halt
 

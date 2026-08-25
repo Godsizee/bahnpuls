@@ -9,36 +9,92 @@ Ein Zug kommt zwölf Minuten zu spät an. Das steht in jeder Statistik. Was nirg
 einem bestimmten Streckenabschnitt dazu? Oder sammelten sie sich in kleinen Portionen an
 sechs Bahnhöfen, weil überall der Aufenthalt zu knapp bemessen ist?
 
-Das sind drei völlig verschiedene Probleme mit drei verschiedenen Antworten. Wer nur die
-Ankunftsverspätung kennt, kann sie nicht auseinanderhalten.
+Das sind drei völlig verschiedene Probleme mit drei verschiedenen Antworten, und wer nur
+die Ankunftsverspätung kennt, kann sie nicht auseinanderhalten. **Bahnpuls hält sie
+auseinander** — Halt für Halt, für jede Fahrt in VRN und RMV.
 
-Bahnpuls rechnet genau das aus.
+<div style="overflow-x:auto; margin:1.75rem 0 1.25rem;">
+<svg viewBox="0 0 720 290" role="img" aria-label="Schematischer Verlauf einer Fahrt über vier Halte: Die Verspätung wächst auf zwei Abschnitten und während zweier Aufenthalte, auf einem Abschnitt wird Zeit aufgeholt. Am Ziel stehen zwölf Minuten, davon sieben unterwegs und fünf im Bahnhof entstanden." style="width:100%; min-width:620px; height:auto; font-family:inherit;">
+<line x1="80" y1="240" x2="700" y2="240" style="stroke:var(--base-content-muted, #71717a)" stroke-width="1" stroke-dasharray="3 4" />
+<line x1="74" y1="160" x2="80" y2="160" style="stroke:var(--base-content-muted, #71717a)" stroke-width="1" />
+<line x1="74" y1="80" x2="80" y2="80" style="stroke:var(--base-content-muted, #71717a)" stroke-width="1" />
+<text x="80" y="26" text-anchor="start" font-size="12" style="fill:var(--base-content-muted, #71717a)">Verspätung gegenüber Fahrplan (Minuten)</text>
+<text x="68" y="240" dy="0.32em" text-anchor="end" font-size="12" style="fill:var(--base-content-muted, #71717a)">0</text>
+<text x="68" y="160" dy="0.32em" text-anchor="end" font-size="12" style="fill:var(--base-content-muted, #71717a)">5</text>
+<text x="68" y="80" dy="0.32em" text-anchor="end" font-size="12" style="fill:var(--base-content-muted, #71717a)">10</text>
+<line x1="300" y1="164" x2="300" y2="236" style="stroke:var(--base-content-muted, #71717a)" stroke-width="1" stroke-dasharray="2 4" opacity="0.55" />
+<line x1="490" y1="164" x2="490" y2="236" style="stroke:var(--base-content-muted, #71717a)" stroke-width="1" stroke-dasharray="2 4" opacity="0.55" />
+<line x1="660" y1="52" x2="660" y2="236" style="stroke:var(--base-content-muted, #71717a)" stroke-width="1" stroke-dasharray="2 4" opacity="0.55" />
+<line x1="110" y1="240" x2="300" y2="160" style="stroke:var(--verloren-stark, #8f3d56)" stroke-width="3" stroke-linecap="round" />
+<line x1="300" y1="160" x2="300" y2="128" style="stroke:var(--verloren-stark, #8f3d56)" stroke-width="3" stroke-linecap="round" />
+<line x1="300" y1="128" x2="490" y2="160" style="stroke:var(--aufgeholt-stark, #236aa4)" stroke-width="3" stroke-linecap="round" />
+<line x1="490" y1="160" x2="490" y2="112" style="stroke:var(--verloren-stark, #8f3d56)" stroke-width="3" stroke-linecap="round" />
+<line x1="490" y1="112" x2="660" y2="48" style="stroke:var(--verloren-stark, #8f3d56)" stroke-width="3" stroke-linecap="round" />
+<circle cx="110" cy="240" r="4" style="fill:var(--base-content, #27272a)" />
+<circle cx="660" cy="48" r="5" style="fill:var(--verloren-stark, #8f3d56)" />
+<text x="205" y="186" text-anchor="middle" font-size="13" style="fill:var(--verloren-stark, #8f3d56)">+5 unterwegs</text>
+<text x="292" y="148" text-anchor="end" font-size="13" style="fill:var(--verloren-stark, #8f3d56)">+2 im Halt</text>
+<text x="395" y="132" text-anchor="middle" font-size="13" style="fill:var(--aufgeholt-stark, #236aa4)">−2 aufgeholt</text>
+<text x="502" y="140" text-anchor="start" font-size="13" style="fill:var(--verloren-stark, #8f3d56)">+3 im Halt</text>
+<text x="555" y="58" text-anchor="middle" font-size="13" style="fill:var(--verloren-stark, #8f3d56)">+4 unterwegs</text>
+<text x="660" y="28" text-anchor="middle" font-size="14" font-weight="600" style="fill:var(--verloren-stark, #8f3d56)">+12</text>
+<text x="110" y="264" text-anchor="middle" font-size="12.5" style="fill:var(--base-content, #27272a)">Start</text>
+<text x="300" y="264" text-anchor="middle" font-size="12.5" style="fill:var(--base-content, #27272a)">Halt 1</text>
+<text x="490" y="264" text-anchor="middle" font-size="12.5" style="fill:var(--base-content, #27272a)">Halt 2</text>
+<text x="660" y="264" text-anchor="middle" font-size="12.5" style="fill:var(--base-content, #27272a)">Ziel</text>
+</svg>
+</div>
 
-**Wer nur das Ergebnis will:** Auf der Seite [Befunde](/befunde) stehen drei Aussagen aus
-den Daten — jede mit einer Zahl, einer Grafik und dem, was sie betrieblich bedeutet. Alles
-Übrige auf diesen Seiten sind Werkzeuge, um sie nachzuprüfen.
+**Das ist ein Schema, keine Messung** — die Zahlen in der Skizze sind erfunden, sie zeigen
+nur, wie gelesen wird. **Schräg** heißt: entstanden zwischen zwei Bahnhöfen. **Senkrecht**
+heißt: entstanden während des Halts, während der Zug stand. Rot ist dazugekommene Zeit,
+blau aufgeholte. Am Ziel stehen zwölf Minuten — sieben davon unterwegs, fünf im Bahnhof.
 
-## Wie das funktioniert
+**Diese Aufteilung steht in keiner öffentlichen Statistik.** Sie ist der Unterschied
+zwischen „der Zug war zu spät" und „der Zug hat auf diesem Abschnitt Zeit verloren und an
+jenem Bahnsteig noch einmal" — zwei Befunde, die auf zwei verschiedene Maßnahmen zeigen.
+Jede Zahl auf den folgenden Seiten ist gemessen, nicht geschätzt.
 
-Für jeden Halt wird zweierlei festgehalten: **wie viel Verspätung ein Zug beim Ankommen
-hatte** und **wie viel beim Weiterfahren**. Aus dem Vergleich ergibt sich, wo sie
-entstanden ist:
+## Was diese Seite dafür tut
 
-- Wächst die Verspätung **zwischen zwei Bahnhöfen**, hat der Zug für die Strecke länger
-  gebraucht als vorgesehen — Langsamfahrstelle, Umleitung, ein anderer Zug im Weg.
-- Wächst sie **während des Halts**, hat der Aufenthalt länger gedauert als geplant —
-  Fahrgastwechsel, Anschluss abwarten, Personalwechsel.
-- Wird sie kleiner, hat der Zug **Reserve genutzt**, die im Fahrplan eingebaut ist. Das
-  ist normal und kein Fehler.
-
-Die Daten stammen nicht aus einer Auswertung der Bahn, sondern aus eigener Mitschrift:
-Alle 30 Sekunden fragt ein Programm die öffentlichen Echtzeitdaten ab und notiert, was
-sich seit dem letzten Mal geändert hat.
+**Erstens: mitschreiben.** Alle 30 Sekunden fragt ein Programm die öffentlichen
+Echtzeitdaten für VRN und RMV ab und notiert, was sich seit dem letzten Mal geändert hat.
+Für jeden Halt jedes Zuges stehen am Ende vier Zeiten fest: wann er ankommen sollte, wann
+er ankam, wann er abfahren sollte, wann er abfuhr.
 
 Warum dieser Umweg nötig ist: Echtzeitdaten sind **Vorhersagen**, die sich laufend ändern.
 Eine Stunde vor der Abfahrt sagt der Feed etwas anderes als fünf Minuten vorher, und wenn
 der Zug durch ist, verschwindet der Eintrag. Nur wer fortlaufend mitschreibt, kann
 hinterher sagen, was tatsächlich passiert ist. Aufbewahrt wird das sonst nirgends.
+
+**Zweitens: auseinanderrechnen.** Aus diesen vier Zeiten ergeben sich die beiden Größen
+aus der Skizze. Wächst die Verspätung **zwischen zwei Bahnhöfen**, hat der Zug für die
+Strecke länger gebraucht als vorgesehen — Langsamfahrstelle, Umleitung, ein anderer Zug im
+Weg. Wächst sie **während des Halts**, hat der Aufenthalt länger gedauert als geplant —
+Fahrgastwechsel, Anschluss abwarten, Personalwechsel. Wird sie kleiner, hat der Zug
+**Reserve genutzt**, die im Fahrplan eingebaut ist. Das ist normal und kein Fehler.
+
+**Drittens: zeigen.** Was dabei herauskommt, steht auf diesen Seiten:
+
+- **[Befunde](/befunde)** — drei Aussagen aus den Daten, jede mit einer Zahl, einer Grafik
+  und dem, was sie betrieblich bedeutet. Wer nur das Ergebnis will, liest diese eine Seite.
+- **[Bahnhöfe](/bahnhoefe)** — je eine Seite für die größeren Knoten in VRN und Rhein-Main:
+  kommt die Verspätung dort an, oder entsteht sie dort?
+- **[Laufweg einer Fahrt](/laufweg)** — die Skizze von oben mit gemessenen Zahlen, an einer
+  einzelnen Fahrt. Sie öffnet auf dem jüngsten vollständig erhobenen Betriebstag, ohne dass
+  man erst etwas auswählen müsste.
+- **[Engpässe im Netz](/engpaesse)** und **[Fahrplanreserve](/puffer)** — viele Fahrten
+  übereinandergelegt: wo es wiederholt klemmt, und wo der Fahrplan zu knappe oder zu
+  großzügige Zuschläge enthält.
+- **[Pünktlichkeit und Ausfälle](/puenktlichkeit)** — warum eine Pünktlichkeitsquote besser
+  wird, wenn Züge ausfallen.
+- **[Methodik](/methodik)** — wie jede Zahl gerechnet wird, mit allen Annahmen und ihren
+  Grenzen.
+
+Der Rest dieser Seite ist der Beleg dafür: was aufgezeichnet ist, wie sich die Verspätung
+im Ganzen aufteilt, und wie lückenlos gemessen wurde.
+
+## Was bisher aufgezeichnet ist
 
 ```sql datenstand
 select
@@ -73,9 +129,10 @@ select
 from bahnpuls.mart_verspaetungsentstehung
 ```
 
-Alle gemessenen Fahrten zusammengenommen: wie viele Minuten kamen unterwegs dazu, und wie
-viele während der Halte. Aufgeholte Zeit ist dabei schon abgezogen — ein Minuswert
-bedeutet also, dass unter dem Strich Reserve genutzt wurde.
+Dieselbe Aufteilung wie in der Skizze oben, nur über alle gemessenen Fahrten statt über
+eine: wie viele Minuten kamen unterwegs dazu, und wie viele während der Halte. Aufgeholte
+Zeit ist dabei schon abgezogen — ein Minuswert bedeutet also, dass unter dem Strich
+Reserve genutzt wurde.
 
 <BigValue data={aufteilung} value=strecke_min title="Unterwegs dazugekommen (Minuten)" fmt="#,##0.0" />
 <BigValue data={aufteilung} value=bahnhof_min title="An Bahnhöfen dazugekommen (Minuten)" fmt="#,##0.0" />
@@ -107,14 +164,16 @@ setzt immer die viel befahrenen Abschnitte nach oben, ganz gleich wie gut sie la
 Durchschnitt zeigt, wo es für den einzelnen Zug klemmt.
 
 Die Spalte „messbar" sagt, auf wie vielen Fahrten der Wert beruht. Bei wenigen Fahrten ist
-ein Ausreißer schnell dabei.
+ein Ausreißer schnell dabei. Der Balken läuft nach rechts, wenn unterwegs Zeit verloren
+ging, und nach links, wenn welche aufgeholt wurde — die Null liegt in jeder Zeile an
+derselben Stelle.
 
 <DataTable data={top_abschnitte} rows=10>
     <Column id=abschnitt title="Von — nach" />
     <Column id=betriebstag title="Tag" fmt='dd"."mm"."yyyy' />
     <Column id=zuege title="Züge" />
     <Column id=messbar title="davon messbar" />
-    <Column id=unterwegs_min title="Unterwegs (Min. je Zug)" fmt="#,##0.0" contentType=colorscale colorScale=negative />
+    <Column id=unterwegs_min title="Unterwegs (Min. je Zug)" fmt="#,##0.0" contentType=bar barColor=verloren negativeBarColor=aufgeholt />
     <Column id=bahnhof_min title="Im Bahnhof (Min. je Zug)" fmt="#,##0.0" />
 </DataTable>
 
@@ -252,17 +311,6 @@ sieht in jeder Auswertung darüber aus wie ruhiger Betrieb. Wer die Zahlen diese
 liest, soll sehen können, ob sie auf lückenloser Beobachtung beruhen.
 
 ---
-
-Wie es an einem bestimmten Bahnhof aussieht — und ob die Verspätung dort ankommt oder dort
-entsteht —, steht auf den [Bahnhofsseiten](/bahnhoefe) — je eine für die größeren
-Knoten in VRN und Rhein-Main. Wie eine einzelne Fahrt Halt für Halt verläuft, zeigt die Seite
-[Laufweg einer Fahrt](/laufweg) — sie öffnet mit einer Fahrt des jüngsten vollständig
-erhobenen Betriebstags, ohne dass man erst etwas auswählen müsste. Ob es Stellen im Netz gibt, an denen es immer wieder
-klemmt, beantwortet [Engpässe im Netz](/engpaesse); wo der Fahrplan zu knappe oder zu
-großzügige Zuschläge enthält, zeigt [Fahrplanreserve](/puffer). Was passiert, wenn ein Zug gar nicht
-erst fährt — und warum Pünktlichkeitsquoten dadurch besser werden —, steht unter
-[Pünktlichkeit und Ausfälle](/puenktlichkeit). Wer genau wissen will, wie gerechnet wird
-— mit allen Annahmen und ihren Grenzen —, findet das auf der Seite [Methodik](/methodik).
 
 Warum jemand, der sieben Jahre Züge gefahren hat, das ausrechnet, steht unter
 [Über das Projekt](/ueber).

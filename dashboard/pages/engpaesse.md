@@ -64,7 +64,7 @@ limit 10
 <DataTable data={rangliste} rows=10>
     <Column id=abschnitt title="Abschnitt" />
     <Column id=zuege title="Züge" />
-    <Column id=laufzeit_min title="unterwegs dazu (Min./Zug)" fmt='#,##0.00' contentType=colorscale scaleColor=negative />
+    <Column id=laufzeit_min title="unterwegs dazu (Min./Zug)" fmt='#,##0.00' contentType=bar barColor=verloren negativeBarColor=aufgeholt />
     <Column id=laufzeit_messwerte title="davon messbar" />
     <Column id=haltezeit_min title="im Bahnhof dazu (Min./Zug)" fmt='#,##0.00' />
     <Column id=ausgefallene_halte title="Ausfälle" />
@@ -79,7 +79,8 @@ und desto kürzer die Liste. Unter etwa fünf Zügen ist ein Mittelwert Zufall m
 Nachkommastellen.
 
 Negative Werte sind kein Fehler: dort wird im Mittel **aufgeholt**, weil im Fahrplan
-Reserve steckt. Genau dafür ist sie da.
+Reserve steckt. Genau dafür ist sie da. Der Balken zeigt es an der Richtung: nach rechts
+verlorene, nach links aufgeholte Zeit, mit der Null in jeder Zeile an derselben Stelle.
 
 Die Spalte „davon messbar" steht bewusst neben der Zugzahl: der Durchschnitt wird über
 die Fahrten gebildet, für die sich der Wert **tatsächlich bestimmen ließ**, nicht über
@@ -116,7 +117,7 @@ order by abschnitt, stunde
     value=laufzeit_min
     valueFmt='#,##0.0'
     title="Unterwegs neu entstandene Verspätung je Zug (Minuten), nach Tagesstunde"
-    colorScale={['#45a1bf', '#ffffff', '#8f3d56']}
+    colorScale=verlust
 />
 
 Die Stunde ist die **planmäßige Ankunftszeit** am Ende des Abschnitts, als Uhrzeit
@@ -126,6 +127,11 @@ ist genau das die richtige Zuordnung.
 
 Leere Felder heißen: in dieser Stunde fuhr dort kein Zug, oder es lag kein Messwert vor.
 Sie sind **nicht** als Null zu lesen.
+
+Die Farbe ist hier eine Rangfolge **innerhalb dieser Grafik**: sie läuft vom kleinsten zum
+größten Wert der gezeigten Auswahl. Ein Nullpunkt steckt nicht darin — ob auf einem Feld
+aufgeholt wurde, steht in der Zahl und nicht in der Farbe. Eine Skala mit fester Null
+bräuchte feste Grenzen, und die würden mit den Daten nicht mitwandern.
 
 ## Fährt es in eine Richtung schlechter?
 

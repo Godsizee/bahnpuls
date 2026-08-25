@@ -59,6 +59,35 @@ Spaltenüberschrift; „Min." heißt Minuten, „s" Sekunden. Sekundenwerte je H
 Abschnitt sind bewusst nicht in Minuten umgerechnet: die Beträge liegen im einstelligen
 Sekundenbereich, und `0,1 Min.` liest sich schlechter als `5,84 s`.
 
+## Wie die Farben zu lesen sind
+
+Farbe trägt auf diesen Seiten Bedeutung und ist keine Verzierung. Sie folgt zwei Regeln.
+
+**Wo eine Zahl ein Vorzeichen hat, steht ein Balken und keine Farbfläche.** Betroffen sind
+alle Spalten, die eine entstandene oder abgebaute Zeit ausweisen — „unterwegs dazu",
+„im Bahnhof entstanden", „auf dem Abschnitt entstanden". Der Balken läuft von der Null aus:
+nach rechts, wenn Zeit **verloren** ging, nach links, wenn welche **aufgeholt** wurde. Die
+Null liegt in jeder Zeile derselben Tabelle an derselben Stelle; die Länge ist auf die
+stärkste Abweichung der jeweiligen Spalte bezogen.
+
+Der Grund ist nicht Geschmack. Eine durchgehende Farbskala läuft vom kleinsten zum größten
+Wert einer Spalte — enthält die Spalte auch negative Werte, bekommt aufgeholte Zeit damit
+denselben Farbton wie verlorene, nur etwas blasser. Das ist genau die Verwechslung, die
+diese Seiten vermeiden wollen: **eine abgebaute Verspätung ist kein schwacher Schaden,
+sondern das Gegenteil davon.**
+
+**Wo eine Zahl kein Vorzeichen haben kann, steht eine Farbskala mit festen Grenzen.**
+Betroffen sind die Anteile auf der Seite [Fahrplanreserve](/puffer): Sie laufen von 0 auf
+100 %, nicht vom kleinsten zum größten Wert der jeweiligen Liste. Eine Skala, die sich an
+den gezeigten Zeilen ausrichtet, ließe die harmloseste Zeile einer schlechten Liste wie
+einen Nullwert aussehen — und zwei Tabellen nebeneinander wären nicht vergleichbar.
+
+Eine Ausnahme steht auf der Seite [Engpässe im Netz](/engpaesse): die Heatmap nach
+Tagesstunde. Ihre Farbe ist eine Rangfolge **innerhalb der Grafik**, vom kleinsten zum
+größten gezeigten Wert, ohne verankerten Nullpunkt — feste Grenzen würden hier mit den
+Daten nicht mitwandern. Ob auf einem Feld aufgeholt wurde, steht deshalb dort in der Zahl
+und nicht in der Farbe.
+
 ## Was eine Zeile ist
 
 Alles hier rechnet mit einer einzigen Grundeinheit: **ein Zug an einem Bahnhof.** Nicht
