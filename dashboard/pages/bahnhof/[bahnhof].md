@@ -197,8 +197,8 @@ limit 10
     <Column id=von title="letzter Halt davor" />
     <Column id=zuege title="Züge" fmt="#,##0" />
     <Column id=messbar title="davon messbar" fmt="#,##0" />
-    <Column id=laufzeit_sek title="auf dem Abschnitt entstanden (s je Zug)" fmt="#,##0.0" contentType=bar barColor=verloren negativeBarColor=aufgeholt />
-    <Column id=haltezeit_sek title="hier entstanden (s je Halt)" fmt="#,##0.0" />
+    <Column id=laufzeit_sek title="auf dem Abschnitt (s je Zug)" fmt="#,##0.0" wrapTitle=true contentType=bar barColor=verloren negativeBarColor=aufgeholt />
+    <Column id=haltezeit_sek title="hier entstanden (s je Halt)" fmt="#,##0.0" wrapTitle=true />
 </DataTable>
 
 Der Balken zeigt die Richtung mit: nach rechts, was auf dem Abschnitt **dazukam**, nach

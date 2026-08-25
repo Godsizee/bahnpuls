@@ -34,9 +34,9 @@ order by verbund, bahnhof
     <Column id=seite title="Bahnhof" contentType=link linkLabel=bahnhof />
     <Column id=verbund title="Verbund" />
     <Column id=zuege title="Züge" fmt="#,##0" />
-    <Column id=halte title="Halte mit Ankunft" fmt="#,##0" />
-    <Column id=quote_planmaessig title="pünktlich (6 Min.) %" fmt="#,##0.0" />
-    <Column id=hier_sek title="im Bahnhof entstanden (s je Halt)" fmt="#,##0.0" contentType=bar barColor=verloren negativeBarColor=aufgeholt />
+    <Column id=halte title="Halte mit Ankunft" fmt="#,##0" wrapTitle=true />
+    <Column id=quote_planmaessig title="pünktlich (6 Min.) %" fmt="#,##0.0" wrapTitle=true />
+    <Column id=hier_sek title="im Bahnhof (s je Halt)" fmt="#,##0.0" wrapTitle=true contentType=bar barColor=verloren negativeBarColor=aufgeholt />
 </DataTable>
 
 **So liest sich die letzte Spalte.** Der Balken läuft nach rechts, wenn der Aufenthalt
