@@ -69,6 +69,8 @@ benannt as (
         betriebstag,
         quelle,
         trip_key,
+        verkehrsart,
+        gattung,
 
         coalesce(von_stop_name, von_stop_id) as von_bezeichnung,
         coalesce(stop_name, stop_id)         as nach_bezeichnung,
@@ -94,6 +96,12 @@ aggregiert as (
         quelle,
         von_bezeichnung,
         nach_bezeichnung,
+        -- **Echte Korn-Aenderung** (ADR-014): ein Abschnitt je Gattung statt ein
+        -- Abschnitt. `group by all` zieht die beiden Spalten von selbst mit -- der
+        -- Grain-Test in _marts__models.yml nennt sie trotzdem ausdruecklich, sonst
+        -- pruefte er ein Korn, das die Abfrage gar nicht mehr hat.
+        verkehrsart,
+        gattung,
         stunde,
 
         -- Richtungspaar: derselbe Wert fuer A->B und B->A. Damit laesst sich die

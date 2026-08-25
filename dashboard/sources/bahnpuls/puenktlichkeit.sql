@@ -25,6 +25,11 @@ select
     puenktlichkeit.quelle,
     coalesce(puenktlichkeit.route_kurzname, 'ohne Liniennummer') as linie,
     puenktlichkeit.route_kurzname is not null                    as linie_bekannt,
+    -- ADR-014: NULL bekommt ein eigenes Etikett -- eine Auswahlliste kann auf NULL
+    -- nicht filtern. Es ist dieselbe Gruppe wie 'ohne Liniennummer' eine Zeile darueber:
+    -- Fahrten, deren trip_id in keiner gueltigen Fahrplan-Version steht.
+    coalesce(puenktlichkeit.verkehrsart, 'ohne Angabe') as verkehrsart,
+    coalesce(puenktlichkeit.gattung, 'ohne Angabe')     as gattung,
     puenktlichkeit.schwelle_sek,
     puenktlichkeit.schwelle_sek / 60                             as schwelle_min,
 

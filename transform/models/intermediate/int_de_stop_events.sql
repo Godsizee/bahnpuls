@@ -197,6 +197,13 @@ ereignisse as (
         -- im Scope), der Weg fuehrt deshalb ueber die trip_id in trips.txt. block_id liefert
         -- die Quelle gar nicht (BPULS-003).
         linien_name.bezeichnung as route_kurzname,
+        -- Zwei Spalten, zwei Herkuenfte (ADR-014): die Verkehrsart reist auf demselben
+        -- Join mit, der den Liniennamen holt -- sie ist eine Eigenschaft des Feeds, aus
+        -- dem er stammt. Die Gattung steckt dagegen allein im Praefix des Namens; RE, RB
+        -- und S liegen alle im rv-Feed. Beide sind fuer genau dieselben Fahrten NULL:
+        -- die, deren trip_id in keiner gueltigen Fahrplan-Version steht.
+        {{ verkehrsart('linien_name.feed') }} as verkehrsart,
+        {{ zuggattung('linien_name.bezeichnung') }} as gattung,
         cast(null as varchar) as block_id,
 
         halte.quelle
@@ -256,6 +263,8 @@ ereignisse as (
         halt_ausgelassen,
         zug_ausgefallen,
         route_kurzname,
+        verkehrsart,
+        gattung,
         block_id,
         quelle
 

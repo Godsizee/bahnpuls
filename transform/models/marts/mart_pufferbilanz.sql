@@ -82,6 +82,9 @@ eingang as (
         betriebstag,
         quelle,
         route_kurzname,
+        -- Ohne eine einzige zusaetzliche Zeile: die Linie steht schon im Korn (ADR-014).
+        verkehrsart,
+        gattung,
         trip_key,
         coalesce(von_stop_name, von_stop_id) as von_bezeichnung,
         coalesce(stop_name, stop_id)         as nach_bezeichnung,
@@ -119,6 +122,8 @@ select
     betriebstag,
     quelle,
     route_kurzname,
+    verkehrsart,
+    gattung,
     von_bezeichnung,
     nach_bezeichnung,
     bool_and(bezeichnung_vollstaendig) as bezeichnung_vollstaendig,
@@ -164,4 +169,4 @@ select
     sum(laufzeit_delta_sek) as bilanz_sek
 
 from eingeordnet
-group by 1, 2, 3, 4, 5
+group by 1, 2, 3, 4, 5, 6, 7

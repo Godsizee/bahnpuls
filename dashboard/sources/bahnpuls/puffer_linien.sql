@@ -18,6 +18,10 @@ with fenster as (
 select
     puffer.quelle,
     coalesce(puffer.route_kurzname, 'ohne Liniennummer') as linie,
+    -- ADR-014: NULL bekommt ein eigenes Etikett -- eine Auswahlliste kann auf NULL
+    -- nicht filtern, und die Gruppe verschwaende sonst aus jeder Ansicht.
+    coalesce(puffer.verkehrsart, 'ohne Angabe') as verkehrsart,
+    coalesce(puffer.gattung, 'ohne Angabe')     as gattung,
 
     count(distinct puffer.von_bezeichnung || ' -> ' || puffer.nach_bezeichnung) as abschnitte,
     sum(puffer.zuege)                  as zuege,
@@ -36,4 +40,4 @@ from mart_pufferbilanz as puffer
 join fenster
   on  fenster.quelle      = puffer.quelle
   and fenster.betriebstag = puffer.betriebstag
-group by 1, 2
+group by 1, 2, 3, 4

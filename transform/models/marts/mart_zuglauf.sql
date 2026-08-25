@@ -65,6 +65,10 @@ select
     trip_key,
     quelle,
     route_kurzname,
+    -- Kommen ohne eine einzige zusaetzliche Zeile dazu: die Linie steht hier schon im
+    -- Korn, Verkehrsart und Gattung haengen funktional an ihr (ADR-014).
+    verkehrsart,
+    gattung,
     nach_stop_sequence as halt_nr,
     von_stop_id,
     von_stop_name,

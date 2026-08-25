@@ -30,6 +30,10 @@ zusammengefasst as (
         engpass.nach_bezeichnung,
         engpass.abschnitt_paar,
         engpass.richtung_hin,
+        -- ADR-014: NULL heisst "der Fahrplan kennt diese Fahrt nicht" und bekommt ein
+        -- eigenes Etikett -- eine Auswahlliste kann auf NULL nicht filtern.
+        coalesce(engpass.verkehrsart, 'ohne Angabe') as verkehrsart,
+        coalesce(engpass.gattung, 'ohne Angabe')     as gattung,
         engpass.stunde,
 
         bool_and(engpass.bezeichnung_vollstaendig) as bezeichnung_vollstaendig,
@@ -49,7 +53,7 @@ zusammengefasst as (
     join fenster
       on  fenster.quelle      = engpass.quelle
       and fenster.betriebstag = engpass.betriebstag
-    group by 1, 2, 3, 4, 5, 6
+    group by 1, 2, 3, 4, 5, 6, 7, 8
 
 ),
 

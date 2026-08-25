@@ -25,6 +25,12 @@ select
     bahnhof.bahnhof,
     bahnhof.slug,
     bahnhof.verbund,
+    -- Verkehrsart und Gattung (ADR-014). NULL heisst "der Fahrplan kennt diese Fahrt
+    -- nicht" -- als **eigene, sichtbare** Auswahl, nie als stille Auslassung. Deshalb
+    -- ein Etikett statt NULL: eine Auswahlliste kann auf NULL nicht filtern, und die
+    -- Gruppe verschwaende sonst aus jeder Ansicht, obwohl sie in "alle" enthalten ist.
+    coalesce(bahnhof.verkehrsart, 'ohne Angabe') as verkehrsart,
+    coalesce(bahnhof.gattung, 'ohne Angabe')     as gattung,
     bahnhof.schwelle_sek,
     bahnhof.schwelle_sek / 60 as schwelle_min,
 

@@ -76,6 +76,8 @@ eingeordnet as (
         betriebstag,
         quelle,
         stop_name,
+        verkehrsart,
+        gattung,
         trip_key,
         delay_an_sek,
         laufzeit_delta_sek,
@@ -103,6 +105,12 @@ gezaehlt as (
         eingeordnet.betriebstag,
         eingeordnet.quelle,
         eingeordnet.stop_name as bahnhof,
+        -- **Echte Korn-Aenderung** (ADR-014): eine Zeile je Bahnhof **und** Gattung,
+        -- nicht mehr je Bahnhof. Wer ueber die Gattungen hinweg lesen will, summiert --
+        -- Summe und Zaehler stehen getrennt daneben, genau dafuer. Ein Mittel der
+        -- Mittelwerte waere hier falsch.
+        eingeordnet.verkehrsart,
+        eingeordnet.gattung,
         schwellen.schwelle_sek,
 
         count(distinct eingeordnet.trip_key) as zuege,
@@ -172,7 +180,7 @@ gezaehlt as (
     where eingeordnet.halt_im_gebiet
       and eingeordnet.fahrt_im_gebiet
       and eingeordnet.stop_name is not null
-    group by 1, 2, 3, 4
+    group by 1, 2, 3, 4, 5, 6
 
 )
 
@@ -180,6 +188,8 @@ select
     gezaehlt.betriebstag,
     gezaehlt.quelle,
     gezaehlt.bahnhof,
+    gezaehlt.verkehrsart,
+    gezaehlt.gattung,
     gezaehlt.schwelle_sek,
 
     knoten.bahnhof is not null as ist_knoten,

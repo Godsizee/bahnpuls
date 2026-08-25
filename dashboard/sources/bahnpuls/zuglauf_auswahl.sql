@@ -51,6 +51,10 @@ fahrten as (
         zuglauf.betriebstag,
         zuglauf.trip_key,
         coalesce(zuglauf.route_kurzname, 'ohne Liniennummer') as linie,
+        -- ADR-014. Aendert die Vorauswahl nicht: beide haengen funktional an der Linie,
+        -- die schon im group by steht -- sechs Fahrten je Linie bleiben sechs.
+        coalesce(zuglauf.verkehrsart, 'ohne Angabe')          as verkehrsart,
+        coalesce(zuglauf.gattung, 'ohne Angabe')              as gattung,
         min(zuglauf.soll_ab)                                  as ab_soll
 
     from mart_zuglauf as zuglauf
@@ -58,7 +62,7 @@ fahrten as (
       on  tage.quelle      = zuglauf.quelle
       and tage.betriebstag = zuglauf.betriebstag
     where zuglauf.halt_im_gebiet
-    group by 1, 2, 3, 4
+    group by 1, 2, 3, 4, 5, 6
     -- Eine Fahrt mit einem einzigen gemeldeten Halt ergibt keinen Laufweg.
     having count(*) >= 2
     -- nulls last: eine Fahrt ohne planmaessige Abfahrt am ersten gemeldeten Halt (der
@@ -77,6 +81,8 @@ select
     zuglauf.quelle,
     zuglauf.trip_key,
     fahrten.linie,
+    fahrten.verkehrsart,
+    fahrten.gattung,
     fahrten.ab_soll,
     zuglauf.halt_nr,
 

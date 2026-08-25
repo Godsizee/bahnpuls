@@ -128,6 +128,12 @@ eingeordnet as (
         betriebstag,
         quelle,
         route_kurzname,
+        -- Reisen ab hier ueberall mit, obwohl sie funktional an route_kurzname haengen.
+        -- Sie trotzdem in jedes group by zu nehmen ist Absicht (ADR-014): sollte eine
+        -- trip_id doch einmal in zwei Feeds stehen, bricht der Grain-Test -- statt die
+        -- Mehrdeutigkeit stillschweigend auf eine Zeile zu falten.
+        verkehrsart,
+        gattung,
         trip_key,
         delay_an_sek,
         zug_ausgefallen,
@@ -149,6 +155,8 @@ fahrtzustand as (
         eingeordnet.betriebstag,
         eingeordnet.quelle,
         eingeordnet.route_kurzname,
+        eingeordnet.verkehrsart,
+        eingeordnet.gattung,
         eingeordnet.trip_key,
         bool_or(eingeordnet.zug_ausgefallen)                as fahrt_ausgefallen,
         bool_or(eingeordnet.zustand = 'unbedienter_lauf')   as fahrt_unbedienter_lauf,
@@ -171,7 +179,7 @@ fahrtzustand as (
     -- Fahrten ohne einen einzigen Halt im Gebiet zaehlen hier nicht mit: sie sind ueber
     -- eine Nummernkollision oder als reiner Durchlaeufer hereingekommen (BPULS-075).
     where eingeordnet.fahrt_im_gebiet
-    group by 1, 2, 3, 4
+    group by 1, 2, 3, 4, 5, 6
 
 ),
 
@@ -187,6 +195,8 @@ gezaehlt as (
         eingeordnet.betriebstag,
         eingeordnet.quelle,
         eingeordnet.route_kurzname,
+        eingeordnet.verkehrsart,
+        eingeordnet.gattung,
         schwellen.schwelle_sek,
 
         count(*) filter (where hat_planmaessige_ankunft) as halte_mit_ankunft,
@@ -221,7 +231,7 @@ gezaehlt as (
     -- stehen weiter in mart_zuglauf -- sie gehoeren zum Laufweg, aber nicht in eine
     -- Puenktlichkeitsquote ueber dieses Gebiet.
     where eingeordnet.halt_im_gebiet
-    group by 1, 2, 3, 4
+    group by 1, 2, 3, 4, 5, 6
 
 )
 
@@ -229,6 +239,8 @@ select
     gezaehlt.betriebstag,
     gezaehlt.quelle,
     gezaehlt.route_kurzname,
+    gezaehlt.verkehrsart,
+    gezaehlt.gattung,
     gezaehlt.schwelle_sek,
 
     fahrten.fahrten,
@@ -266,6 +278,8 @@ join (
         betriebstag,
         quelle,
         route_kurzname,
+        verkehrsart,
+        gattung,
         count(*)                                       as fahrten,
         count(*) filter (where fahrt_ausgefallen)      as fahrten_ausgefallen,
         count(*) filter (where fahrt_unbedienter_lauf) as fahrten_unbedienter_lauf,
@@ -277,8 +291,13 @@ join (
         ) as fahrten_unbedienter_lauf_nicht_pruefbar,
         count(*) filter (where fahrt_verkuerzt)        as fahrten_verkuerzt
     from fahrtzustand
-    group by 1, 2, 3
+    group by 1, 2, 3, 4, 5
 ) as fahrten
   on  fahrten.betriebstag = gezaehlt.betriebstag
   and fahrten.quelle      = gezaehlt.quelle
   and fahrten.route_kurzname is not distinct from gezaehlt.route_kurzname
+  -- `is not distinct from`, nicht `=`: beide Spalten sind fuer Fahrten ohne bekannten
+  -- Fahrplan NULL, und ein Gleichheitsvergleich liesse genau die Gruppe aus dem Join
+  -- fallen, die BPULS-091 als Zahl ausweisen soll.
+  and fahrten.verkehrsart is not distinct from gezaehlt.verkehrsart
+  and fahrten.gattung is not distinct from gezaehlt.gattung

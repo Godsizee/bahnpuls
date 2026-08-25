@@ -52,7 +52,18 @@ linien as (
     select
         trips.trip_id,
         max(routes.route_short_name) as route_kurzname,
-        count(distinct routes.route_short_name) as namensvarianten
+        count(distinct routes.route_short_name) as namensvarianten,
+        -- Der Feed, aus dem der Linienname stammt -- "rv" oder "fv". gtfs.de liefert
+        -- die Fahrplaene nach Verkehrsart getrennt aus, die Verkehrsart einer Fahrt ist
+        -- damit eine **Eigenschaft der gelesenen Datei** und keine Ableitung daraus
+        -- (ADR-014). Sie hier mitzunehmen ist Normalisierung, keine Business-Logik:
+        -- static_herkunft liest den Feed ohnehin schon, er wurde nur nie weitergereicht.
+        max({{ static_feed('trips.filename') }}) as feed,
+        -- Dieselbe Behandlung wie beim Liniennamen darueber: bei Uneinigkeit gewinnt ein
+        -- Wert, und dass es Uneinigkeit gibt, meldet ein eigener Test. Still aufloesen
+        -- waere hier der teurere Fehler -- eine Regionalfahrt als Fernverkehr zu zaehlen
+        -- faellt in keiner Zahl auf.
+        count(distinct {{ static_feed('trips.filename') }}) as feedvarianten
 
     from {{ source('de_static', 'trips') }} as trips
     join {{ source('de_static', 'routes') }} as routes
@@ -76,7 +87,11 @@ select
     stop_name             as bezeichnung,
     namensvarianten,
     zuerst_gesehen,
-    zuletzt_gesehen
+    zuletzt_gesehen,
+    -- Nur fuer 'linie' befuellt: ein Haltestellenname steht in beiden Feeds und traegt
+    -- keine Verkehrsart.
+    cast(null as varchar) as feed,
+    cast(null as bigint)  as feedvarianten
 from stops
 
 union all
@@ -87,5 +102,7 @@ select
     route_kurzname,
     namensvarianten,
     cast(null as varchar),
-    cast(null as varchar)
+    cast(null as varchar),
+    feed,
+    feedvarianten
 from linien

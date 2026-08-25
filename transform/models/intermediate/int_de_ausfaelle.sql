@@ -124,6 +124,12 @@ select
     true  as zug_ausgefallen,
 
     linien_name.bezeichnung as route_kurzname,
+    -- Muss mit int_de_stop_events mitziehen: beide Zweige laufen in dieselbe
+    -- Faktentabelle, und ein ausgefallener Zug ohne Verkehrsart fiele aus jeder
+    -- Auswahl heraus -- ausgerechnet dort, wo Ausfall und Verspaetung nebeneinander
+    -- stehen sollen (CLAUDE.md Regel 8).
+    {{ verkehrsart('linien_name.feed') }} as verkehrsart,
+    {{ zuggattung('linien_name.bezeichnung') }} as gattung,
     cast(null as varchar)   as block_id,
 
     'de_gtfsrt' as quelle

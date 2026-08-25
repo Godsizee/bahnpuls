@@ -452,7 +452,7 @@ models:
     tests:
       - dbt_utils.unique_combination_of_columns:
           arguments:
-            combination_of_columns: ['betriebstag', 'quelle', 'route_kurzname', 'schwelle_sek']
+            combination_of_columns: ['betriebstag', 'quelle', 'route_kurzname', 'verkehrsart', 'gattung', 'schwelle_sek']
 
   - name: mart_bahnhof
     description: >
@@ -609,7 +609,7 @@ models:
     tests:
       - dbt_utils.unique_combination_of_columns:
           arguments:
-            combination_of_columns: ['betriebstag', 'quelle', 'bahnhof', 'schwelle_sek']
+            combination_of_columns: ['betriebstag', 'quelle', 'bahnhof', 'verkehrsart', 'gattung', 'schwelle_sek']
 
   - name: mart_engpassknoten
     description: >
@@ -674,7 +674,7 @@ models:
     tests:
       - dbt_utils.unique_combination_of_columns:
           arguments:
-            combination_of_columns: ['betriebstag', 'quelle', 'von_bezeichnung', 'nach_bezeichnung', 'stunde']
+            combination_of_columns: ['betriebstag', 'quelle', 'von_bezeichnung', 'nach_bezeichnung', 'verkehrsart', 'gattung', 'stunde']
 
   - name: mart_pufferbilanz
     description: >
@@ -756,7 +756,7 @@ models:
     tests:
       - dbt_utils.unique_combination_of_columns:
           arguments:
-            combination_of_columns: ['betriebstag', 'quelle', 'route_kurzname', 'von_bezeichnung', 'nach_bezeichnung']
+            combination_of_columns: ['betriebstag', 'quelle', 'route_kurzname', 'verkehrsart', 'gattung', 'von_bezeichnung', 'nach_bezeichnung']
 
   - name: mart_erhebung
     description: >

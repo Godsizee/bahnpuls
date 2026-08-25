@@ -34,6 +34,12 @@ select
     halt_ausgelassen,
     zug_ausgefallen,
     route_kurzname,
+    -- Verkehrsart und Gattung (ADR-014). Sie stehen hier und nicht erst im Mart, weil
+    -- sie Eigenschaften des Halt-Ereignisses sind -- und weil eine neue Quelle an dieser
+    -- Naht Stellung beziehen soll: wer sie nicht beantworten kann, schreibt NULL hin,
+    -- statt die Spalte wegzulassen und stillschweigend aus jeder Auswahl zu fallen.
+    verkehrsart,
+    gattung,
     block_id,
     -- Liegt der Halt in VRN + RMV (BPULS-075)? Eine Quelle, die das nicht beantworten
     -- kann, muss hier Stellung beziehen statt die Spalte wegzulassen -- sonst rechnete

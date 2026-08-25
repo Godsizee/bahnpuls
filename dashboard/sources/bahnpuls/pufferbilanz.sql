@@ -23,6 +23,10 @@ zusammengefasst as (
     select
         puffer.quelle,
         coalesce(puffer.route_kurzname, 'ohne Liniennummer') as linie,
+        -- ADR-014: NULL heisst "der Fahrplan kennt diese Fahrt nicht" und bekommt ein
+        -- eigenes Etikett -- eine Auswahlliste kann auf NULL nicht filtern.
+        coalesce(puffer.verkehrsart, 'ohne Angabe') as verkehrsart,
+        coalesce(puffer.gattung, 'ohne Angabe')     as gattung,
         puffer.von_bezeichnung,
         puffer.nach_bezeichnung,
         bool_and(puffer.bezeichnung_vollstaendig) as bezeichnung_vollstaendig,
@@ -45,7 +49,7 @@ zusammengefasst as (
     join fenster
       on  fenster.quelle      = puffer.quelle
       and fenster.betriebstag = puffer.betriebstag
-    group by 1, 2, 3, 4
+    group by 1, 2, 3, 4, 5, 6
 
 ),
 
