@@ -137,11 +137,15 @@ darunter — beide sind Tarifverbünde und keine Datenkategorie.
 
 ### Was „ohne Angabe" bedeutet
 
-**„Ohne Angabe" heißt: der Fahrplan kennt diese Fahrt nicht.** Es heißt nicht „sonstige".
+**„Ohne Angabe" heißt: die Angabe ist nicht bekannt.** Es heißt nie „sonstige". Die beiden
+Stufen meinen damit aber nicht ganz dasselbe:
 
-Beide Angaben sind für genau dieselben Fahrten leer — für die, deren Kennung in keiner zum
-Betriebstag gültigen Fahrplan-Version vorkommt. Dort fehlt auch schon der Linienname; in
-den Tabellen stehen diese Fahrten als „ohne Liniennummer".
+- **Ohne Verkehrsart** heißt: der Fahrplan kennt diese Fahrt nicht. Ihre Kennung kommt in
+  keiner zum Betriebstag gültigen Fahrplan-Version vor. Dort fehlt auch schon der
+  Linienname; in den Tabellen stehen diese Fahrten als „ohne Liniennummer".
+- **Ohne Gattung** heißt zusätzlich: der Linienname beginnt mit einer Ziffer, es gibt also
+  kein Kürzel zu lesen. Im Zielgebiet trifft das zurzeit auf die Linien `82` und `12N` zu —
+  beide sind Nahverkehr, und das steht auch so da; nur eine Gattung haben sie nicht.
 
 Diese Gruppe ist als **eigene, anwählbare Gattung** sichtbar und in der Auswahl *Alle*
 enthalten. Sie verschwindet nirgends stillschweigend. Wählst du oben *Nahverkehr* oder
@@ -159,7 +163,11 @@ select
           / nullif(sum(fahrten), 0)                             as anteil_ohne,
     sum(halte_mit_ankunft)                                      as halte,
     100.0 * sum(halte_mit_ankunft) filter (where verkehrsart = 'ohne Angabe')
-          / nullif(sum(halte_mit_ankunft), 0)                   as halte_anteil_ohne
+          / nullif(sum(halte_mit_ankunft), 0)                   as halte_anteil_ohne,
+    -- Getrennt gezaehlt, weil es nicht dieselbe Gruppe ist: eine Fahrt kann eine
+    -- Verkehrsart haben und trotzdem keine Gattung, wenn ihr Linienname mit einer
+    -- Ziffer beginnt.
+    sum(fahrten) filter (where gattung = 'ohne Angabe')          as fahrten_ohne_gattung
 from bahnpuls.puenktlichkeit
 -- Eine einzige Schwelle: die Fahrten- und Haltezahlen hängen nicht von ihr ab und
 -- stünden sonst fünffach in der Summe.
@@ -172,6 +180,8 @@ where schwelle_min = 6
     title="Fahrten ohne Verkehrsart" />
 <BigValue data={ohne_angabe} value=halte_anteil_ohne fmt='#,##0.0'
     title="deren Anteil an den planmäßigen Halten (%)" />
+<BigValue data={ohne_angabe} value=fahrten_ohne_gattung fmt='#,##0'
+    title="Fahrten ohne Gattung" />
 
 Die Zahlen stehen auf den letzten 30 aufgezeichneten Betriebstagen — demselben Fenster wie
 die Seite [Pünktlichkeit und Ausfälle](/puenktlichkeit). Ist der Anteil groß, ist eine nach
