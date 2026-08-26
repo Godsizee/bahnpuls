@@ -34,10 +34,18 @@ import duckdb
 STANDARD_MANIFEST = "/app/dashboard/build/data/manifest.json"
 MANIFEST = pathlib.Path(sys.argv[1] if len(sys.argv) > 1 else STANDARD_MANIFEST)
 SEITEN = pathlib.Path(sys.argv[2] if len(sys.argv) > 2 else "/app/dashboard/pages")
+# Eigene Svelte-Komponenten (BPULS-087/088). Sie legen Eingabenamen an, die im SQL der
+# Seiten stehen -- ohne dieses Verzeichnis meldete der Pruefer jeden davon als "keine
+# Eingabekomponente dieser Seite legt ihn an" und braeche bei jedem Rebuild ab.
+KOMPONENTEN = pathlib.Path(sys.argv[3]) if len(sys.argv) > 3 else SEITEN.parent / "components"
 
 # ```sql name ... ``` -- der Name ist optional, Evidence erlaubt auch namenlose Bloecke.
 BLOCK = re.compile(r"^```sql[ \t]*([A-Za-z_][A-Za-z0-9_]*)?[^\n]*\n(.*?)^```", re.M | re.S)
 EINGABE = re.compile(r"\$\{\s*inputs\.[^}]*\}")
+# `where gattung in ${inputs.gattung.value}` -- eine Mehrfachauswahl liefert ein fertiges
+# SQL-Tupel. An dieser Stelle muss der Platzhalter geklammert sein: `in 0` ist ein
+# Syntaxfehler und saehe aus wie ein Fehler der Seite statt wie einer dieses Skripts.
+EINGABE_IN = re.compile(r"\bin\s+" + EINGABE.pattern, re.I)
 # Ein einzelner Eingabebezug, zerlegt in Namen und -- falls vorhanden -- Zugriffspfad:
 # `${inputs.tag.value}` -> ("tag", ".value"), `${inputs.mindestzuege}` -> ("mindestzuege", "").
 EINGABE_BEZUG = re.compile(r"\$\{\s*inputs\.([A-Za-z_][A-Za-z0-9_]*)((?:\.[A-Za-z_][A-Za-z0-9_]*)*)\s*\}")
@@ -51,7 +59,12 @@ EINGABE_TAG = re.compile(r"<(Slider|Dropdown|ButtonGroup|TextInput|DateRange|Che
 # die Abfrage gar nicht erst ausfuehren (`noResolve`). Die Seite bleibt im gebauten Stand
 # bei ihren Ladekaesten stehen, mit HTTP 200 und ohne Konsolenmeldung; genau das war
 # BPULS-084. Von aussen ist der Fehler nicht zu sehen, deshalb steht er hier.
-ROHER_WERT = {"Slider"}
+ROHER_WERT = {"Slider", "ButtonGroup"}
+# Eigene Komponenten legen ihre Eingaben selbst an. **Was** sie anlegen und in welcher
+# Form, steht als Zeile `EINGABEN: name (roh) · name (.value)` im Kopfkommentar der
+# Komponente -- an derselben Stelle, an der auch ein Mensch danach sucht.
+EINGABEN_ZEILE = re.compile(r"([A-Za-z_][A-Za-z0-9_]*)\s*\((roh|\.value)\)")
+EIGENE_KOMPONENTE = re.compile(r"<([A-Z][A-Za-z0-9]*)\b")
 # Erklaerkommentare stehen im Markup und nennen die Bezuege, die sie erklaeren -- ohne
 # sie herauszunehmen meldete ausgerechnet die Dokumentation dieser Regel einen Befund.
 KOMMENTAR = re.compile(r"<!--.*?-->", re.S)
@@ -134,6 +147,7 @@ def quellen_aus_manifest():
 
 
 def einsetzen(sql):
+	sql = EINGABE_IN.sub(f"in ({PLATZHALTER})", sql)
 	sql = EINGABE.sub(PLATZHALTER, sql)
 	sql = SEITENPARAMETER.sub(PLATZHALTER, sql)
 	sql = ABFRAGE.sub(lambda m: '"' + m.group(1) + '"', sql)
@@ -165,8 +179,26 @@ def eingaben_pruefen(text, kennung_seite):
 
 	Gibt die Zahl der geprueften Bezuege zurueck.
 	"""
-	text = KOMMENTAR.sub("", text)
 	quelle = {}
+	# Erst die eigenen Komponenten, die die Seite einbindet, dann die Seite selbst --
+	# eine Eingabe direkt auf der Seite ueberschreibt damit die gleichnamige aus einer
+	# Komponente, und nicht umgekehrt.
+	for komponente in sorted(set(EIGENE_KOMPONENTE.findall(KOMMENTAR.sub("", text)))):
+		datei = KOMPONENTEN / f"{komponente}.svelte"
+		if not datei.exists():
+			continue
+		roh = datei.read_text(encoding="utf-8")
+		# Der Kopfkommentar ist hier die **Quelle** und wird nicht entfernt: in ihm steht
+		# die EINGABEN-Zeile, mit der die Komponente erklaert, was sie anlegt.
+		for name, form in EINGABEN_ZEILE.findall(roh):
+			quelle[name] = "Slider" if form == "roh" else "Dropdown"
+		for treffer in EINGABE_TAG.finditer(KOMMENTAR.sub("", roh)):
+			art, attribute_roh = treffer.groups()
+			name = dict(ATTR.findall(attribute_roh or "")).get("name", "").strip("\"'")
+			if name:
+				quelle[name] = art
+
+	text = KOMMENTAR.sub("", text)
 	for treffer in EINGABE_TAG.finditer(text):
 		komponente, roh = treffer.groups()
 		attribute = dict(ATTR.findall(roh or ""))
