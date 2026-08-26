@@ -4,9 +4,10 @@ description: Wie die Kennzahlen gerechnet werden — und was sie bewusst nicht b
 sidebar_position: 8
 ---
 
-Eine Zahl ohne offengelegte Definition ist eine Behauptung. Diese Seite beschreibt jede
-Kennzahl, die im Dashboard vorkommt, und benennt die Annahmen dahinter. Sie wird
-zusammen mit den Kennzahlen gepflegt, nicht nachträglich.
+**Diese Seite beschreibt jede Kennzahl des Dashboards und benennt die Annahmen dahinter.**
+
+Eine Zahl ohne offengelegte Definition ist eine Behauptung. Die Seite wird zusammen mit den
+Kennzahlen gepflegt, nicht nachträglich.
 
 **Diese Seite muss man nicht lesen, um das Dashboard zu verstehen.** Sie ist für alle da,
 die eine Zahl nachprüfen oder ihr widersprechen wollen — und dafür wissen müssen, wie
@@ -102,6 +103,96 @@ Fahrten werden dem **Betriebstag** zugeordnet, nicht dem Kalendertag. Ein Zug, d
 23:50 abfährt und um 00:40 ankommt, gehört zu einem einzigen Betriebstag — sonst fielen
 genau die Nachtfahrten auseinander, in denen die auffälligsten Störungen stecken. Ein
 Betriebstag kann deshalb länger als 24 Stunden sein.
+
+## Verkehrsart und Zuggattung
+
+Auf jeder Auswertungsseite steht dieselbe Auswahlleiste: **Alle · Nahverkehr ·
+Fernverkehr**, darunter die Zuggattungen — ICE, IC, EC, RE, RB, S und was der Fahrplan
+sonst führt. Die beiden Angaben stammen aus **zwei verschiedenen Quellen**, und keine von
+beiden wird geraten.
+
+| Angabe | Woher sie kommt | Werte |
+|---|---|---|
+| **Verkehrsart** | aus der Fahrplandatei, in der die Fahrt steht | Fernverkehr, Nahverkehr, ohne Angabe |
+| **Zuggattung** | aus dem Liniennamen, bis zur ersten Ziffer | ICE, IC, EC, RE, RB, S, … , ohne Angabe |
+
+**Die Verkehrsart ist eine Eigenschaft der Datei, nicht eine Deutung des Namens.** gtfs.de
+liefert die Schienenfahrpläne getrennt aus: einen Datensatz für den Fernverkehr, einen für
+den Nahverkehr. Welcher Datensatz den Liniennamen einer Fahrt liefert, entscheidet damit
+zugleich ihre Verkehrsart. Diese Zuordnung reist auf demselben Weg mit, auf dem ohnehin
+der Name geholt wird.
+
+**Die Zuggattung wird gelesen, nicht zugeordnet:** der Anfang des Liniennamens bis zur
+ersten Ziffer. Aus `RE 70` wird `RE`, aus `S 3` wird `S`, aus `IC 2011` wird `IC`. Es gibt
+keine gepflegte Liste bekannter Gattungen. Ein `MEX` oder `SÜWEX` bekommt deshalb seine
+eigene Gattung, statt in einem Sammeleimer „sonstige" zu landen — und liegt trotzdem
+richtig unter Nahverkehr, weil das die andere Angabe entscheidet.
+
+**Warum nicht aus dem Namen auf die Verkehrsart geschlossen wird.** Eine Liste
+„ICE, IC, EC gehören zum Fernverkehr, RE, RB, S zum Nahverkehr" müsste gepflegt werden,
+und jede unbekannte Gattung landete auf der falschen Seite oder in einem Sammeleimer. Eine
+Regionalfahrt als Fernverkehr zu zählen fiele in keiner Zahl auf. Auch die Verkehrsgesellschaft
+taugt nicht dafür: Der Nahverkehrsdatensatz führt 147 davon, und weder VRN noch RMV sind
+darunter — beide sind Tarifverbünde und keine Datenkategorie.
+
+### Was „ohne Angabe" bedeutet
+
+**„Ohne Angabe" heißt: der Fahrplan kennt diese Fahrt nicht.** Es heißt nicht „sonstige".
+
+Beide Angaben sind für genau dieselben Fahrten leer — für die, deren Kennung in keiner zum
+Betriebstag gültigen Fahrplan-Version vorkommt. Dort fehlt auch schon der Linienname; in
+den Tabellen stehen diese Fahrten als „ohne Liniennummer".
+
+Diese Gruppe ist als **eigene, anwählbare Gattung** sichtbar und in der Auswahl *Alle*
+enthalten. Sie verschwindet nirgends stillschweigend. Wählst du oben *Nahverkehr* oder
+*Fernverkehr*, fällt sie dagegen heraus — sie gehört zu keinem von beiden, und eine
+Zuordnung wäre erfunden.
+
+```sql ohne_angabe
+-- Die Zahl kommt aus der Abfrage, nicht aus dem Text: diese Seite wird stündlich neu
+-- gebaut, und ein festgeschriebener Prozentsatz wäre irgendwann falsch, ohne dass es
+-- auffiele. Dieselbe Regel, nach der die Befundseite gebaut ist.
+select
+    sum(fahrten)                                                as fahrten,
+    sum(fahrten) filter (where verkehrsart = 'ohne Angabe')     as fahrten_ohne,
+    100.0 * sum(fahrten) filter (where verkehrsart = 'ohne Angabe')
+          / nullif(sum(fahrten), 0)                             as anteil_ohne,
+    sum(halte_mit_ankunft)                                      as halte,
+    100.0 * sum(halte_mit_ankunft) filter (where verkehrsart = 'ohne Angabe')
+          / nullif(sum(halte_mit_ankunft), 0)                   as halte_anteil_ohne
+from bahnpuls.puenktlichkeit
+-- Eine einzige Schwelle: die Fahrten- und Haltezahlen hängen nicht von ihr ab und
+-- stünden sonst fünffach in der Summe.
+where schwelle_min = 6
+```
+
+<BigValue data={ohne_angabe} value=anteil_ohne fmt='#,##0.0'
+    title="Anteil der Fahrten ohne Verkehrsart (%)" />
+<BigValue data={ohne_angabe} value=fahrten_ohne fmt='#,##0'
+    title="Fahrten ohne Verkehrsart" />
+<BigValue data={ohne_angabe} value=halte_anteil_ohne fmt='#,##0.0'
+    title="deren Anteil an den planmäßigen Halten (%)" />
+
+Die Zahlen stehen auf den letzten 30 aufgezeichneten Betriebstagen — demselben Fenster wie
+die Seite [Pünktlichkeit und Ausfälle](/puenktlichkeit). Ist der Anteil groß, ist eine nach
+Verkehrsart gefilterte Ansicht entsprechend kleiner als die Gesamtsicht. Deshalb steht die
+Zahl hier und nicht in einer Fußnote.
+
+Mit jeder geladenen Fahrplan-Version wird die Gruppe kleiner: Die Fahrpläne werden
+gesammelt und nicht ersetzt, und eine Fahrt, deren Kennung später auflösbar wird, verlässt
+diese Gruppe.
+
+### Wo nicht gefiltert werden kann
+
+Zwei Auswertungen tragen die Verkehrsart **nicht** und lassen sich deshalb nicht danach
+einschränken:
+
+- die Gesamtzahlen der [Startseite](/) — sie sollen mit einer Aussage beginnen und nicht
+  mit einer Auswahl;
+- die Tabelle „Woher die Züge kommen" auf jeder Bahnhofsseite, die aus derselben
+  Auswertung stammt.
+
+Beide zeigen also immer alle Züge. Wo das zutrifft, steht es auf der Seite selbst.
 
 ## Laufzeit- und Haltezeitanteil
 

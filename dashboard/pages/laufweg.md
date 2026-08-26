@@ -4,24 +4,43 @@ description: Der Verspätungsverlauf einer einzelnen Fahrt, zerlegt in Laufzeit-
 sidebar_position: 4
 ---
 
-Eine einzelne Fahrt, von Halt zu Halt nachgezeichnet. Statt einer Zahl am Ende — „zwölf
-Minuten zu spät" — steht hier, an welcher Stelle diese Minuten dazugekommen sind, und ob
-das unterwegs passierte oder während eines Aufenthalts.
+**Diese Seite zeichnet eine einzelne Fahrt nach: an welchem Halt und auf welchem Abschnitt
+die Verspätung dazukam.**
 
-**Gezeigt wird der Laufweg innerhalb von VRN und RMV.** Ein Fernzug fährt weiter, als
-hier zu sehen ist — seine Halte außerhalb des Gebiets stehen in den Daten, aber nicht auf
-dieser Seite. Was er an Verspätung mitbringt, ist trotzdem abzulesen: Sie steht als
-Ankunftsverspätung an seinem ersten Halt hier. Nur der Laufzeitanteil des
-Einfahrtsabschnitts fehlt, weil er auf einer Strecke entstanden ist, die diese Seite nicht
-zeigt (siehe [Methodik](/methodik)).
+Statt einer Zahl am Ende — „zwölf Minuten zu spät" — steht hier, wo diese Minuten
+entstanden sind. Und ob das unterwegs passierte oder während eines Aufenthalts.
 
-**So liest man die Diagramme:** Das obere zeigt, was jeder einzelne Abschnitt und jeder
-Halt beigetragen hat. Ein Balken nach oben heißt, dort ist Verspätung entstanden; ein
-Balken nach unten heißt, dort wurde welche aufgeholt. Die Farbe sagt, ob es unterwegs
-passierte oder im Bahnhof. Das untere Diagramm zeigt denselben Zug noch einmal anders: wie
+**So liest du die beiden Diagramme.** Das obere zeigt, was jeder einzelne Abschnitt und
+jeder Halt beigetragen hat. Ein Balken nach oben heißt: dort ist Verspätung entstanden. Ein
+Balken nach unten heißt: dort wurde welche aufgeholt. Die Farbe sagt, ob es unterwegs
+passierte oder im Bahnhof. Das untere Diagramm zeigt denselben Zug noch einmal anders — wie
 viel Verspätung er zu jedem Zeitpunkt insgesamt mit sich trug.
 
+<Details title="Warum ein Fernzug hier kürzer fährt, als er wirklich fährt">
+
+**Gezeigt wird der Laufweg innerhalb von VRN und RMV.** Ein Fernzug fährt weiter, als hier
+zu sehen ist. Seine Halte außerhalb des Gebiets stehen in den Daten, aber nicht auf dieser
+Seite.
+
+Was er an Verspätung mitbringt, ist trotzdem abzulesen: Sie steht als Ankunftsverspätung an
+seinem ersten Halt hier. Nur die unterwegs entstandene Zeit des Einfahrtsabschnitts fehlt.
+Sie ist auf einer Strecke entstanden, die diese Seite nicht zeigt (siehe
+[Methodik](/methodik)).
+
+</Details>
+
 ## Fahrt auswählen
+
+```sql gattungen
+-- Nur die Auswahlliste: welche Verkehrsarten und Gattungen in der angebotenen Auswahl
+-- vorkommen (ADR-014). Sie folgt derselben Begrenzung wie alles auf dieser Seite --
+-- drei Betriebstage, je Tag und Linie sechs Fahrten.
+select verkehrsart, gattung
+from bahnpuls.zuglauf_auswahl
+group by verkehrsart, gattung
+```
+
+<Auswahlleiste data={gattungen} hinweis="Betriebstag, Linie und Fahrt stehen darunter." />
 
 ```sql tage
 -- Der Betriebstag wird als **Text** ausgewählt, nicht als Datum: der Wert eines
@@ -39,6 +58,8 @@ select
     max(betriebstag)                   as sortierung,
     count(distinct trip_key)           as fahrten
 from bahnpuls.zuglauf_auswahl
+where verkehrsart like '${inputs.verkehrsart}'
+  and gattung in ${inputs.gattung.value}
 group by strftime(betriebstag, '%Y-%m-%d')
 order by sortierung desc
 ```
@@ -50,6 +71,8 @@ order by sortierung desc
 select linie, count(distinct trip_key) as fahrten
 from bahnpuls.zuglauf_auswahl
 where strftime(betriebstag, '%Y-%m-%d') = '${inputs.tag.value}'
+  and verkehrsart like '${inputs.verkehrsart}'
+  and gattung in ${inputs.gattung.value}
 group by linie
 order by linie
 ```
@@ -61,6 +84,8 @@ with gefiltert as (
     from bahnpuls.zuglauf_auswahl
     where strftime(betriebstag, '%Y-%m-%d') = '${inputs.tag.value}'
       and linie like '${inputs.linie.value}'
+      and verkehrsart like '${inputs.verkehrsart}'
+      and gattung in ${inputs.gattung.value}
 
 ),
 
@@ -104,6 +129,8 @@ order by grenzen.ab_soll nulls last, bezeichnung
 select strftime(max(betriebstag), '%Y-%m-%d') as tag
 from bahnpuls.zuglauf_auswahl
 where erhebung_vollstaendig
+  and verkehrsart like '${inputs.verkehrsart}'
+  and gattung in ${inputs.gattung.value}
 ```
 
 <!--
@@ -114,16 +141,30 @@ where erhebung_vollstaendig
     `standard` -- die Auswahl entsteht also erst im Browser, und genau dort steht sie auch.
 -->
 
-<Dropdown data={tage} name=tag value=tag label=beschriftung title="Betriebstag"
-    defaultValue={(typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('tag')) || standard[0]?.tag || []} />
+<!--
+    Bis zum 25.08.2026 las die Seite die drei Parameter nur -- geschrieben hat sie nie
+    einer. Der Satz darunter ("die Auswahl steht in der Adresse") stimmte damit erst,
+    nachdem jemand die Adresse von Hand gebaut hatte.
 
+    Die Adresse wirkt jetzt **nach** dem Aufbau, nicht währenddessen -- warum das kein
+    Detail ist, steht im Kopf von `components/AdresseMerken.svelte`.
+-->
+<AdresseMerken eingabe="tag" let:vorauswahl>
+<Dropdown data={tage} name=tag value=tag label=beschriftung title="Betriebstag"
+    defaultValue={vorauswahl || standard[0]?.tag || []} />
+</AdresseMerken>
+
+<AdresseMerken eingabe="linie" vorgabe="%" let:vorauswahl>
 <Dropdown data={linien} name=linie value=linie title="Linie"
-    defaultValue={(typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('linie')) || []}>
+    defaultValue={vorauswahl || []}>
     <DropdownOption value="%" valueLabel="alle Linien" />
 </Dropdown>
+</AdresseMerken>
 
+<AdresseMerken eingabe="fahrt" let:vorauswahl>
 <Dropdown data={fahrten} name=fahrt value=trip_key label=bezeichnung title="Fahrt"
-    defaultValue={(typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('fahrt')) || []} />
+    defaultValue={vorauswahl || []} />
+</AdresseMerken>
 
 {#if typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('fahrt') && inputs.fahrt?.value !== new URLSearchParams(window.location.search).get('fahrt')}
 <Alert status=warning>
@@ -136,10 +177,10 @@ aktuellen Stand.
 </Alert>
 {/if}
 
-**Diese Seite lässt sich verlinken.** Die getroffene Auswahl steht in der Adresse
-(`?tag=…&linie=…&fahrt=…`) und kann so zitiert werden. Wer den Link ohne Anhang aufruft,
-bekommt immer den jüngsten vollständig erhobenen Betriebstag — das ist der Einstieg, der
-nicht altert.
+**Diese Seite lässt sich verlinken.** Deine Auswahl steht in der Adresse
+(`?art=…&gattung=…&tag=…&linie=…&fahrt=…`) und lässt sich so zitieren. Rufst du den Link
+ohne Anhang auf, bekommst du immer den jüngsten vollständig erhobenen Betriebstag — den
+Einstieg, der nicht altert.
 
 <Alert status=info>
 
@@ -283,15 +324,17 @@ order by reihenfolge
     sort=false
     yAxisTitle="Minuten"
     title="Nach oben: dort entstanden. Nach unten: dort aufgeholt."
+    emptySet=warn
+    emptyMessage="Zu dieser Auswahl steht keine Fahrt zur Verfügung. Stell die Verkehrsart oben auf „Alle“, oder wähle einen anderen Betriebstag."
 />
 
-Ein Balken nach unten ist kein Fehler, sondern der Normalfall: In jedem Fahrplan steckt
-Reserve — etwas mehr Fahrzeit zwischen zwei Bahnhöfen, etwas längerer Aufenthalt als
-nötig. Ein verspäteter Zug holt damit auf. Genau dafür ist sie da.
+Ein Balken nach unten ist kein Fehler, sondern der Normalfall. In jedem Fahrplan steckt
+Reserve: etwas mehr Fahrzeit zwischen zwei Bahnhöfen, etwas längerer Aufenthalt als nötig.
+Ein verspäteter Zug holt damit auf. Genau dafür ist sie da.
 
 Wo für einen Abschnitt kein Balken erscheint, fehlt die Angabe. Sie wird dann **nicht als
-Null gezeichnet**, denn Null hieße „hier hat sich nichts verändert" — und das ist etwas
-anderes als „wir wissen es nicht".
+Null gezeichnet**. Null hieße „hier hat sich nichts verändert", und das ist etwas anderes
+als „wir wissen es nicht".
 
 Fährt ein Zug denselben Bahnhof zweimal an — beim Kopfmachen oder auf einer Wendefahrt —,
 steht hinter dem Namen, das wievielte Mal es ist. Ohne diese Unterscheidung fielen beide
@@ -306,6 +349,9 @@ where stand_min is not null
 order by reihenfolge
 ```
 
+**So liest du die Linie.** Sie zeigt nicht, was an einer Stelle dazukam, sondern wie viel
+Verspätung der Zug dort insgesamt hatte.
+
 <LineChart
     data={verlauf}
     x=schritt
@@ -313,16 +359,19 @@ order by reihenfolge
     sort=false
     yAxisTitle="Minuten"
     markers=true
+    emptySet=warn
+    emptyMessage="Zu dieser Auswahl steht keine Fahrt zur Verfügung. Stell die Verkehrsart oben auf „Alle“, oder wähle einen anderen Betriebstag."
 />
 
-Diese Linie stammt aus den tatsächlich gemeldeten Werten, nicht aus dem Aufaddieren der
-Balken darüber. Das ist Absicht: Beide Wege müssten dasselbe ergeben, und wo sie es nicht
-tun, fehlt eine Meldung. Deshalb bricht die Linie dort ab, statt eine Zwischenzahl zu
-erfinden, die plausibel aussieht.
+Diese Linie stammt aus den gemeldeten Werten, nicht aus dem Aufaddieren der Balken darüber.
+Das ist Absicht. Beide Wege müssten dasselbe ergeben; wo sie es nicht tun, fehlt eine
+Meldung. Deshalb bricht die Linie dort ab, statt eine Zwischenzahl zu erfinden, die
+plausibel aussieht.
 
 ## Halt für Halt zum Nachlesen
 
-<DataTable data={schritte} rows=20>
+<DataTable data={schritte} rows=20 emptySet=warn
+    emptyMessage="Zu dieser Auswahl steht keine Fahrt zur Verfügung. Stell die Verkehrsart oben auf „Alle“, oder wähle einen anderen Betriebstag.">
     <Column id=schritt title="Wo" />
     <Column id=art title="Unterwegs oder im Bahnhof" />
     <Column id=beitrag_min title="Dort dazugekommen (Min.)" fmt='#,##0.0' />

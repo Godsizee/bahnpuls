@@ -4,13 +4,16 @@ description: Drei Aussagen aus den Daten — jede mit einer Zahl, einer Grafik u
 sidebar_position: 2
 ---
 
-Die übrigen Seiten sind Werkzeuge: Sie lassen eine Fahrt nachzeichnen, eine Rangliste
-sortieren, eine Schwelle verschieben. Diese Seite tut das Gegenteil — sie **trifft drei
-Aussagen** und legt daneben, woran sie sich messen lassen.
+**Diese Seite trifft drei Aussagen über den Zugverkehr in VRN und RMV. Jede steht auf
+einer Zahl, einer Grafik und dem, was sie betrieblich bedeutet.**
 
-Der Ton ist dabei bewusst sachlich. Hinter jeder Verspätung stehen Randbedingungen, die
-eine Zahl nicht kennt; wer daraus eine Anklage baut, überdehnt seine Datenbasis. Was hier
-steht, ist gemessen, nicht gedeutet.
+Die übrigen Seiten sind Werkzeuge. Sie lassen eine Fahrt nachzeichnen, eine Rangliste
+sortieren, eine Schwelle verschieben. Diese Seite tut das Gegenteil: Sie sagt, was
+herauskommt.
+
+Der Ton ist dabei sachlich. Hinter jeder Verspätung stehen Umstände, die eine Zahl nicht
+kennt. Wer daraus eine Anklage baut, überdehnt seine Daten. Was hier steht, ist gemessen
+und nicht gedeutet.
 
 ```sql fenster
 -- Alle drei Befunde stehen auf **demselben** Zeitraum. Das ist keine Selbstverständlichkeit:
@@ -105,6 +108,10 @@ from bahnpuls.puenktlichkeit where schwelle_min = 6
 order by reihenfolge
 ```
 
+**So liest du die Grafik.** Die vier Balken teilen **alle** planmäßigen Ankünfte auf. Sie
+ergeben zusammen wieder die Gesamtzahl; keine Gruppe fehlt, keine zählt doppelt. In der
+üblichen Pünktlichkeitsquote kommen nur die ersten beiden vor.
+
 <BarChart
     data={befund_verbleib}
     x=verbleib
@@ -133,9 +140,9 @@ die ohne Meldung eingeschlossen.
 
 **Was das betrieblich heißt:** Ein Zug, der nicht fährt, ist nie verspätet. Er fällt aus
 der Rechnung, und die Quote wird dadurch **besser**. Das ist kein Rechenfehler und keine
-Absicht — so ist die Kennzahl definiert, und sie beantwortet die Frage „wie pünktlich
-waren die Züge, die fuhren" korrekt. Sie beantwortet nur nicht die Frage, die auf dem
-Bahnsteig zählt. Die
+Absicht — so ist die Kennzahl definiert. Sie beantwortet die Frage „wie pünktlich waren die
+Züge, die fuhren" korrekt. Sie beantwortet nur nicht die Frage, die auf dem Bahnsteig
+zählt. Die
 <Value data={befund_puenktlich} column=abstand_pp fmt='#,##0.0'/> Prozentpunkte zwischen
 beiden Zahlen sind genau das, was zwischen diesen beiden Fragen liegt.
 
@@ -180,6 +187,10 @@ union all
 select 'im Bahnhof, während des Halts', haltezeit_sek_je_halt from ${befund_ort}
 ```
 
+**So liest du die Grafik.** Der obere Balken zählt, was ein Zug auf **einem** Abschnitt
+zwischen zwei Bahnhöfen im Mittel verliert. Der untere zählt, was **ein** Halt im Mittel
+kostet. Ein Wert nach links heißt: dort wird unter dem Strich aufgeholt.
+
 <BarChart
     data={befund_ort_lang}
     x=ort
@@ -193,10 +204,10 @@ select 'im Bahnhof, während des Halts', haltezeit_sek_je_halt from ${befund_ort
 **Die Zahl:** Je gefahrenem Abschnitt kamen im Mittel
 <Value data={befund_ort} column=laufzeit_sek_je_abschnitt fmt='#,##0.0'/> Sekunden dazu,
 je Halt <Value data={befund_ort} column=haltezeit_sek_je_halt fmt='#,##0.0'/> Sekunden.
-Mehr entsteht damit <strong><Value data={befund_ort} column=ueberwiegt/></strong> — und
-das ist die Stelle, an der sich diese Auswertung von einer gewöhnlichen unterscheidet, denn eine
-Ankunftsverspätung allein sagt darüber nichts. Ein negativer Wert bedeutet, dass dort unter
-dem Strich Reserve genutzt und Verspätung abgebaut wurde.
+Mehr entsteht damit <strong><Value data={befund_ort} column=ueberwiegt/></strong>. Genau
+das trennt diese Auswertung von einer gewöhnlichen: Eine Ankunftsverspätung allein sagt
+darüber nichts. Ein negativer Wert bedeutet, dass dort unter dem Strich Reserve genutzt und
+Verspätung abgebaut wurde.
 
 **Was der Unterschied ist:** Für jeden Halt wird zweierlei festgehalten — wie viel
 Verspätung ein Zug beim Ankommen hatte und wie viel beim Weiterfahren. Wächst sie
@@ -204,10 +215,11 @@ Verspätung ein Zug beim Ankommen hatte und wie viel beim Weiterfahren. Wächst 
 **während** des Halts, hat der Aufenthalt länger gedauert.
 
 **Was das betrieblich heißt:** Das sind zwei verschiedene Probleme mit zwei verschiedenen
-Maßnahmen. Laufzeitverlust deutet auf Trassenkonflikt, Langsamfahrstelle, Überholung oder
-Baustelle — also auf Infrastruktur und Trassenlage. Haltezeitverlust deutet auf
-Fahrgastwechsel, Anschlusswarten, Disposition oder Personalwechsel. Eine Ankunftsverspätung
-allein trennt die beiden nicht, und genau deshalb rechnet dieses Projekt sie auseinander.
+Maßnahmen. Verlorene Zeit **unterwegs** (Laufzeitverlust) deutet auf Trassenkonflikt,
+Langsamfahrstelle, Überholung oder Baustelle — also auf Infrastruktur und Trassenlage.
+Verlorene Zeit **im Halt** (Haltezeitverlust) deutet auf Fahrgastwechsel, Anschlusswarten,
+Disposition oder Personalwechsel. Eine Ankunftsverspätung allein trennt die beiden nicht.
+Genau deshalb rechnet dieses Projekt sie auseinander.
 
 Der Verlauf an einer einzelnen Fahrt steht auf der Seite
 [Laufweg einer Fahrt](/laufweg).
@@ -295,10 +307,10 @@ Summe rankt zwangsläufig den dichtest befahrenen Abschnitt nach oben — der ha
 nicht mehr Probleme. Diese eine Regel entscheidet, ob die Rangliste etwas aussagt.
 
 **Was das betrieblich heißt:** Verspätung verteilt sich nicht gleichmäßig über das Netz.
-Sie sammelt sich an wenigen Stellen — und die Tagesganglinie darüber wird mit wachsender
-Aufzeichnung zur eigentlich interessanten Grafik: Ausgeprägte Spitzen deuten auf
-Kapazität, die nur in den Hauptverkehrszeiten nicht reicht; ein über den Tag flaches Bild
-deutet eher auf eine bauliche oder fahrplanseitige Ursache, die immer wirkt.
+Sie sammelt sich an wenigen Stellen. Die Linie darüber wird mit wachsender Aufzeichnung zur
+eigentlich interessanten Grafik: Ausgeprägte Spitzen deuten auf Kapazität, die nur in den
+Hauptverkehrszeiten nicht reicht. Ein über den Tag flaches Bild deutet eher auf eine
+bauliche oder fahrplanseitige Ursache, die immer wirkt.
 
 **Noch ist sie das nicht.** Bei wenigen Betriebstagen stehen hinter jeder Stunde nur
 einige Züge; einzelne Ausschläge sind dann Zufall und keine Tagesspitze. Die Linie ist
@@ -310,8 +322,8 @@ Fahrtrichtung, steht auf der Seite [Engpässe im Netz](/engpaesse).
 
 ## Was diese drei Befunde nicht sagen
 
-Dieser Abschnitt ist kein Anhängsel. Wer die Zahlen prüft, muss die Grenzen von hier
-erfahren und nicht selbst finden.
+Dieser Abschnitt ist kein Anhängsel. Wer die Zahlen prüft, soll ihre Grenzen hier finden
+und nicht selbst suchen müssen.
 
 - **Es sind Tage, keine Regelmäßigkeit.** <Value data={fenster} column=tage/> Betriebstage
   tragen eine Aussage über das Gebiet, aber keine über einen einzelnen Bahnhof, eine

@@ -4,9 +4,13 @@ description: Je eine Seite für die größeren Knoten in VRN und Rhein-Main — 
 sidebar_position: 3
 ---
 
-Die übrigen Seiten fragen nach Linien, Fahrten und Abschnitten. Diese fragt nach dem Ort:
-**Wie zuverlässig kommt ein Zug an diesem Bahnhof an — und wie viel Verspätung entsteht
-dort, wo er steht?**
+**Diese Seite führt zu den 44 Bahnhöfen mit einer eigenen Auswertung.** Jede zeigt, wie
+pünktlich Züge dort ankommen und wie viel Verspätung der Halt selbst kostet.
+
+Die übrigen Seiten fragen nach Linien, Fahrten und Abschnitten. Diese fragt nach dem Ort.
+
+**Such deinen Bahnhof im Feld unten, oder klick ihn in der Tabelle an.** Auf seiner Seite
+kannst du ihn merken; danach steht er oben auf der Startseite.
 
 ```sql knoten
 select
@@ -29,6 +33,15 @@ group by bahnhof, verbund, slug
 order by verbund, bahnhof
 ```
 
+<GemerkterBahnhof />
+
+<BahnhofSuche data={knoten} />
+
+**So liest du die letzte Spalte.** Der Balken läuft nach rechts, wenn der Aufenthalt Zeit
+**gekostet** hat, und nach links, wenn der Zug am Bahnsteig welche **aufgeholt** hat. Die
+Null liegt in jeder Zeile an derselben Stelle. Eine aufgeholte halbe Minute sieht damit
+anders aus als eine verlorene, nicht nur blasser.
+
 <DataTable data={knoten} rows=15 search=true emptySet=warn
     emptyMessage="Für keinen Knoten liegen Zahlen vor — vermutlich ist der letzte Datenlauf nicht durchgelaufen.">
     <Column id=seite title="Bahnhof" contentType=link linkLabel=bahnhof />
@@ -39,20 +52,15 @@ order by verbund, bahnhof
     <Column id=hier_sek title="im Bahnhof (s je Halt)" fmt="#,##0.0" wrapTitle=true contentType=bar barColor=verloren negativeBarColor=aufgeholt />
 </DataTable>
 
-**So liest sich die letzte Spalte.** Der Balken läuft nach rechts, wenn der Aufenthalt
-Zeit **gekostet** hat, und nach links, wenn der Zug am Bahnsteig welche **aufgeholt** hat.
-Die Null liegt in jeder Zeile an derselben Stelle — eine aufgeholte halbe Minute sieht
-damit anders aus als eine verlorene, nicht nur blasser.
-
 ## Warum eine Auswahl und nicht jeder Halt
 
 Der Feed nennt im Zielgebiet mehrere hundert Betriebsstellen beim Namen — von der
 Frankfurter Stammstrecke bis zum Haltepunkt mit einer Handvoll Züge am Tag. Jede von ihnen
-bekäme eine Seite, die niemand aufruft, und der Browser müsste für jeden Aufruf mehr Daten
+bekäme eine Seite, die niemand aufruft. Und der Browser müsste bei jedem Aufruf mehr Daten
 laden.
 
-Die Auswahl steht deshalb als Liste im Projekt und nicht als Bestenliste in den Daten. Das
-ist keine Bequemlichkeit, sondern hat zwei Gründe:
+Die Auswahl steht deshalb als feste Liste im Projekt, nicht als Bestenliste in den Daten.
+Dafür gibt es zwei Gründe:
 
 - **Eine Bestenliste nach Verkehrsmenge wäre keine Auswahl über das Gebiet.** Die
   meistbefahrenen Halte liegen fast alle auf der Frankfurter Stammstrecke. Eine Seite je
@@ -67,7 +75,7 @@ einer Kennzahl.
 ## Was auf diesen Seiten steht
 
 Jede Bahnhofsseite trennt drei Dinge, die eine gewöhnliche Pünktlichkeitsstatistik in eine
-Zahl wirft:
+einzige Zahl wirft:
 
 - **Mitgebracht** — mit welchem Rückstand die Züge ankommen. Das sagt etwas über die
   Strecke davor, nicht über den Bahnhof.
@@ -76,9 +84,13 @@ Zahl wirft:
 - **Auf dem Weg hierher entstanden** — was der letzte Abschnitt vor der Einfahrt gekostet
   hat.
 
-Dazu die beiden Pünktlichkeitsquoten nebeneinander: die übliche, die nur zählt, was
-gemessen wurde, und die, in der auch Ausfälle und ausgelassene Halte im Nenner stehen. Wie
+Dazu stehen die beiden Pünktlichkeitsquoten nebeneinander: die übliche, die nur zählt, was
+gemessen wurde — und die, in der auch Ausfälle und ausgelassene Halte im Nenner stehen. Wie
 beides gerechnet wird, steht auf der [Methodik-Seite](/methodik).
+
+Auf jeder Bahnhofsseite lässt sich außerdem auswählen, welche Züge gezählt werden: Nah-
+oder Fernverkehr, darin RE, RB oder S. Und ab wie vielen Minuten ein Halt als verspätet
+gilt.
 
 **Alle Zahlen stehen auf den letzten 30 Betriebstagen** und auf einer Sammlung, die am
 19.08.2026 begonnen hat. Für Aussagen über einen einzelnen Bahnhof über die Zeit ist das

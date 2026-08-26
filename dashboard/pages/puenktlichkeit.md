@@ -4,15 +4,49 @@ description: Zwei Quoten nebeneinander — die übliche und die, in der Ausfäll
 sidebar_position: 7
 ---
 
+**Diese Seite stellt zwei Pünktlichkeitsquoten nebeneinander: die übliche und die, in der
+ausgefallene Züge nicht verschwinden.**
+
 Ein ausgefallener Zug ist nie verspätet. Das klingt wie ein Wortspiel, hat aber eine
-handfeste Folge: Eine Pünktlichkeitsquote zählt nur Züge, die gefahren sind. Wird ein Zug
+handfeste Folge. Eine Pünktlichkeitsquote zählt nur Züge, die gefahren sind. Wird ein Zug
 gestrichen, fällt er aus der Rechnung — und die Quote wird dadurch **besser**.
 
-Das ist kein Vorwurf an irgendjemanden; so ist die Kennzahl definiert, und sie beantwortet
-die Frage „wie pünktlich waren die Züge, die fuhren" korrekt. Sie beantwortet nur nicht
-die Frage, die auf dem Bahnsteig zählt: **kam mein Zug, und kam er rechtzeitig?**
+Das ist kein Vorwurf an irgendjemanden. So ist die Kennzahl definiert, und sie beantwortet
+ihre Frage korrekt: „Wie pünktlich waren die Züge, die fuhren?" Sie beantwortet nur nicht
+die Frage, die auf dem Bahnsteig zählt: **Kam mein Zug, und kam er rechtzeitig?**
 
-Diese Seite stellt beide Antworten nebeneinander.
+```sql gattungen
+-- Nur die Auswahlliste: welche Verkehrsarten und Gattungen auf **dieser** Seite
+-- ueberhaupt vorkommen (ADR-014). Eine Gattung anzubieten, die es hier nicht gibt,
+-- waere ein Knopf, der in eine leere Tabelle fuehrt.
+select verkehrsart, gattung
+from bahnpuls.puenktlichkeit
+group by verkehrsart, gattung
+```
+
+<Auswahlleiste data={gattungen} hinweis="Die Schwelle steht darunter." />
+
+<!--
+`${inputs.schwelle}` steht ohne `.value` -- <ButtonGroup> legt seinen Wert roh im
+Eingabespeicher ab, genau wie <Slider>. Mit `.value` bliebe die Abfrage stumm stehen
+(BPULS-084).
+-->
+<AdresseMerken eingabe="schwelle" vorgabe="6" let:vorauswahl>
+<ButtonGroup name=schwelle title="Ab wann gilt ein Halt als verspätet?" defaultValue={vorauswahl}>
+    <ButtonGroupItem value="1" valueLabel="1 Min." defaultValue={vorauswahl} />
+    <ButtonGroupItem value="3" valueLabel="3 Min." defaultValue={vorauswahl} />
+    <ButtonGroupItem value="6" valueLabel="6 Min." defaultValue={vorauswahl} />
+    <ButtonGroupItem value="15" valueLabel="15 Min." defaultValue={vorauswahl} />
+    <ButtonGroupItem value="60" valueLabel="60 Min." defaultValue={vorauswahl} />
+</ButtonGroup>
+</AdresseMerken>
+
+```sql gewaehlte_schwelle
+-- Die gewählte Schwelle als Zahl, damit sie im Text stehen kann, ohne dort
+-- festgeschrieben zu sein. Bis zum 25.08.2026 stand dort „Sechs-Minuten-Grenze" —
+-- ein Satz, der ab dem ersten Klick auf einen anderen Knopf falsch gewesen wäre.
+select ${inputs.schwelle} as schwelle_min
+```
 
 ## Die Kurve, nicht die eine Zahl
 
@@ -25,6 +59,8 @@ select
     100.0 * sum(halte_puenktlich) / nullif(sum(halte_gemessen), 0)    as quote_gemessen,
     100.0 * sum(halte_puenktlich) / nullif(sum(halte_mit_ankunft), 0) as quote_planmaessig
 from bahnpuls.puenktlichkeit
+where verkehrsart like '${inputs.verkehrsart}'
+  and gattung in ${inputs.gattung.value}
 group by schwelle_min
 order by schwelle_min
 ```
@@ -35,6 +71,12 @@ union all
 select schwelle_min, 'alle planmäßigen Halte', quote_planmaessig from ${kurve}
 order by lesart, schwelle_min
 ```
+
+**So liest du die beiden Linien.** Sie unterscheiden sich nur im Nenner. Die obere teilt
+durch alle Halte, an denen ein Zug *tatsächlich gemessen* wurde. Die untere teilt durch
+alle Halte, an denen planmäßig einer ankommen sollte — die ausgefallenen, die ausgelassenen
+und die ohne Meldung eingeschlossen. Der Abstand zwischen den Linien ist das, was in der
+oberen Zahl nicht vorkommt.
 
 <LineChart
     data={kurve_lang}
@@ -47,17 +89,14 @@ order by lesart, schwelle_min
     yMax=100
     markers=true
     title="Anteil pünktlicher Halte, je nachdem wo man die Grenze zieht"
+    emptySet=warn
+    emptyMessage="Die Auswahl oben trifft keinen einzigen Halt. Stell die Verkehrsart auf „Alle“ oder nimm eine Gattung dazu."
 />
 
-Die branchenübliche Grenze liegt bei **unter sechs Minuten**. Als einzige Zahl verdeckt
-sie genau das, was Reisende trifft: 5:59 gilt als pünktlich, der Vier-Minuten-Anschluss
-ist trotzdem weg. Deshalb stehen hier fünf Grenzen nebeneinander — die Form der Kurve sagt
+Die branchenübliche Grenze liegt bei **unter sechs Minuten**. Als einzige Zahl verdeckt sie
+genau das, was Reisende trifft: 5:59 gilt als pünktlich, der Vier-Minuten-Anschluss ist
+trotzdem weg. Deshalb stehen hier alle fünf Grenzen nebeneinander. Die Form der Kurve sagt
 mehr als jeder einzelne Punkt auf ihr.
-
-**Die beiden Linien unterscheiden sich nur im Nenner.** Oben: alle Halte, an denen ein
-Zug *tatsächlich gemessen* wurde. Unten: alle Halte, an denen planmäßig einer ankommen
-sollte — die ausgefallenen, die ausgelassenen und die ohne Meldung eingeschlossen. Der
-Abstand zwischen den Linien ist das, was in der oberen Zahl nicht vorkommt.
 
 ## Wohin die Halte fallen, die keine Zahl bekommen
 
@@ -79,10 +118,15 @@ select
 from bahnpuls.puenktlichkeit
 -- Eine einzige Schwelle: die Zustände hängen nicht von ihr ab und stünden sonst fünffach
 -- in der Summe. Genau dieser Fehler wäre unauffällig — die Zahlen sähen nur größer aus.
-where schwelle_sek = 360
+-- Welche der fünf es ist, ist deshalb gleichgültig; genommen wird die gewählte, damit
+-- die Seite nicht an zwei Stellen von verschiedenen Schwellen spricht.
+where schwelle_min = ${inputs.schwelle}
+  and verkehrsart like '${inputs.verkehrsart}'
+  and gattung in ${inputs.gattung.value}
 ```
 
-<DataTable data={zustaende} rows=1>
+<DataTable data={zustaende} rows=1 emptySet=warn
+    emptyMessage="Die Auswahl oben trifft keinen einzigen Halt. Stell die Verkehrsart auf „Alle“ oder nimm eine Gattung dazu.">
     <Column id=planmaessig title="planmäßige Halte" />
     <Column id=gemessen title="gemessen" />
     <Column id=ausgefallen title="Ausfall gemeldet" />
@@ -94,7 +138,7 @@ where schwelle_sek = 360
 </DataTable>
 
 Die sieben Spalten schließen einander aus und ergeben zusammen genau die erste. Ein Halt
-kann nicht zugleich ausgefallen und ausgelassen gezählt werden; wo mehrere Gründe
+kann nicht zugleich als ausgefallen und als ausgelassen gezählt werden. Wo mehrere Gründe
 zuträfen, gilt der schwerwiegendere.
 
 <Alert status=warning>
@@ -131,17 +175,19 @@ Wie oft das vorkommt, ist offen.
 
 </Alert>
 
-Vier davon sind **Betrieb** und gehören zum Bild: der Ausfall wurde gemeldet, im ganzen
-Lauf wurde kein Halt bedient, der Laufweg wurde gekappt, ein einzelner Halt wurde
-übersprungen. „Laufweg gekappt" heißt, dass der Zug fuhr, aber nicht die ganze Strecke —
-für Reisende an den entfallenen Bahnhöfen ist das ein vollständiger Ausfall, in einer
-Ausfallquote je Zug taucht es meist nicht auf. Ein Lauf ohne jeden bedienten Halt hat
-dagegen keinen Rand, der gekappt sein könnte, und steht deshalb in einer eigenen Spalte.
+**Vier davon sind Betrieb** und gehören zum Bild: Der Ausfall wurde gemeldet. Im ganzen
+Lauf wurde kein Halt bedient. Der Laufweg wurde gekappt. Ein einzelner Halt wurde
+übersprungen.
 
-Zwei sind **Messung**: In der Nacht der Zeitumstellung gibt es eine Stunde doppelt, die
-Rechnung ist dann nicht eindeutig. Und „keine Meldung" heißt, dass der Zug planmäßig da
-sein sollte, nicht ausgefallen war — und trotzdem keine Ist-Zeit kam. Nur bei dieser
-letzten Spalte bedeutet ein Anstieg ein Problem der Erhebung.
+„Laufweg gekappt" heißt: Der Zug fuhr, aber nicht die ganze Strecke. Für Reisende an den
+entfallenen Bahnhöfen ist das ein vollständiger Ausfall; in einer Ausfallquote je Zug
+taucht es meist nicht auf. Ein Lauf ohne jeden bedienten Halt hat dagegen keinen Rand, der
+gekappt sein könnte, und steht deshalb in einer eigenen Spalte.
+
+**Zwei sind Messung.** In der Nacht der Zeitumstellung gibt es eine Stunde doppelt; die
+Rechnung ist dann nicht eindeutig. Und „keine Meldung" heißt: Der Zug sollte planmäßig da
+sein, war nicht ausgefallen — und trotzdem kam keine Ist-Zeit. Nur bei dieser letzten
+Spalte bedeutet ein Anstieg ein Problem der Erhebung.
 
 ## Je Linie
 
@@ -158,12 +204,15 @@ select
     100.0 * sum(halte_puenktlich) / nullif(sum(halte_gemessen), 0)    as quote_gemessen,
     100.0 * sum(halte_puenktlich) / nullif(sum(halte_mit_ankunft), 0) as quote_planmaessig
 from bahnpuls.puenktlichkeit
-where schwelle_sek = 360
+where schwelle_min = ${inputs.schwelle}
+  and verkehrsart like '${inputs.verkehrsart}'
+  and gattung in ${inputs.gattung.value}
 group by linie
 order by halte desc, linie
 ```
 
-<DataTable data={je_linie} rows=15 search=true>
+<DataTable data={je_linie} rows=15 search=true emptySet=warn
+    emptyMessage="Zu dieser Auswahl fuhr im Zeitraum keine Linie. Stell die Verkehrsart auf „Alle“ oder nimm eine Gattung dazu.">
     <Column id=linie title="Linie" />
     <Column id=fahrten title="Fahrten" />
     <Column id=ausgefallen title="Ausfall gemeldet" />
@@ -176,25 +225,36 @@ order by halte desc, linie
     <Column id=quote_planmaessig title="pünktlich, planmäßige (%)" fmt='#,##0.0' />
 </DataTable>
 
-Beide Quoten bei der Sechs-Minuten-Grenze. Linien mit wenigen Halten stehen unten — bei
+Beide Quoten bei der oben gewählten Grenze von <Value data={gewaehlte_schwelle} column=schwelle_min/>
+Minuten. Linien mit wenigen Halten stehen unten — bei
 kleiner Grundmenge schwankt eine Quote stark, und eine Rangliste über solche Werte wäre
 Zufall mit Nachkommastellen.
 
 „Davon am Fahrplan belegt" heißt: der beobachtete Laufweg deckt den planmäßigen
 vollständig ab, es wurde also nicht bloß ein gestrichenes Ende gesehen.
 
-„Davon nicht prüfbar" ist die Gegenprobe dazu und steht bewusst daneben: für diese Fahrten
-gibt es **überhaupt keinen** Soll-Laufweg, weil ihre Kennung in keiner zum Betriebstag
-gültigen Fahrplan-Version vorkommt. Sie sind weder belegt noch widerlegt. Bis zum
-22.08.2026 zählten sie stillschweigend als „nicht belegt" — und weil dieselbe Quelle auch
-den Liniennamen liefert, traf das ausschließlich Fahrten ohne Liniennummer: über drei
-Betriebstage war dort **keine einzige** von 182 belegt, bei Fahrten mit Liniennummer
-dagegen 97,6 bis 100 %. Der Unterschied zwischen zwei Betriebstagen (84,4 % gegen 61,3 %
-belegt) bestand vollständig daraus, wie groß diese Gruppe an dem Tag war — er sagte nichts
-über den Betrieb. Was die drei Spalten offen lassen, ist damit sichtbar statt eingerechnet.
+„Davon nicht prüfbar" ist die Gegenprobe dazu. Für diese Fahrten gibt es **überhaupt
+keinen** Soll-Laufweg: Ihre Kennung kommt in keiner zum Betriebstag gültigen
+Fahrplan-Version vor. Sie sind weder belegt noch widerlegt.
 
-Für Betriebstage vor der ersten Fahrplan-Ladung lässt sich ohnehin nichts belegen; die
+<Details title="Warum es diese dritte Spalte gibt">
+
+Bis zum 22.08.2026 zählten diese Fahrten stillschweigend als „nicht belegt". Weil dieselbe
+Quelle auch den Liniennamen liefert, traf das ausschließlich Fahrten ohne Liniennummer:
+Über drei Betriebstage war dort **keine einzige** von 182 belegt, bei Fahrten mit
+Liniennummer dagegen 97,6 bis 100 %.
+
+Der Unterschied zwischen zwei Betriebstagen (84,4 % gegen 61,3 % belegt) bestand
+vollständig daraus, wie groß diese Gruppe an dem Tag war. Er sagte nichts über den Betrieb.
+Was die drei Spalten offen lassen, ist seither sichtbar statt eingerechnet.
+
+Für Betriebstage vor der ersten Fahrplan-Ladung lässt sich ohnehin nichts belegen. Die
 Aufzeichnung läuft erst seit dem 19.08.2026.
+
+</Details>
+
+**Diese Seite lässt sich verlinken.** Deine Auswahl steht in der Adresse
+(`?art=…&gattung=…&schwelle=…`) und lässt sich so zitieren.
 
 <Alert status=info>
 

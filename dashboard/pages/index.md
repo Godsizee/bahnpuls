@@ -4,14 +4,19 @@ description: Wo Verspätung im Schienenverkehr entsteht — auf der Strecke oder
 sidebar_position: 1
 ---
 
+<GemerkterBahnhof />
+
+**Diese Seite zeigt, wo Verspätung entsteht: unterwegs zwischen zwei Bahnhöfen oder im
+Bahnhof, während der Zug steht.** Gemessen in VRN und RMV, Halt für Halt.
+
 Ein Zug kommt zwölf Minuten zu spät an. Das steht in jeder Statistik. Was nirgends steht:
 **wo diese zwölf Minuten entstanden sind.** Standen sie schon beim Start? Kamen sie auf
-einem bestimmten Streckenabschnitt dazu? Oder sammelten sie sich in kleinen Portionen an
-sechs Bahnhöfen, weil überall der Aufenthalt zu knapp bemessen ist?
+einem Streckenabschnitt dazu? Oder sammelten sie sich in kleinen Portionen an sechs
+Bahnhöfen, weil überall der Aufenthalt zu knapp bemessen ist?
 
-Das sind drei völlig verschiedene Probleme mit drei verschiedenen Antworten, und wer nur
-die Ankunftsverspätung kennt, kann sie nicht auseinanderhalten. **Bahnpuls hält sie
-auseinander** — Halt für Halt, für jede Fahrt in VRN und RMV.
+Das sind drei verschiedene Probleme mit drei verschiedenen Antworten. Wer nur die
+Ankunftsverspätung kennt, kann sie nicht auseinanderhalten. **Bahnpuls hält sie
+auseinander.**
 
 <div style="overflow-x:auto; margin:1.75rem 0 1.25rem;">
 <svg viewBox="0 0 720 290" role="img" aria-label="Schematischer Verlauf einer Fahrt über vier Halte: Die Verspätung wächst auf zwei Abschnitten und während zweier Aufenthalte, auf einem Abschnitt wird Zeit aufgeholt. Am Ziel stehen zwölf Minuten, davon sieben unterwegs und fünf im Bahnhof entstanden." style="width:100%; min-width:620px; height:auto; font-family:inherit;">
@@ -45,15 +50,18 @@ auseinander** — Halt für Halt, für jede Fahrt in VRN und RMV.
 </svg>
 </div>
 
-**Das ist ein Schema, keine Messung** — die Zahlen in der Skizze sind erfunden, sie zeigen
-nur, wie gelesen wird. **Schräg** heißt: entstanden zwischen zwei Bahnhöfen. **Senkrecht**
-heißt: entstanden während des Halts, während der Zug stand. Rot ist dazugekommene Zeit,
-blau aufgeholte. Am Ziel stehen zwölf Minuten — sieben davon unterwegs, fünf im Bahnhof.
+**So liest du die Skizze.** Eine **schräge** Linie heißt: die Verspätung wuchs zwischen
+zwei Bahnhöfen. Eine **senkrechte** heißt: sie wuchs während des Halts, als der Zug stand.
+Rot ist dazugekommene Zeit, blau aufgeholte. Am Ziel stehen zwölf Minuten — sieben davon
+unterwegs, fünf im Bahnhof.
+
+**Die Zahlen in der Skizze sind erfunden.** Sie zeigen nur, wie gelesen wird. Jede Zahl auf
+den folgenden Seiten ist dagegen gemessen.
 
 **Diese Aufteilung steht in keiner öffentlichen Statistik.** Sie ist der Unterschied
-zwischen „der Zug war zu spät" und „der Zug hat auf diesem Abschnitt Zeit verloren und an
-jenem Bahnsteig noch einmal" — zwei Befunde, die auf zwei verschiedene Maßnahmen zeigen.
-Jede Zahl auf den folgenden Seiten ist gemessen, nicht geschätzt.
+zwischen zwei Sätzen: „der Zug war zu spät" und „der Zug verlor auf diesem Abschnitt Zeit
+und an jenem Bahnsteig noch einmal". Die beiden Sätze zeigen auf zwei verschiedene
+Maßnahmen.
 
 ## Was diese Seite dafür tut
 
@@ -90,6 +98,11 @@ Fahrgastwechsel, Anschluss abwarten, Personalwechsel. Wird sie kleiner, hat der 
   wird, wenn Züge ausfallen.
 - **[Methodik](/methodik)** — wie jede Zahl gerechnet wird, mit allen Annahmen und ihren
   Grenzen.
+
+**Auf den Auswertungsseiten kannst du auswählen.** Oben auf jeder steht dieselbe Leiste:
+Nah- oder Fernverkehr, darin RE, RB oder S — einzeln oder zusammen. Diese Seite hat keine
+Leiste, denn sie zeigt die Gesamtzahlen. Woher die Einteilung kommt, steht auf der
+[Methodik-Seite](/methodik).
 
 Der Rest dieser Seite ist der Beleg dafür: was aufgezeichnet ist, wie sich die Verspätung
 im Ganzen aufteilt, und wie lückenlos gemessen wurde.
@@ -168,6 +181,21 @@ ein Ausreißer schnell dabei. Der Balken läuft nach rechts, wenn unterwegs Zeit
 ging, und nach links, wenn welche aufgeholt wurde — die Null liegt in jeder Zeile an
 derselben Stelle.
 
+**Steht statt eines Bahnhofsnamens eine Nummer, ist der Name nicht bekannt.**
+
+<Details title="Warum manchmal eine Nummer statt eines Bahnhofsnamens steht">
+
+Der Echtzeit-Feed liefert nur Kennnummern. Der amtliche Fahrplandatensatz vergibt diese
+Nummern bei jeder Neuveröffentlichung anders. Der Echtzeit-Feed benutzt außerdem mehrere
+Nummernkreise nebeneinander; ein einzelner Fahrplandatensatz kennt deshalb nur einen Teil
+davon — zurzeit rund ein Drittel.
+
+Deshalb wird jede Woche ein neuer Fahrplandatensatz geholt und **zu den bisherigen
+hinzugefügt**, statt sie zu ersetzen. Mit jeder Woche werden mehr Nummern auflösbar. Wie
+weit das gediehen ist, steht unten in der Spalte „Bahnhofsname bekannt".
+
+</Details>
+
 <DataTable data={top_abschnitte} rows=10>
     <Column id=abschnitt title="Von — nach" />
     <Column id=betriebstag title="Tag" fmt='dd"."mm"."yyyy' />
@@ -176,16 +204,6 @@ derselben Stelle.
     <Column id=unterwegs_min title="Unterwegs (Min. je Zug)" fmt="#,##0.0" contentType=bar barColor=verloren negativeBarColor=aufgeholt />
     <Column id=bahnhof_min title="Im Bahnhof (Min. je Zug)" fmt="#,##0.0" />
 </DataTable>
-
-Wo statt eines Bahnhofsnamens eine Nummer steht, ist der Name schlicht nicht bekannt: Der
-Echtzeit-Feed liefert nur Kennnummern, und der amtliche Fahrplandatensatz vergibt diese
-Nummern bei jeder Neuveröffentlichung anders. Der Echtzeit-Feed benutzt dabei mehrere
-Nummernkreise nebeneinander, ein einzelner Fahrplandatensatz kennt also nur einen Teil
-davon — zurzeit rund ein Drittel.
-
-Deshalb wird jede Woche ein neuer Fahrplandatensatz geholt und **zu den bisherigen
-hinzugefügt**, statt sie zu ersetzen. Mit jeder Woche werden mehr Nummern auflösbar. Wie
-weit das gediehen ist, steht unten in der Spalte „Bahnhofsname bekannt".
 
 ## Wie verlässlich ist das?
 
@@ -209,11 +227,48 @@ order by betriebstag desc
 Keine Auswertung ist besser als ihre Datengrundlage. Deshalb steht hier offen, für wie
 viele Halte überhaupt ein Wert vorlag — und woran es lag, wenn nicht.
 
-Vier Gründe kann es haben, dass ein Halt keine Zahl trägt: Der Zug ist **ausgefallen**,
-der Halt wurde **ausgelassen**, die Zeit fiel in die Nacht der **Zeitumstellung** (dort
-gibt es eine Stunde doppelt, die Rechnung ist dann nicht eindeutig) — oder es kam
-**einfach keine Meldung**. Nur der letzte Fall ist ein Problem der Messung. Die anderen
-drei sind Betrieb und gehören zum Bild.
+Vier Gründe kann es haben, dass ein Halt keine Zahl trägt:
+
+- Der Zug ist **ausgefallen**.
+- Der Halt wurde **ausgelassen**.
+- Die Zeit fiel in die Nacht der **Zeitumstellung**. Dort gibt es eine Stunde doppelt, und
+  die Rechnung ist dann nicht eindeutig.
+- Es kam **keine Meldung**.
+
+Nur der letzte Fall ist ein Problem der Messung. Die anderen drei sind Betrieb und gehören
+zum Bild.
+
+<Details title="Was in den Spalten „Halte außerhalb“, „aussortiert“ und „Erhebung“ steht">
+
+**Halte außerhalb** sind Halte in den Daten, die nicht in VRN oder RMV liegen. Sie kommen
+mit den Fernzügen herein: Gesammelt wird eine Fahrt, sobald sie einen Bahnhof im Gebiet
+berührt — und zwar mit ihrem ganzen Laufweg, also auch mit München, Köln oder Hamburg.
+Diese Halte bleiben in den Daten stehen, damit ein Laufweg lückenlos lesbar bleibt. In
+eine Kennzahl gehen sie nicht ein. Was ein Zug an Verspätung **mitbringt**, geht dabei
+nicht verloren: es steht an seinem ersten Halt im Gebiet.
+
+**Aussortiert** zählt Fahrten, die gar nicht hierher gehören. Sie kommen so herein:
+Gesammelt wird über eine Liste von Bahnhöfen im Gebiet, und zwar über deren Nummern. Der
+Datenanbieter vergibt diese Nummern je Datensatz neu. Im Datensatz für Busse und
+Straßenbahnen trägt eine Haltestelle in Hannover zufällig dieselbe Nummer wie ein Bahnhof
+hier — für die Sammlung sieht das aus wie ein Treffer.
+
+Erkennen lässt sich das nur an der ganzen Fahrt: Gehen mehr ihrer Halte im Nahverkehr auf
+als im Bahnfahrplan, ist es keine Bahnfahrt im Gebiet. Steht dort eine 0, wurde entweder
+nichts aussortiert — oder die Vergleichsliste fehlt gerade. Das sagt dann der
+Bauprotokoll-Eintrag, nicht diese Tabelle.
+
+**Erhebung** trägt „unvollständig", wenn die Sammlung an diesem Tag nachweislich schief
+gegriffen hat. Der Tag steht dann hier, geht aber in **keine** Kennzahl auf diesen Seiten
+ein. Betroffen sind der 22. und 23.08.2026: Der Datenanbieter vergab an diesem Wochenende
+die Bahnhofsnummern neu, und die Sammlung lief danach gegen eine veraltete Liste.
+Aufgezeichnet ist an beiden Tagen rund die Hälfte der planmäßigen Fahrten — und zwar nicht
+irgendeine Hälfte, sondern überwiegend Fernverkehr über große Knoten. Eine Quote darüber
+beschriebe diesen Rest und nicht das Gebiet, ohne dabei falsch auszusehen. Warum der Tag
+trotzdem stehen bleibt, steht auf der [Methodik-Seite](/methodik) unter „Zwei Betriebstage,
+die nicht mitzählen".
+
+</Details>
 
 <DataTable data={abdeckung} rows=10>
     <Column id=betriebstag title="Tag" fmt='dd"."mm"."yyyy' />
@@ -228,35 +283,6 @@ drei sind Betrieb und gehören zum Bild.
     <Column id=fahrten_gebietsfremd title="aussortiert" />
     <Column id=erhebung title="Erhebung" />
 </DataTable>
-
-**Halte außerhalb** sind Halte in den Daten, die nicht in VRN oder RMV liegen. Sie kommen
-mit den Fernzügen herein: Gesammelt wird eine Fahrt, sobald sie einen Bahnhof im Gebiet
-berührt — und zwar mit ihrem ganzen Laufweg, also auch mit München, Köln oder Hamburg.
-Diese Halte bleiben in den Daten stehen, damit ein Laufweg lückenlos lesbar bleibt, gehen
-aber in keine Kennzahl ein. Was ein Zug an Verspätung **mitbringt**, geht dabei nicht
-verloren: sie steht an seinem ersten Halt im Gebiet.
-
-Die letzte Spalte zählt Fahrten, die **gar nicht hierher gehören** und deshalb aus allen
-Zahlen genommen wurden. Wie sie hereinkommen: gesammelt wird über eine Liste von
-Bahnhöfen im Gebiet, und zwar über deren Nummern. Der Datenanbieter vergibt diese Nummern
-je Datensatz neu — im Datensatz für Busse und Straßenbahnen trägt eine Haltestelle in
-Hannover zufällig dieselbe Nummer wie ein Bahnhof hier. Für die Sammlung sieht das aus
-wie ein Treffer.
-
-Erkennen lässt sich das nur an der ganzen Fahrt: gehen mehr ihrer Halte im Nahverkehr
-auf als im Bahnfahrplan, ist es keine Bahnfahrt im Gebiet. Steht hier eine 0, wurde
-entweder nichts aussortiert — oder die Vergleichsliste fehlt gerade; dann sagt das der
-Bauprotokoll-Eintrag, nicht diese Tabelle.
-
-Steht in der Spalte **Erhebung** ein „unvollständig", hat die Sammlung an diesem Tag
-nachweislich schief gegriffen. Der Tag steht deshalb hier, geht aber in **keine** Kennzahl
-auf diesen Seiten ein. Betroffen sind der 22. und 23.08.2026: Der Datenanbieter vergab an
-diesem Wochenende die Bahnhofsnummern neu, und die Sammlung lief danach gegen eine
-veraltete Liste. Aufgezeichnet ist an beiden Tagen rund die Hälfte der planmäßigen
-Fahrten — und zwar nicht irgendeine Hälfte, sondern überwiegend Fernverkehr über große
-Knoten. Eine Quote darüber beschriebe diesen Rest und nicht das Gebiet, ohne dabei falsch
-auszusehen. Warum der Tag trotzdem stehen bleibt und was seither anders läuft, steht auf
-der [Methodik-Seite](/methodik) unter „Zwei Betriebstage, die nicht mitzählen“.
 
 ### Und hat der Sammler durchgehalten?
 
@@ -290,8 +316,8 @@ order by kalendertag desc
 </DataTable>
 
 Erwartet werden **120 Abrufe je Stunde**, einer alle 30 Sekunden. Gezählt sind nur
-abgeschlossene Stunden — die laufende ist naturgemäß unvollständig und wäre sonst jeden
-Tag ein Befund.
+abgeschlossene Stunden. Die laufende ist naturgemäß unvollständig und wäre sonst jeden Tag
+ein Befund.
 
 Drei Einschränkungen, damit die Spalten nicht mehr versprechen, als sie halten:
 

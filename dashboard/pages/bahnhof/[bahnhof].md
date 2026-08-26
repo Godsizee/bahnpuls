@@ -41,7 +41,9 @@ select
 
 from bahnpuls.bahnhof
 where slug = '${params.bahnhof}'
-  and schwelle_sek = 360
+  and schwelle_min = ${inputs.schwelle}
+  and verkehrsart like '${inputs.verkehrsart}'
+  and gattung in ${inputs.gattung.value}
 ```
 
 <!--
@@ -53,21 +55,52 @@ where slug = '${params.bahnhof}'
 
 # <Value data={kennzahl} column=bahnhof/>
 
+**Diese Seite zeigt, wie pünktlich Züge hier ankommen und wie viel Verspätung der Halt
+selbst kostet.**
+
 <Value data={kennzahl} column=zuege fmt='#,##0'/> Züge an
 <Value data={kennzahl} column=tage fmt='#,##0'/> Betriebstagen,
 <Value data={kennzahl} column=von/> bis <Value data={kennzahl} column=bis/>. Verbund:
 <Value data={kennzahl} column=verbund/>.
 
-<BigValue data={kennzahl} value=quote_planmaessig fmt='#,##0.0' title="Pünktlich unter 6 Min. (%)" />
+```sql gattungen
+-- Nur die Auswahlliste, und zwar die **dieses** Bahnhofs: an einem Halt ohne
+-- Fernverkehr soll kein Knopf stehen, der in eine leere Seite fuehrt (ADR-014).
+select verkehrsart, gattung
+from bahnpuls.bahnhof
+where slug = '${params.bahnhof}'
+group by verkehrsart, gattung
+```
+
+<Auswahlleiste data={gattungen} hinweis="Die Schwelle steht darunter." />
+
+<!--
+`${inputs.schwelle}` ohne `.value` -- <ButtonGroup> legt seinen Wert roh ab (BPULS-084).
+-->
+<AdresseMerken eingabe="schwelle" vorgabe="6" let:vorauswahl>
+<ButtonGroup name=schwelle title="Ab wann gilt ein Halt als verspätet?" defaultValue={vorauswahl}>
+    <ButtonGroupItem value="1" valueLabel="1 Min." defaultValue={vorauswahl} />
+    <ButtonGroupItem value="3" valueLabel="3 Min." defaultValue={vorauswahl} />
+    <ButtonGroupItem value="6" valueLabel="6 Min." defaultValue={vorauswahl} />
+    <ButtonGroupItem value="15" valueLabel="15 Min." defaultValue={vorauswahl} />
+    <ButtonGroupItem value="60" valueLabel="60 Min." defaultValue={vorauswahl} />
+</ButtonGroup>
+</AdresseMerken>
+
+<BahnhofMerken slug={params.bahnhof} name={kennzahl[0]?.bahnhof} />
+
+<BigValue data={kennzahl} value=quote_planmaessig fmt='#,##0.0' title="Pünktlich unter der gewählten Schwelle (%)" />
 <BigValue data={kennzahl} value=quote_gemessen fmt='#,##0.0' title="dieselbe Quote, nur über gemessene Halte (%)" />
 <BigValue data={kennzahl} value=halte_mit_ankunft fmt='#,##0' title="Halte mit planmäßiger Ankunft" />
 <BigValue data={kennzahl} value=halte_nicht_bedient fmt='#,##0' title="davon nicht bedient" />
 
-Die erste Zahl ist die strengere: in ihrem Nenner stehen **alle** Halte, an denen
-planmäßig ein Zug ankommen sollte — auch die ausgefallenen und ausgelassenen. Die zweite
-zählt nur, wofür eine Ankunftszeit gemeldet wurde, und ist damit die Quote, die man sonst
-liest. Der Abstand zwischen beiden ist kein Rundungsfehler, sondern das, was übliche
-Statistiken weglassen.
+**Die erste Zahl ist die strengere.** In ihrem Nenner stehen **alle** Halte, an denen
+planmäßig ein Zug ankommen sollte — auch die ausgefallenen und die ausgelassenen. Die
+zweite zählt nur, wofür eine Ankunftszeit gemeldet wurde. Sie ist die Quote, die man sonst
+liest.
+
+Der Abstand zwischen beiden ist kein Rundungsfehler. Er ist das, was übliche Statistiken
+weglassen.
 
 ## Mitgebracht oder hier entstanden?
 
@@ -81,6 +114,11 @@ union all
 select 'hier am Bahnsteig entstanden', hier_sek from ${kennzahl}
 ```
 
+**So liest du die Grafik.** Die drei Balken addieren sich **nicht**. Der erste ist ein
+Stand: wie spät die Züge hier ankommen. Die beiden anderen sind Zuwächse — was auf dem
+letzten Abschnitt vor der Einfahrt dazukam und was der Aufenthalt selbst gekostet hat. Ein
+Wert nach links heißt: dort wurde unter dem Strich Verspätung abgebaut.
+
 <BarChart
     data={anteile}
     x=art
@@ -90,18 +128,13 @@ select 'hier am Bahnsteig entstanden', hier_sek from ${kennzahl}
     yAxisTitle="Sekunden je gemessenem Halt"
     title="Drei verschiedene Größen — nicht drei Teile einer Summe"
     emptySet=warn
-    emptyMessage="Für diesen Bahnhof liegen im Zeitraum keine messbaren Halte vor."
+    emptyMessage="Zu dieser Auswahl hält hier im Zeitraum kein Zug. Stell die Verkehrsart oben auf „Alle“ oder nimm eine Gattung dazu."
 />
 
-Die drei Balken addieren sich **nicht**. Der erste ist ein Stand — wie spät die Züge hier
-ankommen. Die beiden anderen sind Zuwächse: was auf dem letzten Abschnitt vor der Einfahrt
-dazukam und was der Aufenthalt selbst gekostet hat. Ein negativer Wert heißt, dass dort
-unter dem Strich Verspätung abgebaut wurde.
-
 **Betrieblich sind das verschiedene Dinge.** Ein hoher Rückstand bei der Einfahrt bei
-kleinem Zuwachs vor Ort heißt: der Bahnhof erbt sein Problem von der Strecke. Wächst die
-Verspätung dagegen am Bahnsteig, liegt es näher am Ort — Fahrgastwechsel, Anschlusswarten,
-Disposition, Personalwechsel.
+kleinem Zuwachs vor Ort heißt: Der Bahnhof erbt sein Problem von der Strecke. Wächst die
+Verspätung dagegen am Bahnsteig, liegt die Ursache näher am Ort — Fahrgastwechsel,
+Anschlusswarten, Disposition, Personalwechsel.
 
 ## Nicht eine Schwelle, sondern eine Kurve
 
@@ -112,6 +145,8 @@ select
     100.0 * sum(halte_puenktlich) / nullif(sum(halte_mit_ankunft), 0) as quote_planmaessig
 from bahnpuls.bahnhof
 where slug = '${params.bahnhof}'
+  and verkehrsart like '${inputs.verkehrsart}'
+  and gattung in ${inputs.gattung.value}
 group by schwelle_min
 order by schwelle_min
 ```
@@ -126,12 +161,13 @@ order by schwelle_min
     yMax=100
     title="Wie sich die Quote mit der Schwelle verschiebt"
     emptySet=warn
-    emptyMessage="Für diesen Bahnhof liegen im Zeitraum keine Halte vor."
+    emptyMessage="Zu dieser Auswahl hält hier im Zeitraum kein Zug. Stell die Verkehrsart oben auf „Alle“ oder nimm eine Gattung dazu."
 />
 
 Die branchenübliche Grenze liegt bei unter sechs Minuten. Als einzige Zahl verdeckt sie
-genau die Fälle, um die es Reisenden geht: 5:59 ist pünktlich, der Vier-Minuten-Anschluss
-ist trotzdem weg.
+genau die Fälle, um die es Reisenden geht: 5:59 gilt als pünktlich, der
+Vier-Minuten-Anschluss ist trotzdem weg. Deshalb steht hier die ganze Kurve — und oben ein
+Knopf für jede der fünf Grenzen.
 
 ## Über die Tage
 
@@ -143,7 +179,9 @@ select
     sum(haltezeit_delta_sek_summe) / nullif(sum(haltezeit_messwerte), 0) as hier_sek
 from bahnpuls.bahnhof
 where slug = '${params.bahnhof}'
-  and schwelle_sek = 360
+  and schwelle_min = ${inputs.schwelle}
+  and verkehrsart like '${inputs.verkehrsart}'
+  and gattung in ${inputs.gattung.value}
 group by betriebstag
 order by betriebstag
 ```
@@ -152,19 +190,19 @@ order by betriebstag
     data={taeglich}
     x=betriebstag
     y=quote_planmaessig
-    yAxisTitle="pünktlich unter 6 Min. (%)"
+    yAxisTitle="pünktlich unter der gewählten Schwelle (%)"
     yMin=0
     yMax=100
     title="Pünktlichkeit je Betriebstag"
     emptySet=warn
-    emptyMessage="Für diesen Bahnhof liegen im Zeitraum keine Betriebstage vor."
+    emptyMessage="Zu dieser Auswahl hält hier im Zeitraum kein Zug. Stell die Verkehrsart oben auf „Alle“ oder nimm eine Gattung dazu."
 />
 
 <DataTable data={taeglich} rows=10 emptySet=warn
-    emptyMessage="Für diesen Bahnhof liegen im Zeitraum keine Betriebstage vor.">
+    emptyMessage="Zu dieser Auswahl hält hier im Zeitraum kein Zug. Stell die Verkehrsart oben auf „Alle“ oder nimm eine Gattung dazu.">
     <Column id=betriebstag title="Tag" fmt='dd"."mm"."yyyy' />
     <Column id=zuege title="Züge" fmt="#,##0" />
-    <Column id=quote_planmaessig title="pünktlich (6 Min.) %" fmt="#,##0.0" />
+    <Column id=quote_planmaessig title="pünktlich unter der gewählten Schwelle (%)" fmt="#,##0.0" wrapTitle=true />
     <Column id=hier_sek title="hier entstanden (s je Halt)" fmt="#,##0.0" />
 </DataTable>
 
@@ -201,6 +239,11 @@ limit 10
     <Column id=haltezeit_sek title="hier entstanden (s je Halt)" fmt="#,##0.0" wrapTitle=true />
 </DataTable>
 
+**Diese eine Tabelle folgt der Auswahl oben nicht.** Sie stammt aus der Auswertung, die
+die Gesamtzahlen der Startseite trägt, und die ist bewusst nicht nach Verkehrsart geteilt
+(ADR-014). Sie zeigt hier also immer alle Züge — auch dann, wenn oben nur eine Gattung
+gewählt ist.
+
 Der Balken zeigt die Richtung mit: nach rechts, was auf dem Abschnitt **dazukam**, nach
 links, was dort **aufgeholt** wurde. Sortiert ist danach, was ein Zug auf dem letzten
 Abschnitt vor der Einfahrt im Durchschnitt verliert — nicht danach, wie viel dort
@@ -219,6 +262,9 @@ ganz gleich wie gut sie läuft.
   Erhebung an ihnen nachweislich schief gegriffen hat.
 - **Verspätung ist hier Abweichung vom Fahrplan**, keine Schuldzuweisung. Warum ein Zug
   steht, sagen diese Daten nicht.
+
+**Diese Seite lässt sich verlinken.** Deine Auswahl steht in der Adresse
+(`?art=…&gattung=…&schwelle=…`) und lässt sich so zitieren.
 
 Wie die Kennzahlen im Einzelnen gerechnet werden, steht auf der
 [Methodik-Seite](/methodik). Zurück zur [Übersicht aller Bahnhöfe](/bahnhoefe).

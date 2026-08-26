@@ -4,20 +4,21 @@ description: Warum jemand, der sieben Jahre Züge gefahren hat, anfängt, Versp�
 sidebar_position: 9
 ---
 
-Sieben Jahre Lokführer im Güterverkehr, deutschlandweit, mit Berechtigungen für die
-Schweiz und Österreich. Trassenkonflikt, Langsamfahrstelle, Anschlusswarten,
-Umlaufbindung, Regelzuschlag — das sind hier keine Begriffe aus einer Dokumentation,
-sondern Berufsalltag gewesen.
+**Diese Seite erklärt, warum es Bahnpuls gibt und wer es rechnet.**
+
+Sieben Jahre Lokführer im Güterverkehr, deutschlandweit, mit Berechtigungen für die Schweiz
+und Österreich. Trassenkonflikt, Langsamfahrstelle, Anschlusswarten, Umlaufbindung,
+Regelzuschlag — das sind hier keine Begriffe aus einer Dokumentation. Das war Berufsalltag.
 
 Dieses Projekt ist der Versuch, aus dieser Kenntnis eine Rechnung zu machen.
 
 ## Die Frage, die auf dem Führerstand entsteht
 
-Wer Züge fährt, sieht Verspätung nicht als Zahl am Ende, sondern als Verlauf. Man weiß,
-an welcher Stelle es regelmäßig klemmt, wo der Fahrplan zu knapp gerechnet ist und wo
-Reserve steckt, die fast nie gebraucht wird. Man weiß auch, dass „zwölf Minuten zu spät"
-mindestens drei verschiedene Geschichten sein können — und dass die Statistik am Ende
-alle drei gleich behandelt.
+Wer Züge fährt, sieht Verspätung nicht als Zahl am Ende, sondern als Verlauf. Man weiß, an
+welcher Stelle es regelmäßig klemmt. Man weiß, wo der Fahrplan zu knapp gerechnet ist und
+wo Reserve steckt, die fast nie gebraucht wird. Und man weiß, dass „zwölf Minuten zu spät"
+mindestens drei verschiedene Geschichten sein können — die Statistik am Ende aber alle drei
+gleich behandelt.
 
 Was auf dem Führerstand fehlt, ist die Gegenprobe: Ist das, was man an einzelnen Tagen
 erlebt, ein Muster? Oder erinnert man vor allem die Tage, an denen es schiefging?

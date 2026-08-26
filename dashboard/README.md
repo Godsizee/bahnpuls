@@ -76,6 +76,80 @@ dann leer, und zwar zu Recht. Wer diesen Fehler messen will, zieht die ausgelief
 Quellen nach `static/data/` (siehe *Lokal starten*) und vergleicht die Seite vorher und
 nachher im Browser, nicht im Compiler.
 
+## Die Auswahlleiste: eigene Komponenten in `components/` (BPULS-087/088/090)
+
+Fünf Seiten tragen dieselbe Leiste: **Alle · Nahverkehr · Fernverkehr**, darunter die
+Zuggattungen als Chips. Sie steckt in `components/Auswahlleiste.svelte`, nicht fünfmal im
+Markup — Reihenfolge, Beschriftung und Vorauswahl liegen genau einmal.
+
+Evidence importiert jede `.svelte`-Datei aus `dashboard/components/` von selbst in jede
+Seite (`injectComponents` mit `directory: '../../components', flat: true`). Ein `<script>`
+in einer `.md` gibt es nicht — das ist der einzige saubere Ort für eigenen Browsercode.
+
+**Warum die Gattungsauswahl nicht Evidences `<Dropdown multiple>` ist**, am Quelltext von
+Evidence 40.1.8 geprüft: `selectAllByDefault` wirkt nur auf den **ersten** Stapel Optionen
+(`dropdownOptionStore.js` setzt `selectAll` danach auf `false`), und eine ausgewählte
+Option, die später aus der Liste fällt, bleibt über `__removeOnDeselect` ausgewählt stehen.
+Ein Klick auf „Fernverkehr" ließe RE, RB und S ausgewählt — die Seite wäre leer,
+ausgerechnet auf dem Hauptweg. Dazu kommt, dass die Mehrfachauswahl sich auf Englisch
+beschriftet („6 Selected"). Die Verkehrsart kommt weiterhin von Evidences `<ButtonGroup>`;
+der schreibt seinen Wert **roh** ab, deshalb steht `${inputs.verkehrsart}` ohne `.value` in
+den Abfragen (dieselbe Falle wie beim Slider, siehe oben).
+
+### Zwei Regeln, die eine Sitzung gekostet haben
+
+**1. Eine Eingabe muss vom ersten Aufbau an einen Wert haben.** Wer sie erst setzt, wenn
+seine Daten geladen sind, bekommt eine Seite, die stumm leer bleibt. Deshalb steht für
+„nicht eingeschränkt" nicht ein leeres Tupel, sondern die Gattungsliste **als
+Unterabfrage** (`gattung in (select gattung from (…))`) — der Abfragetext von `data` steht
+sofort bereit, seine Zeilen erst später. Gemessen: `/engpaesse?gattung=RE,RB` zeigte seine
+Tabellen, dieselbe Auswahl ohne Adressanhang nicht.
+
+**2. Die Adresse darf erst *nach* dem Aufbau wirken.** Evidence baut die **erste** Abfrage
+einer Seite mit den beim Vorrendern berechneten Zeilen als Startwert
+(`Query.createReactive`: beim ersten Aufruf steht `initialData` noch in den Optionen) und
+prüft dabei **nicht**, ob der Abfragetext derselbe ist. Stünde die Auswahl aus der Adresse
+schon beim Aufbau fest, zeigte die Seite die **ungefilterten** Zahlen des Vorrenderns — und
+behielte sie. Gemessen: `/puenktlichkeit?art=Fernverkehr` lieferte alle Linien,
+`?schwelle=60` dieselben Quoten wie `?schwelle=6`.
+
+Beides liegt in `components/AdresseMerken.svelte`: die Komponente schreibt eine Eingabe in
+die Adresse **und** gibt den Wert aus der Adresse erst in `onMount` an ihren Inhalt weiter.
+Ein `{#key}` baut das Eingabefeld dabei neu auf, weil `defaultValue` nur beim Aufbau
+gelesen wird. Auf den Seiten steht sie als Hülle um das jeweilige Feld:
+
+```svelte
+<AdresseMerken eingabe="schwelle" vorgabe="6" let:vorauswahl>
+<ButtonGroup name=schwelle defaultValue={vorauswahl}> … </ButtonGroup>
+</AdresseMerken>
+```
+
+### Leerzustände sind Bedienung, nicht Befund
+
+Jede gefilterte Abfrage trägt `emptySet=warn` und eine `emptyMessage`, die sagt, **welcher
+Regler hilft** — nicht „keine Daten". Dazu steht in der Leiste ein „Auswahl zurücksetzen"
+auf die Seite ohne Adressanhang (`data-sveltekit-reload`, sonst bleiben die
+Eingabekomponenten stehen). Nebeneffekt: `evidence build:strict` bricht an dünnen Daten
+nicht mehr mit HTTP 500 ab, sondern meldet.
+
+**Achtung bei `emptyMessage`:** der Text steht in einem HTML-Attribut. Ein gerades `"`
+darin beendet das Attribut mitten im Satz — deutsche Anführungszeichen deshalb als
+`„…“`, nicht als `„…"`.
+
+### Der gemerkte Bahnhof
+
+`components/bahnhofSpeicher.js` kapselt `localStorage` (BPULS-088). Jeder Zugriff steht in
+`try`/`catch`: der Speicher kann **werfen**, nicht nur leer sein — im privaten Fenster, bei
+blockierten Website-Daten. Gelesen wird ausschließlich in `onMount`; beim Vorrendern gibt
+es kein `window`, und ein Zugriff dort bräche den Bau mit einem 500er ab. Ohne
+JavaScript, ohne Speicher bleibt die Seite vollständig: der Verweis erscheint dann gar
+nicht erst.
+
+Der Seitenabfragen-Prüfer kennt diese Komponenten: er liest die Zeile
+`EINGABEN: name (roh) · name (.value)` aus ihrem Kopfkommentar und die
+`<ButtonGroup name=…>`-Tags in ihrem Markup. Ohne das meldete er jeden Eingabenamen als
+„keine Eingabekomponente dieser Seite legt ihn an".
+
 ## Deutsche Zahlen — und warum dafür in `node_modules` gefasst wird
 
 `32,126.0` liest ein deutscher Leser nicht nur ungewohnt, sondern falsch: als
